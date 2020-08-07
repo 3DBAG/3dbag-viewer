@@ -8,7 +8,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "3d-tiles-renderer": "^0.1.4",
     "core-js": "^3.6.5",
+    "three": "^0.119.1",
     "vue": "^2.6.11"
   },
   "devDependencies": {
@@ -32,7 +34,9 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
-    "rules": {}
+    "rules": {
+      "no-unused-vars": [ 1, { "args": "none" } ]
+    }
   },
   "browserslist": [
     "> 1%",

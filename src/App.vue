@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
+    <ThreeViewer/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import ThreeViewer from './components/ThreeViewer.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    ThreeViewer
   }
 }
 </script>
@@ -23,6 +23,19 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  height: 100%;
+  margin: 0px;
+}
+
+#logo {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 10%;
+}
+
+html, body {
+  height: 100%;
+  margin: 0px;
 }
 </style>
