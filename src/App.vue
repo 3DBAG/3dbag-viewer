@@ -1,7 +1,22 @@
 <template>
   <div id="app">
-    <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
-    <ThreeViewer/>
+    <div id="sidebar">
+      <div>
+        Error Target:
+        <input type="number" name="" id="" v-model.number="errorTarget">
+      </div>
+      <div>
+        Error Threshold:
+        <input type="number" name="" id="" v-model.number="errorThreshold">
+      </div>
+    </div>
+    <div id="viewer">
+      <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
+      <ThreeViewer
+        :error-target="errorTarget"
+        :error-threshold="errorThreshold"
+      />
+    </div>
   </div>
 </template>
 
@@ -12,6 +27,12 @@ export default {
   name: 'App',
   components: {
     ThreeViewer
+  },
+  data() {
+    return {
+      errorTarget: 50,
+      errorThreshold: 60
+    }
   }
 }
 </script>
@@ -25,6 +46,15 @@ export default {
   color: #2c3e50;
   height: 100%;
   margin: 0px;
+  display: flex;
+}
+
+#sidebar {
+  width: 30%;
+}
+
+#viewer {
+  width: 70%;
 }
 
 #logo {

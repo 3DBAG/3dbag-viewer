@@ -21,6 +21,16 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 export default {
   name: 'ThreeViewer',
+  props: {
+    errorTarget: {
+      type: Number,
+      default: 50
+    },
+    errorThreshold: {
+      type: Number,
+      default: 60
+    }
+  },
   beforeCreate() {
     this.renderer = null;
     this.scene = null;
@@ -35,6 +45,16 @@ export default {
   },
   mounted() {
     this.initScene();
+  },
+  watch: {
+    errorTarget: function( val ) {
+      this.tiles.errorTarget = val;
+      this.renderScene();
+    },
+    errorThreshold: function( val ) {
+      this.tiles.errorThreshold = val;
+      this.renderScene();
+    }
   },
   methods: {
     initScene() {
@@ -106,6 +126,8 @@ export default {
 
       this.camera.updateProjectionMatrix();
       this.renderer.setPixelRatio( window.devicePixelRatio );
+
+      this.renderScene();
 
     },
     renderScene() {
