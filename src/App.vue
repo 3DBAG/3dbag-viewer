@@ -10,6 +10,12 @@
         <input type="number" name="" id="" v-model.number="errorThreshold">
       </div>
       <div>
+        <select v-model="tilesUrl">
+          <option value="http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json">LoD2.2</option>
+          <option value="http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json">LoD1.3</option>
+        </select>
+      </div>
+      <div>
         <input type="text" name="" id="" v-model="selectedInfo.batchID">
       </div>
       <div>
@@ -21,6 +27,7 @@
       <ThreeViewer
         :error-target="errorTarget"
         :error-threshold="errorThreshold"
+        :tiles-url="tilesUrl"
         @object-picked="objectPicked"
       />
     </div>
@@ -42,7 +49,8 @@ export default {
       selectedInfo: {
         batchID: "-",
         identificatie: "-"
-      }
+      },
+      tilesUrl: "http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json"
     }
   },
   methods: {

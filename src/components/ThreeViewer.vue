@@ -35,6 +35,10 @@ export default {
     castOnHover: {
       type: Boolean,
       default: false
+    },
+    tilesUrl: {
+      type: String,
+      default: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
     }
   },
   beforeCreate() {
@@ -57,15 +61,64 @@ export default {
   },
   watch: {
     errorTarget: function( val ) {
+
       this.tiles.errorTarget = val;
       this.renderScene();
+
     },
     errorThreshold: function( val ) {
+
       this.tiles.errorThreshold = val;
       this.renderScene();
+
+    },
+    tilesUrl: function( val ) {
+
+      this.reinitTiles();
+      this.renderScene();
+
     }
   },
   methods: {
+    reinitTiles() {
+      if ( this.tiles ) {
+
+          this.offsetParent.remove( this.tiles.group );
+
+      }
+
+      this.tiles = new TilesRenderer( this.tilesUrl );
+
+      this.tiles.errorTarget = this.errorTarget;
+      this.tiles.errorThreshold = this.errorThreshold;
+      this.tiles.loadSiblings = false;
+      this.tiles.maxDepth = 15;
+
+      this.tiles.downloadQueue.priorityCallback = tile => 1 / tile.cached.distance;
+
+      this.tiles.setCamera( this.camera );
+      this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
+
+      this.tiles.onLoadModel = ( s ) => {
+
+        s.traverse( c => {
+
+          if ( c.material ) {
+
+            c.material = this.material;
+
+          }
+
+        } );
+
+        let render = this.renderScene;
+        setInterval(function(){ render(); }, 3000);
+
+      }
+
+      this.offsetParent.add( this.tiles.group );
+
+    },
     initScene() {
       this.scene = new Scene();
 
@@ -94,38 +147,7 @@ export default {
 
       this.mouse = new Vector2();
 
-      this.tiles = new TilesRenderer( 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json' );
-
-      this.tiles.onLoadModel = ( s ) => {
-
-        s.traverse( c => {
-
-          if ( c.material ) {
-
-            c.material = this.material;
-
-          }
-
-          // if ( c.geometry && params.flattenTiles ) {
-
-          //   c.geometry.computeBoundingBox();
-          //   c.position.y = - c.geometry.boundingBox.min.y;
-
-          // }
-
-        } );
-
-      }
-
-      this.tiles.errorTarget = 50;
-      this.tiles.errorThreshold = 60;
-      this.tiles.loadSiblings = false;
-      this.tiles.maxDepth = 15;
-
-      this.tiles.downloadQueue.priorityCallback = tile => 1 / tile.cached.distance;
-
-      this.tiles.setCamera( this.camera );
-      this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
+      this.reinitTiles();
 
       this.controls = new OrbitControls( this.camera, this.renderer.domElement );
       this.controls.screenSpacePanning = false;
@@ -145,10 +167,10 @@ export default {
 
       const ambLight = new AmbientLight( 0xffffff, 0.2 );
       this.scene.add( ambLight );
-      
-      this.offsetParent.add( this.tiles.group );
+
       this.offsetParent.rotation.x = - Math.PI / 2;
 
+      this.renderScene();
       this.renderScene();
 
       window.addEventListener( 'resize', this.onWindowResize, false );
