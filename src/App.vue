@@ -1,6 +1,11 @@
 <template>
   <div id="app">
     <div id="sidebar">
+      <h1>3D BAG</h1>
+      <input type="text" id="search" v-model="searchTerm" @keyup="doSearch">
+      <ul>
+        <li v-for="res in searchResults" :key="res.id"><a :href="'#' + res.bbox[2] + ',' + res.bbox[0]">{{ res.name }}</a></li>
+      </ul>
       <h3>Selection information</h3>
       <div>
         <label for="batchId">Batch ID: </label>
@@ -89,7 +94,10 @@ export default {
 
       },
 
-      castOnHover: false
+      castOnHover: false,
+
+      searchTerm: null,
+      searchResults: []
 
     }
 
@@ -100,6 +108,30 @@ export default {
     objectPicked: function( event ) {
 
       this.selectedInfo = event;
+
+    },
+
+    doSearch: function ( e ) {
+
+      if ( e.keyCode == 13 ) {
+
+        fetch( 'https://nominatim.openstreetmap.org/?addressdetails=1&q=' + this.searchTerm + '&format=json&limit=10' )
+        .then( res => {
+
+          if ( res.ok ) {
+
+            return res.json();
+
+          }
+
+        })
+        .then( json => {
+
+          this.searchResults = json.map( a => { return { id: a.place_id, name: a.display_name, bbox: a.boundingbox } } );
+
+        });
+
+      }
 
     }
 
@@ -172,14 +204,14 @@ export default {
 
 #sidebar {
 
-  width: 30%;
+  width: 20%;
   padding: 10px;
 
 }
 
 #viewer {
 
-  width: 70%;
+  width: 80%;
   height: 100%;
 
 }
