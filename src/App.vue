@@ -9,12 +9,19 @@
         Error Threshold:
         <input type="number" name="" id="" v-model.number="errorThreshold">
       </div>
+      <div>
+        <input type="text" name="" id="" v-model="selectedInfo.batchID">
+      </div>
+      <div>
+        <input type="text" name="" id="" v-model="selectedInfo.identificatie">
+      </div>
     </div>
     <div id="viewer">
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
       <ThreeViewer
         :error-target="errorTarget"
         :error-threshold="errorThreshold"
+        @object-picked="objectPicked"
       />
     </div>
   </div>
@@ -31,7 +38,16 @@ export default {
   data() {
     return {
       errorTarget: 50,
-      errorThreshold: 60
+      errorThreshold: 60,
+      selectedInfo: {
+        batchID: "-",
+        identificatie: "-"
+      }
+    }
+  },
+  methods: {
+    objectPicked: function( event ) {
+      this.selectedInfo = event;
     }
   }
 }

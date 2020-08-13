@@ -12,7 +12,9 @@ import {
   Group,
   Box3,
   DirectionalLight,
-  AmbientLight
+  AmbientLight,
+  Vector2,
+  Raycaster
 } from 'three';
 import {
   TilesRenderer
@@ -29,6 +31,10 @@ export default {
     errorThreshold: {
       type: Number,
       default: 60
+    },
+    castOnHover: {
+      type: Boolean,
+      default: false
     }
   },
   beforeCreate() {
@@ -38,6 +44,9 @@ export default {
     this.camera = null;
     this.controls = null;
     this.material = null;
+
+    this.raycaster = null;
+    this.mouse = null;
 
     this.box = null;
 
@@ -61,6 +70,7 @@ export default {
       this.scene = new Scene();
 
       this.material = new MeshLambertMaterial();
+      this.material.color.setHex( 0x7a0000 );
 
       let canvas = document.getElementById("canvas");
 
@@ -80,7 +90,32 @@ export default {
 
       this.box = new Box3();
 
-      this.tiles = new TilesRenderer( 'http://localhost:8000/tileset1.json' );
+      this.raycaster = new Raycaster();
+
+      this.mouse = new Vector2();
+
+      this.tiles = new TilesRenderer( 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json' );
+
+      this.tiles.onLoadModel = ( s ) => {
+
+        s.traverse( c => {
+
+          if ( c.material ) {
+
+            c.material = this.material;
+
+          }
+
+          // if ( c.geometry && params.flattenTiles ) {
+
+          //   c.geometry.computeBoundingBox();
+          //   c.position.y = - c.geometry.boundingBox.min.y;
+
+          // }
+
+        } );
+
+      }
 
       this.tiles.errorTarget = 50;
       this.tiles.errorThreshold = 60;
@@ -98,10 +133,10 @@ export default {
       this.controls.maxDistance = 10000;
       this.controls.addEventListener( "change", this.renderScene );
 
-      // var geometry = new BoxBufferGeometry( 10, 10, 10 );
-      // var material = new MeshBasicMaterial( {color: 0x00ff00} );
-      // var cube = new Mesh( geometry, material );
-      // this.scene.add( cube );
+      this.renderer.domElement.addEventListener( 'mousemove', this.onMouseMove, false );
+      this.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown, false );
+      this.renderer.domElement.addEventListener( 'mouseup', this.onMouseUp, false );
+      this.renderer.domElement.addEventListener( 'mouseleave', this.onMouseLeave, false );
 
       // lights
       const dirLight = new DirectionalLight( 0xffffff );
@@ -130,7 +165,51 @@ export default {
       this.renderScene();
 
     },
+    onMouseMove( e ) {
+      if ( this.castOnHover ) {
+
+        this.castRay();
+
+      }
+    },
+    onMouseDown() {
+      
+    },
+    onMouseUp() {
+      this.castRay();
+    },
+    onMouseLeave() {
+
+    },
+    castRay() {
+      const rect = this.renderer.domElement.getBoundingClientRect();
+      this.mouse.x = ( (event.clientX - rect.left) / this.renderer.domElement.clientWidth) * 2 - 1;
+      this.mouse.y = -( (event.clientY - rect.top) / this.renderer.domElement.clientHeight) * 2 + 1;
+      
+      this.raycaster.setFromCamera( this.mouse, this.camera );
+      
+      const results = this.raycaster.intersectObject( this.tiles.group, true );
+      
+      if ( results.length ) {
+
+        const object = results[ 0 ].object;
+
+        const idx = results[ 0 ].face.a;
+        const b_offset = object.geometry.attributes._batchid.offset;
+        const stride = object.geometry.attributes._batchid.data.stride;
+        const batch_id = object.geometry.attributes._batchid.data.array[ b_offset + stride * idx ];
+
+        if ( 'identificatie' in object.parent.batchAttributes ) {
+
+          const identificatie = object.parent.batchAttributes.identificatie[ batch_id ];
+          this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie } );
+
+        }
+
+      }
+    },
     renderScene() {
+
       // update tiles center
       if ( this.tiles.getBounds( this.box ) ) {
 
@@ -142,6 +221,7 @@ export default {
       this.camera.updateMatrixWorld();
       this.tiles.update();
       this.renderer.render( this.scene, this.camera );
+
     }
   }
 }
