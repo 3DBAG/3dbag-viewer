@@ -17,10 +17,15 @@
       <h3>Tiles settings</h3>
       <div>
         <label for="lod">Active LoD: </label>
-        <select id="lod" v-model="tilesUrl">
-          <option value="http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json">LoD2.2</option>
-          <option value="http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json">LoD1.3</option>
+        <select id="lod" v-model="tileset">
+          <option value="lod22">LoD2.2</option>
+          <option value="lod13">LoD1.3</option>
+          <option value="custom">Custom</option>
         </select>
+      </div>
+      <div v-if="tileset == 'custom'">
+        <label for="customTileset">Custom URL: </label>
+        <input type="text" id="customTileset" v-model="customTilesUrl">
       </div>
       <div>
         Error Target:
@@ -48,15 +53,22 @@
 import ThreeViewer from './components/ThreeViewer.vue'
 
 export default {
+
   name: 'App',
+
   components: {
+
     ThreeViewer
+
   },
+
   data() {
+
     return {
 
 
-      tilesUrl: "http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json",
+      tileset: 'lod22',
+      customTilesUrl: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
       errorTarget: 50,
       errorThreshold: 60,
 
@@ -66,20 +78,50 @@ export default {
         identificatie: "-"
 
       },
+
       castOnHover: false
 
     }
+
   },
+
   methods: {
+
     objectPicked: function( event ) {
+
       this.selectedInfo = event;
+
     }
+
+  },
+
+  computed: {
+
+    tilesUrl: function () {
+
+      if ( this.tileset == 'custom' ) {
+
+          return  this.customTilesUrl;
+
+      }
+
+      const sources = {
+        lod22: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json',
+        lod13: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
+      }
+
+      return sources[ this.tileset ];
+
+    }
+
   }
+
 }
 </script>
 
 <style>
 #app {
+
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -88,23 +130,30 @@ export default {
   height: 100%;
   margin: 0px;
   display: flex;
+
 }
 
 #sidebar {
+
   width: 30%;
   padding: 10px;
+
 }
 
 #viewer {
+
   width: 70%;
   height: 100%;
+
 }
 
 #logo {
+
   position: absolute;
   right: 10px;
   bottom: 10px;
   width: 10%;
+
 }
 
 html, body {
