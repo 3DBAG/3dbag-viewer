@@ -19,6 +19,9 @@ import {
 import {
   TilesRenderer
 } from '../3d-tiles/index.js'
+import {
+  WMSTilesRenderer
+} from '../wms-tiles'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 export default {
@@ -39,6 +42,17 @@ export default {
     tilesUrl: {
       type: String,
       default: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
+    },
+    wmsOptions: {
+      type: Object,
+      default: function() {
+        return {
+          url: 'https://geodata.nationaalgeoregister.nl/top10nlv2/ows?',
+          layer: 'top10nlv2',
+          style: '',
+          imageFormat: 'image/png'
+        }
+      }
     }
   },
   beforeCreate() {
@@ -75,6 +89,13 @@ export default {
     tilesUrl: function( val ) {
 
       this.reinitTiles();
+      this.wmsTiles.tiles = this.tiles;
+      this.renderScene();
+
+    },
+    wmsOptions: function( val ) {
+
+      this.reinitWms();
       this.renderScene();
 
     }
@@ -107,6 +128,13 @@ export default {
 
             c.material = this.material;
 
+            if ( c.geometry ) {
+
+              c.geometry.computeBoundingBox();
+              c.position.y = - c.geometry.boundingBox.min.y;
+
+            }
+
           }
 
         } );
@@ -118,6 +146,26 @@ export default {
 
       this.offsetParent.add( this.tiles.group );
 
+    },
+    reinitWms() {
+      if ( this.wmsTiles ) {
+
+        this.offsetParent.remove( this.wmsTiles.group );
+
+      }
+
+      this.wmsTiles = new WMSTilesRenderer(
+        this.wmsOptions.url,
+        this.wmsOptions.layer,
+        this.wmsOptions.style,
+        this.tiles
+      );
+
+      this.wmsTiles.imageFormat = this.wmsOptions.imageFormat;
+
+      this.offsetParent.add( this.wmsTiles.group );
+
+      this.wmsTiles.onLoadTile = this.renderScene;
     },
     initScene() {
       this.scene = new Scene();
@@ -169,6 +217,8 @@ export default {
       this.scene.add( ambLight );
 
       this.offsetParent.rotation.x = - Math.PI / 2;
+
+      this.reinitWms();
 
       this.renderScene();
       this.renderScene();
@@ -242,6 +292,7 @@ export default {
 
       this.camera.updateMatrixWorld();
       this.tiles.update();
+      this.wmsTiles.update();
       this.renderer.render( this.scene, this.camera );
 
     }

@@ -35,6 +35,14 @@
         Error Threshold:
         <input type="number" name="" id="" v-model.number="errorThreshold">
       </div>
+      <h3>WMS settings</h3>
+      <div>
+        <label for="wmsPreset">Preset: </label>
+        <select id="wmsPreset" v-model="wmsPreset">
+          <option value="top10nl">TOP10NL</option>
+          <option value="luchfoto2018">Orthophotos 2018</option>
+        </select>
+      </div>
     </div>
     <div id="viewer">
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
@@ -43,6 +51,7 @@
         :error-threshold="errorThreshold"
         :tiles-url="tilesUrl"
         :cast-on-hover="castOnHover"
+        :wms-options="wmsOptions"
         @object-picked="objectPicked"
       />
     </div>
@@ -66,11 +75,12 @@ export default {
 
     return {
 
-
       tileset: 'lod22',
       customTilesUrl: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
       errorTarget: 50,
       errorThreshold: 60,
+
+      wmsPreset: 'top10nl',
 
       selectedInfo: {
 
@@ -111,6 +121,33 @@ export default {
       }
 
       return sources[ this.tileset ];
+
+    },
+
+    wmsOptions: function () {
+
+      const wms_sources = {
+
+        top10nl: {
+
+          url: 'https://geodata.nationaalgeoregister.nl/top10nlv2/ows?',
+          layer: 'top10nlv2',
+          style: '',
+          imageFormat: 'image/png'
+
+        },
+        luchfoto2018: {
+
+            url: 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts?',
+            layer: '2018_ortho25',
+            style: 'default',
+            imageFormat: 'image/png'
+  
+        }
+
+      }
+
+      return wms_sources[ this.wmsPreset ];
 
     }
 
