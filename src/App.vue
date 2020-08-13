@@ -1,6 +1,27 @@
 <template>
   <div id="app">
     <div id="sidebar">
+      <h3>Selection information</h3>
+      <div>
+        <label for="batchId">Batch ID: </label>
+        <input type="text" id="batchId" readonly v-model="selectedInfo.batchID">
+      </div>
+      <div>
+        <label for="identificatie">Identificatie: </label>
+        <input type="text" id="identificatie" readonly v-model="selectedInfo.identificatie">
+      </div>
+      <div>
+        <input type="checkbox" id="selectOnHover" v-model="castOnHover">
+        <label for="selectOnHover"> Select on hover</label>
+      </div>
+      <h3>Tiles settings</h3>
+      <div>
+        <label for="lod">Active LoD: </label>
+        <select id="lod" v-model="tilesUrl">
+          <option value="http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json">LoD2.2</option>
+          <option value="http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json">LoD1.3</option>
+        </select>
+      </div>
       <div>
         Error Target:
         <input type="number" name="" id="" v-model.number="errorTarget">
@@ -9,18 +30,6 @@
         Error Threshold:
         <input type="number" name="" id="" v-model.number="errorThreshold">
       </div>
-      <div>
-        <select v-model="tilesUrl">
-          <option value="http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json">LoD2.2</option>
-          <option value="http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json">LoD1.3</option>
-        </select>
-      </div>
-      <div>
-        <input type="text" name="" id="" v-model="selectedInfo.batchID">
-      </div>
-      <div>
-        <input type="text" name="" id="" v-model="selectedInfo.identificatie">
-      </div>
     </div>
     <div id="viewer">
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
@@ -28,6 +37,7 @@
         :error-target="errorTarget"
         :error-threshold="errorThreshold"
         :tiles-url="tilesUrl"
+        :cast-on-hover="castOnHover"
         @object-picked="objectPicked"
       />
     </div>
@@ -44,13 +54,20 @@ export default {
   },
   data() {
     return {
+
+
+      tilesUrl: "http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json",
       errorTarget: 50,
       errorThreshold: 60,
+
       selectedInfo: {
+
         batchID: "-",
         identificatie: "-"
+
       },
-      tilesUrl: "http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json"
+      castOnHover: false
+
     }
   },
   methods: {
@@ -75,10 +92,12 @@ export default {
 
 #sidebar {
   width: 30%;
+  padding: 10px;
 }
 
 #viewer {
   width: 70%;
+  height: 100%;
 }
 
 #logo {
@@ -91,5 +110,6 @@ export default {
 html, body {
   height: 100%;
   margin: 0px;
+  overflow: hidden;
 }
 </style>
