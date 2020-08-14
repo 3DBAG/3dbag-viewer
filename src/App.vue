@@ -81,7 +81,7 @@ export default {
     return {
 
       tileset: 'lod22',
-      customTilesUrl: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
+      customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
       errorTarget: 50,
       errorThreshold: 60,
 
@@ -148,8 +148,8 @@ export default {
       }
 
       const sources = {
-        lod22: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json',
-        lod13: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
+        lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json',
+        lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
       }
 
       return sources[ this.tileset ];
