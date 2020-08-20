@@ -23,8 +23,10 @@
       <div>
         <label for="lod">Active LoD: </label>
         <select id="lod" v-model="tileset">
-          <option value="lod22">LoD2.2</option>
-          <option value="lod13">LoD1.3</option>
+          <option value="nl_lod22">LoD2.2 (NL)</option>
+          <option value="nl_lod13">LoD1.3 (NL)</option>
+          <option value="zh_lod22">LoD2.2 (ZH)</option>
+          <option value="zh_lod13">LoD1.3 (ZH)</option>
           <option value="custom">Custom</option>
         </select>
       </div>
@@ -80,8 +82,8 @@ export default {
 
     return {
 
-      tileset: 'lod22',
-      customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
+      tileset: 'nl_lod22',
+      customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
       errorTarget: 50,
       errorThreshold: 60,
 
@@ -148,8 +150,11 @@ export default {
       }
 
       const sources = {
-        lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json',
-        lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
+        zh_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json',
+        zh_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
+        nl_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json'
+        nl_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/lod13_kadaster/tileset1.json'
+
       }
 
       return sources[ this.tileset ];
