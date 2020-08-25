@@ -138,10 +138,6 @@ export default {
           }
 
         } );
-
-        let render = this.renderScene;
-        setInterval(function(){ render(); }, 3000);
-
       }
 
       this.offsetParent.add( this.tiles.group );
@@ -220,7 +216,6 @@ export default {
 
       this.reinitWms();
 
-      this.renderScene();
       this.renderScene();
 
       window.addEventListener( 'resize', this.onWindowResize, false );
