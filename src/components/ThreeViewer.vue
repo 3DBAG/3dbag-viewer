@@ -69,6 +69,7 @@ export default {
     this.box = null;
 
     this.tiles = null;
+    this.cameraTileFocus = null;
   },
   mounted() {
     this.initScene();
@@ -181,6 +182,7 @@ export default {
 
       this.camera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, 1, 40000 );
       this.camera.position.set( 400, 400, 400 );
+      this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
 
       this.offsetParent = new Group();
       this.scene.add( this.offsetParent );
@@ -285,9 +287,18 @@ export default {
 
       }
 
+      // Only update tiles if camera moved sufficiently
+      var camera_delta = [ Math.abs(this.camera.position.x - this.cameraTileFocus.x),
+       Math.abs(this.camera.position.y - this.cameraTileFocus.y),
+       Math.abs(this.camera.position.z - this.cameraTileFocus.z) ]
+
+       if (camera_delta.some(n => n > 500)){
+        this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
+        this.tiles.update();
+        this.wmsTiles.update();
+       }
+
       this.camera.updateMatrixWorld();
-      this.tiles.update();
-      this.wmsTiles.update();
       this.renderer.render( this.scene, this.camera );
 
     }
