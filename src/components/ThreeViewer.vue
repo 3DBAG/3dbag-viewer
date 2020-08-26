@@ -14,6 +14,7 @@ import {
   DirectionalLight,
   AmbientLight,
   Vector2,
+  Vector3,
   Raycaster
 } from 'three';
 import {
@@ -53,6 +54,14 @@ export default {
           imageFormat: 'image/png'
         }
       }
+    },
+    cameraPositionX: {
+      type: Number,
+      default: 400
+    },
+    cameraPositionY: {
+      type: Number,
+      default: 400
     }
   },
   beforeCreate() {
@@ -98,6 +107,16 @@ export default {
       this.reinitWms();
       this.renderScene();
 
+    },
+    cameraPositionX: function( val ) {
+      this.controls.target.x = val;
+      this.camera.position.x = val;
+      this.controls.update();
+    },
+    cameraPositionY: function( val ) {
+      this.controls.target.z = val;
+      this.camera.position.z = val+400;
+      this.controls.update();
     }
   },
   methods: {

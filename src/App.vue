@@ -6,6 +6,13 @@
       <ul>
         <li v-for="res in searchResults" :key="res.id"><a :href="'#' + res.bbox[2] + ',' + res.bbox[0]">{{ res.name }}</a></li>
       </ul>
+      <div>
+        <label for="camPosX">camPosX: </label>
+        <input type="number" id="camPosX" v-model.number="cameraPositionX">
+        <br>
+        <label for="camPosY">camPosY: </label>
+        <input type="number" id="camPosY" v-model.number="cameraPositionY">
+      </div>
       <h3>Selection information</h3>
       <div>
         <label for="batchId">Batch ID: </label>
@@ -59,6 +66,8 @@
         :tiles-url="tilesUrl"
         :cast-on-hover="castOnHover"
         :wms-options="wmsOptions"
+        :camera-position-x="cameraPositionX"
+        :camera-position-y="cameraPositionY"
         @object-picked="objectPicked"
       />
     </div>
@@ -86,6 +95,9 @@ export default {
       customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
       errorTarget: 50,
       errorThreshold: 60,
+
+      cameraPositionX: 400,
+      cameraPositionY: 400,
 
       wmsPreset: 'top10nl',
 
@@ -152,7 +164,7 @@ export default {
       const sources = {
         zh_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json',
         zh_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
-        nl_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json'
+        nl_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
         nl_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/lod13_kadaster/tileset1.json'
 
       }
