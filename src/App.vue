@@ -50,6 +50,28 @@
           <option value="luchfoto2018">Orthophotos 2018</option>
         </select>
       </div>
+      <h3>Rendering settings</h3>
+      <div>
+        AmbientLight intensity:
+        <input type="number" step="0.05" min="0" max="1" name="" id="" v-model.number="ambientIntensity">
+      </div>
+      <div>
+        DirectionalLight intensity:
+        <input type="number" step="0.05" min="0" max="1" name="" id="" v-model.number="directionalIntensity">
+      </div>
+      <div>
+        PointLight intensity:
+        <input type="number" step="0.05" min="0" max="1" name="" id="" v-model.number="pointIntensity">
+      </div>
+      <div>
+        Shading:
+        <select id="Shading" v-model="shading">
+          <option value="normal">Normal</option>
+          <option value="ssao">SSAO</option>
+        </select>
+      </div>
+
+    
     </div>
     <div id="viewer">
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
@@ -60,6 +82,11 @@
         :cast-on-hover="castOnHover"
         :wms-options="wmsOptions"
         @object-picked="objectPicked"
+        :ambient-intensity="ambientIntensity"
+        :directional-intensity="directionalIntensity"
+        :point-intensity="pointIntensity"
+        :shading="shading"
+
       />
     </div>
   </div>
@@ -86,6 +113,10 @@ export default {
       customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
       errorTarget: 50,
       errorThreshold: 60,
+      ambientIntensity: 1,
+      pointIntensity: 1,
+      directionalIntensity: 1,
+      shading: "normal",
 
       wmsPreset: 'top10nl',
 

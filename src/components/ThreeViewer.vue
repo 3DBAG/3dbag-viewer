@@ -12,6 +12,7 @@ import {
   Group,
   Box3,
   DirectionalLight,
+  PointLight,
   AmbientLight,
   Vector2,
   Raycaster
@@ -23,6 +24,8 @@ import {
   WMSTilesRenderer
 } from '../wms-tiles'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 
 export default {
   name: 'ThreeViewer',
@@ -34,6 +37,22 @@ export default {
     errorThreshold: {
       type: Number,
       default: 60
+    },
+      ambientIntensity: {
+      type: Number,
+      default: 1
+    },
+      pointIntensity: {
+      type: Number,
+      default: 1
+    },
+      directionalIntensity: {
+      type: Number,
+      default: 1
+    },
+      shading: {
+      type: String,
+      default: "normal"
     },
     castOnHover: {
       type: Boolean,
@@ -70,6 +89,12 @@ export default {
 
     this.tiles = null;
     this.cameraTileFocus = null;
+
+    this.pLight = null;
+    this.dirLight = null;
+    this.ambLight = null;
+
+    this.renderShading = null;
   },
   mounted() {
     this.initScene();
@@ -82,8 +107,27 @@ export default {
 
     },
     errorThreshold: function( val ) {
-
       this.tiles.errorThreshold = val;
+      this.renderScene();
+
+    },
+    ambientIntensity: function( val ) {
+      this.ambLight.intensity = val;
+      this.renderScene();
+
+    },
+    pointIntensity: function( val ) {
+      this.pLight.intensity = val;
+      this.renderScene();
+
+    },
+    directionalIntensity: function( val ) {
+      this.dirLight.intensity = val;
+      this.renderScene();
+
+    },
+    shading: function( val ) {
+      this.renderShading = val;
       this.renderScene();
 
     },
@@ -206,13 +250,25 @@ export default {
       this.renderer.domElement.addEventListener( 'mouseup', this.onMouseUp, false );
       this.renderer.domElement.addEventListener( 'mouseleave', this.onMouseLeave, false );
 
-      // lights
-      const dirLight = new DirectionalLight( 0xffffff );
-      dirLight.position.set( 1, 2, 3 );
-      this.scene.add( dirLight );
 
-      const ambLight = new AmbientLight( 0xffffff, 0.2 );
-      this.scene.add( ambLight );
+      this.composer = new EffectComposer( this.renderer );
+      var ssaoPass = new SSAOPass(this.scene, this.camera, canvas.cliendWidth, canvas.clientHeight);
+      ssaoPass.kernelRadius = 16;
+      this.composer.addPass(ssaoPass);
+
+      // lights
+      this.pLight = new PointLight( 0xffffff, this.pointIntensity, 0, 1 );
+      this.camera.add( this.pLight );
+      this.scene.add(this.camera);
+
+      this.dirLight = new DirectionalLight( 0xffffff, this.directionalIntensity );
+      this.dirLight.position.set( 0, 1, 0 );
+      this.scene.add( this.dirLight );
+
+      this.ambLight = new AmbientLight( 0xffffff, this.ambientIntensity );
+      this.scene.add( this.ambLight );
+
+      this.renderShading = "normal";
 
       this.offsetParent.rotation.x = - Math.PI / 2;
 
@@ -299,7 +355,13 @@ export default {
        }
 
       this.camera.updateMatrixWorld();
-      this.renderer.render( this.scene, this.camera );
+      if (this.renderShading == "normal"){
+        this.renderer.render( this.scene, this.camera );
+      }
+      else if (this.renderShading == "ssao"){
+        this.composer.render();
+      }
+      
 
     }
   }
