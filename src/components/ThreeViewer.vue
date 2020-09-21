@@ -14,6 +14,7 @@ import {
   DirectionalLight,
   PointLight,
   AmbientLight,
+  HemisphereLight,
   Vector2,
   Raycaster
 } from 'three';
@@ -27,6 +28,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 
+import * as dat from 'dat.gui';
+
 export default {
   name: 'ThreeViewer',
   props: {
@@ -37,22 +40,6 @@ export default {
     errorThreshold: {
       type: Number,
       default: 60
-    },
-      ambientIntensity: {
-      type: Number,
-      default: 1
-    },
-      pointIntensity: {
-      type: Number,
-      default: 1
-    },
-      directionalIntensity: {
-      type: Number,
-      default: 1
-    },
-      shading: {
-      type: String,
-      default: "normal"
     },
     castOnHover: {
       type: Boolean,
@@ -93,10 +80,20 @@ export default {
     this.pLight = null;
     this.dirLight = null;
     this.ambLight = null;
+    //this.hemLight = null;
 
-    this.renderShading = null;
+    this.dirX = null;
+    this.dirY = null;
+    this.dirZ = null;
+
+    this.meshShading = null;
+    this.meshcolor = null;
+
+    
   },
   mounted() {
+    this.guiParams();
+
     this.initScene();
   },
   watch: {
@@ -108,26 +105,6 @@ export default {
     },
     errorThreshold: function( val ) {
       this.tiles.errorThreshold = val;
-      this.renderScene();
-
-    },
-    ambientIntensity: function( val ) {
-      this.ambLight.intensity = val;
-      this.renderScene();
-
-    },
-    pointIntensity: function( val ) {
-      this.pLight.intensity = val;
-      this.renderScene();
-
-    },
-    directionalIntensity: function( val ) {
-      this.dirLight.intensity = val;
-      this.renderScene();
-
-    },
-    shading: function( val ) {
-      this.renderShading = val;
       this.renderScene();
 
     },
@@ -212,7 +189,8 @@ export default {
       this.scene = new Scene();
 
       this.material = new MeshLambertMaterial();
-      this.material.color.setHex( 0x7a0000 );
+
+      this.material.color.set( this.meshcolor );
 
       let canvas = document.getElementById("canvas");
 
@@ -262,13 +240,14 @@ export default {
       this.scene.add(this.camera);
 
       this.dirLight = new DirectionalLight( 0xffffff, this.directionalIntensity );
-      this.dirLight.position.set( 0, 1, 0 );
+      this.dirLight.position.set( this.dirX, this.dirY, this.dirZ );
       this.scene.add( this.dirLight );
 
       this.ambLight = new AmbientLight( 0xffffff, this.ambientIntensity );
       this.scene.add( this.ambLight );
 
-      this.renderShading = "normal";
+      //this.hemLight = new HemisphereLight( 0xffffbb, 0x080820, 1 );
+      //this.scene.add(this.hemLight);
 
       this.offsetParent.rotation.x = - Math.PI / 2;
 
@@ -355,14 +334,99 @@ export default {
        }
 
       this.camera.updateMatrixWorld();
-      if (this.renderShading == "normal"){
+      if (this.meshShading == "normal"){
         this.renderer.render( this.scene, this.camera );
       }
-      else if (this.renderShading == "ssao"){
+      else if (this.meshShading == "ssao"){
         this.composer.render();
       }
       
 
+    },
+
+    guiParams(){
+      var _this = this;
+      
+        var params = {
+          meshcolor: 0x7a0000,  //RED
+          amblight: 1,
+          dirlight: 1,
+          plight: 1,
+          shading: "normal", 
+          dirX: 0,
+          dirY: 1,
+          dirZ: 0
+
+      }
+
+      this.ambientIntensity = params.amblight;
+      this.directionalIntensity = params.dirlight;
+      this.pointIntensity = params.plight;
+      this.meshShading = params.shading;
+      this.meshcolor = params.meshcolor;
+      this.dirX = params.dirX;
+      this.dirY = params.dirY;
+      this.dirZ = params.dirZ;
+
+      const gui = new dat.GUI();
+
+      var intensityFolder = gui.addFolder("Light intensities")
+
+      intensityFolder.add(params, "amblight", 0, 2, 0.01)
+        .name("AmbientLight")
+        .onChange( function(value){
+          _this.ambLight.intensity = value;
+          _this.renderScene(); });
+
+      intensityFolder.add(params, "dirlight", 0, 2, 0.01)
+        .name("DirectionalLight")
+        .onChange( function(value){
+        _this.dirLight.intensity = value;
+        _this.renderScene(); });
+
+      intensityFolder.add(params, "plight", 0, 2, 0.01)
+        .name("PointLight")
+        .onChange( function(value){
+        _this.pLight.intensity = value;
+        _this.renderScene(); });
+
+      var dirFolder = gui.addFolder("DirectionalLight direction")
+
+      dirFolder.add(params, "dirX", 0, 1, 0.01)
+        .onChange( function(value){
+        _this.dirX = value;
+        _this.dirLight.position.set(_this.dirX, _this.dirY, _this.dirZ)
+        _this.renderScene(); 
+        });
+
+      dirFolder.add(params, "dirY", 0, 1, 0.01)
+        .onChange( function(value){
+        _this.dirY = value;
+        _this.dirLight.position.set(_this.dirX, _this.dirY, _this.dirZ)
+        _this.renderScene(); 
+        });
+
+      dirFolder.add(params, "dirZ", 0, 1, 0.01)
+        .onChange( function(value){
+        _this.dirZ = value;
+        _this.dirLight.position.set(_this.dirX, _this.dirY, _this.dirZ)
+        _this.renderScene(); 
+        });
+
+      gui.add(params, "shading", { normal: "normal", SSAO: "ssao"})
+        .name("Shading")
+        .onChange( function(value){
+        _this.meshShading = value;
+        _this.renderScene(); });
+
+
+      gui.addColor(params, 'meshcolor')
+        .name('Mesh color')
+        .onChange(function(value) {
+          _this.meshcolor = value;
+          _this.material.color.set(value);
+          _this.renderScene();
+        });   
     }
   }
 }
