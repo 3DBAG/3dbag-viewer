@@ -18,7 +18,7 @@ import {
 } from 'three';
 import {
   TilesRenderer
-} from '../3d-tiles/index.js'
+} from '../../3DTilesRendererJS/src/index.js'
 import {
   WMSTilesRenderer
 } from '../wms-tiles'
@@ -70,6 +70,8 @@ export default {
 
     this.tiles = null;
     this.cameraTileFocus = null;
+
+    this.needsRerender = false;
   },
   mounted() {
     this.initScene();
@@ -78,26 +80,26 @@ export default {
     errorTarget: function( val ) {
 
       this.tiles.errorTarget = val;
-      this.renderScene();
+      this.needsRerender = true;
 
     },
     errorThreshold: function( val ) {
 
       this.tiles.errorThreshold = val;
-      this.renderScene();
+      this.needsRerender = true;
 
     },
     tilesUrl: function( val ) {
 
       this.reinitTiles();
       this.wmsTiles.tiles = this.tiles;
-      this.renderScene();
+      this.needsRerender = true;
 
     },
     wmsOptions: function( val ) {
 
       this.reinitWms();
-      this.renderScene();
+      this.needsRerender = true;
 
     }
   },
@@ -121,6 +123,7 @@ export default {
       this.tiles.setCamera( this.camera );
       this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
 
+      this.tiles.onLoadTileSet = () => this.needsRerender = true;
       this.tiles.onLoadModel = ( s ) => {
 
         s.traverse( c => {
@@ -139,6 +142,9 @@ export default {
           }
 
         } );
+
+        this.needsRerender = true;
+
       }
 
       this.offsetParent.add( this.tiles.group );
@@ -162,7 +168,7 @@ export default {
 
       this.offsetParent.add( this.wmsTiles.group );
 
-      this.wmsTiles.onLoadTile = this.renderScene;
+      this.wmsTiles.onLoadTile = () => this.needsRerender = true;
     },
     initScene() {
       this.scene = new Scene();
@@ -199,7 +205,7 @@ export default {
       this.controls.screenSpacePanning = false;
       this.controls.minDistance = 1;
       this.controls.maxDistance = 10000;
-      this.controls.addEventListener( "change", this.renderScene );
+      this.controls.addEventListener( "change", () => this.needsRerender = true );
 
       this.renderer.domElement.addEventListener( 'mousemove', this.onMouseMove, false );
       this.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown, false );
@@ -218,6 +224,7 @@ export default {
 
       this.reinitWms();
 
+      this.needsRerender = true;
       this.renderScene();
 
       window.addEventListener( 'resize', this.onWindowResize, false );
@@ -231,7 +238,7 @@ export default {
       this.camera.updateProjectionMatrix();
       this.renderer.setPixelRatio( window.devicePixelRatio );
 
-      this.renderScene();
+      this.needsRerender = true;
 
     },
     onMouseMove( e ) {
@@ -279,28 +286,37 @@ export default {
     },
     renderScene() {
 
-      // update tiles center
-      if ( this.tiles.getBounds( this.box ) ) {
+      requestAnimationFrame( this.renderScene );
 
-        this.box.getCenter( this.tiles.group.position );
-        this.tiles.group.position.multiplyScalar( - 1 );
+      if ( this.needsRerender ) {
+
+        this.needsRerender = false;
+
+        // update tiles center
+        if ( this.tiles.getBounds( this.box ) ) {
+  
+          this.box.getCenter( this.tiles.group.position );
+          this.tiles.group.position.multiplyScalar( - 1 );
+  
+        }
+  
+        // Only update tiles if camera moved sufficiently
+        var camera_delta = [ Math.abs(this.camera.position.x - this.cameraTileFocus.x),
+         Math.abs(this.camera.position.y - this.cameraTileFocus.y),
+         Math.abs(this.camera.position.z - this.cameraTileFocus.z) ]
+  
+        //  if (camera_delta.some(n => n > 500)){
+
+          this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
+          this.tiles.update();
+          this.wmsTiles.update();
+
+        //  }
+  
+        this.camera.updateMatrixWorld();
+        this.renderer.render( this.scene, this.camera );
 
       }
-
-      // Only update tiles if camera moved sufficiently
-      var camera_delta = [ Math.abs(this.camera.position.x - this.cameraTileFocus.x),
-       Math.abs(this.camera.position.y - this.cameraTileFocus.y),
-       Math.abs(this.camera.position.z - this.cameraTileFocus.z) ]
-
-       if (camera_delta.some(n => n > 500)){
-        this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
-        this.tiles.update();
-        this.wmsTiles.update();
-       }
-
-      this.camera.updateMatrixWorld();
-      this.renderer.render( this.scene, this.camera );
-
     }
   }
 }

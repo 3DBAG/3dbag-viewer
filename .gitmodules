@@ -1,0 +1,3 @@
+[submodule "3DTilesRendererJS"]
+	path = 3DTilesRendererJS
+	url = git@github.com:liberostelios/3DTilesRendererJS

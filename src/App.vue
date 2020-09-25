@@ -82,7 +82,7 @@ export default {
 
     return {
 
-      tileset: 'nl_lod22',
+      tileset: 'zh_lod22',
       customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
       errorTarget: 50,
       errorThreshold: 60,
