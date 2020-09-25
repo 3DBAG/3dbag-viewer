@@ -71,7 +71,7 @@ export default {
     this.tiles = null;
     this.cameraTileFocus = null;
 
-    this.needsRerender = false;
+    this.needsRerender = 0;
   },
   mounted() {
     this.initScene();
@@ -80,26 +80,26 @@ export default {
     errorTarget: function( val ) {
 
       this.tiles.errorTarget = val;
-      this.needsRerender = true;
+      this.needsRerender = 1;
 
     },
     errorThreshold: function( val ) {
 
       this.tiles.errorThreshold = val;
-      this.needsRerender = true;
+      this.needsRerender = 1;
 
     },
     tilesUrl: function( val ) {
 
       this.reinitTiles();
       this.wmsTiles.tiles = this.tiles;
-      this.needsRerender = true;
+      this.needsRerender = 1;
 
     },
     wmsOptions: function( val ) {
 
       this.reinitWms();
-      this.needsRerender = true;
+      this.needsRerender = 1;
 
     }
   },
@@ -123,7 +123,7 @@ export default {
       this.tiles.setCamera( this.camera );
       this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
 
-      this.tiles.onLoadTileSet = () => this.needsRerender = true;
+      this.tiles.onLoadTileSet = () => this.needsRerender = 2;
       this.tiles.onLoadModel = ( s ) => {
 
         s.traverse( c => {
@@ -143,7 +143,7 @@ export default {
 
         } );
 
-        this.needsRerender = true;
+        this.needsRerender = 1;
 
       }
 
@@ -168,7 +168,7 @@ export default {
 
       this.offsetParent.add( this.wmsTiles.group );
 
-      this.wmsTiles.onLoadTile = () => this.needsRerender = true;
+      this.wmsTiles.onLoadTile = () => this.needsRerender = 1;
     },
     initScene() {
       this.scene = new Scene();
@@ -205,7 +205,7 @@ export default {
       this.controls.screenSpacePanning = false;
       this.controls.minDistance = 1;
       this.controls.maxDistance = 10000;
-      this.controls.addEventListener( "change", () => this.needsRerender = true );
+      this.controls.addEventListener( "change", () => this.needsRerender = 1 );
 
       this.renderer.domElement.addEventListener( 'mousemove', this.onMouseMove, false );
       this.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown, false );
@@ -224,7 +224,7 @@ export default {
 
       this.reinitWms();
 
-      this.needsRerender = true;
+      this.needsRerender = 1;
       this.renderScene();
 
       window.addEventListener( 'resize', this.onWindowResize, false );
@@ -238,7 +238,7 @@ export default {
       this.camera.updateProjectionMatrix();
       this.renderer.setPixelRatio( window.devicePixelRatio );
 
-      this.needsRerender = true;
+      this.needsRerender = 1;
 
     },
     onMouseMove( e ) {
@@ -288,9 +288,9 @@ export default {
 
       requestAnimationFrame( this.renderScene );
 
-      if ( this.needsRerender ) {
+      if ( this.needsRerender > 0 ) {
 
-        this.needsRerender = false;
+        this.needsRerender--;
 
         // update tiles center
         if ( this.tiles.getBounds( this.box ) ) {
@@ -300,18 +300,9 @@ export default {
   
         }
   
-        // Only update tiles if camera moved sufficiently
-        var camera_delta = [ Math.abs(this.camera.position.x - this.cameraTileFocus.x),
-         Math.abs(this.camera.position.y - this.cameraTileFocus.y),
-         Math.abs(this.camera.position.z - this.cameraTileFocus.z) ]
-  
-        //  if (camera_delta.some(n => n > 500)){
-
-          this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
-          this.tiles.update();
-          this.wmsTiles.update();
-
-        //  }
+        this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
+        this.tiles.update();
+        this.wmsTiles.update();
   
         this.camera.updateMatrixWorld();
         this.renderer.render( this.scene, this.camera );
