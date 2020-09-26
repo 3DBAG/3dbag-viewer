@@ -275,9 +275,9 @@ export default {
         const stride = object.geometry.attributes._batchid.data.stride;
         const batch_id = object.geometry.attributes._batchid.data.array[ b_offset + stride * idx ];
 
-        if ( 'identificatie' in object.parent.batchAttributes ) {
+        if ( object.parent.batchTable.getKeys().includes( "identificatie" ) ) {
 
-          const identificatie = object.parent.batchAttributes.identificatie[ batch_id ];
+          const identificatie = object.parent.batchTable.getData( "identificatie" )[ batch_id ];
           this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie } );
 
         }
