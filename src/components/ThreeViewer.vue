@@ -117,6 +117,7 @@ export default {
       this.tiles.errorThreshold = this.errorThreshold;
       this.tiles.loadSiblings = false;
       this.tiles.maxDepth = 15;
+      this.tiles.showEmptyTiles = true;
 
       this.tiles.downloadQueue.priorityCallback = tile => 1 / tile.cached.distance;
 
@@ -278,8 +279,14 @@ export default {
         if ( object.parent.batchTable.getKeys().includes( "identificatie" ) ) {
 
           const identificatie = object.parent.batchTable.getData( "identificatie" )[ batch_id ];
-          this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie } );
+          this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie, "rmse": "-" } );
 
+        }
+        else if ( object.parent.batchTable.getKeys().includes( "attrs" ) ) {
+
+          const attrs = JSON.parse( object.parent.batchTable.getData( "attrs" )[ batch_id ] );
+          this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": attrs.identificatie, "rmse": attrs.rmse } );
+          console.log( attrs );
         }
 
       }
@@ -299,12 +306,13 @@ export default {
           this.tiles.group.position.multiplyScalar( - 1 );
   
         }
+
+        this.camera.updateMatrixWorld();
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
         this.tiles.update();
         this.wmsTiles.update();
   
-        this.camera.updateMatrixWorld();
         this.renderer.render( this.scene, this.camera );
 
       }
