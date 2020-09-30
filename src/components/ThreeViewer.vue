@@ -286,6 +286,8 @@ export default {
 
           const attrs = JSON.parse( object.parent.batchTable.getData( "attrs" )[ batch_id ] );
           this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": attrs.identificatie, "rmse": attrs.rmse } );
+
+          // eslint-disable-next-line no-console
           console.log( attrs );
         }
 
