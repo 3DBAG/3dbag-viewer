@@ -55,13 +55,13 @@ export default {
         }
       }
     },
-    cameraPositionX: {
+    geoPositionX: {
       type: Number,
-      default: 400
+      default: 85391
     },
-    cameraPositionY: {
+    geoPositionY: {
       type: Number,
-      default: 400
+      default: 446460
     }
   },
   beforeCreate() {
@@ -111,18 +111,38 @@ export default {
       this.needsRerender = 1;
 
     },
-    cameraPositionX: function( val ) {
-      this.controls.target.x = val;
-      this.camera.position.x = val;
-      this.controls.update();
+    geoPositionX: function( val ) {
+
+      // this.geoPositionX=val;
+      this.setCameraPosFromGeoCoordinates()
+
     },
-    cameraPositionY: function( val ) {
-      this.controls.target.z = val;
-      this.camera.position.z = val+400;
-      this.controls.update();
+    geoPositionY: function( val ) {
+
+      // this.geoPositionY=val;
+      this.setCameraPosFromGeoCoordinates()
+
     }
   },
   methods: {
+    setCameraPosFromGeoCoordinates() {
+      // compute local tileset coordinates
+      let tileset_offset_x = this.tiles.root.cached.transform.elements[12];
+      let tileset_offset_y = this.tiles.root.cached.transform.elements[13];
+      let local_x = this.geoPositionX - tileset_offset_x;
+      let local_z = -(this.geoPositionY - tileset_offset_y);
+      
+      // compute current camera position relative to target
+      let cam_xo = this.camera.position.x - this.controls.target.x
+      let cam_zo = this.camera.position.z - this.controls.target.z
+
+      // move target and maintain the relative camera position
+      this.controls.target.x = local_x;
+      this.controls.target.z = local_z;
+      this.camera.position.x = local_x+cam_xo;
+      this.camera.position.z = local_z+cam_zo;
+      this.controls.update();
+    },
     reinitTiles() {
       if ( this.tiles ) {
 

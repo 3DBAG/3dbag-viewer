@@ -4,14 +4,14 @@
       <h1>3D BAG</h1>
       <input type="text" id="search" v-model="searchTerm" @keyup="doSearch">
       <ul>
-        <li v-for="res in searchResults" :key="res.id"><a :href="'#' + res.bbox[2] + ',' + res.bbox[0]">{{ res.name }}</a></li>
+        <li v-for="res in searchResults" :key="res.id"><a :href="'#' + res.rd_x + ',' + res.rd_y" @click="geoPositionX=res.rd_x; geoPositionY=res.rd_y">{{ res.name }}</a></li>
       </ul>
       <div>
-        <label for="camPosX">camPosX: </label>
-        <input type="number" id="camPosX" v-model.number="cameraPositionX">
+        <label for="geoPosX">geoPosX: </label>
+        <input type="number" id="geoPosX" v-model.number="geoPositionX">
         <br>
-        <label for="camPosY">camPosY: </label>
-        <input type="number" id="camPosY" v-model.number="cameraPositionY">
+        <label for="geoPosY">geoPosY: </label>
+        <input type="number" id="geoPosY" v-model.number="geoPositionY">
       </div>
       <h3>Selection information</h3>
       <div>
@@ -71,8 +71,8 @@
         :tiles-url="tilesUrl"
         :cast-on-hover="castOnHover"
         :wms-options="wmsOptions"
-        :camera-position-x="cameraPositionX"
-        :camera-position-y="cameraPositionY"
+        :geo-position-x="geoPositionX"
+        :geo-position-y="geoPositionY"
         @object-picked="objectPicked"
       />
     </div>
@@ -101,8 +101,8 @@ export default {
       errorTarget: 50,
       errorThreshold: 60,
 
-      cameraPositionX: 400,
-      cameraPositionY: 400,
+      geoPositionX: 85391,
+      geoPositionY: 446460,
 
       wmsPreset: 'top10nl',
 
@@ -135,7 +135,7 @@ export default {
 
       if ( e.keyCode == 13 ) {
 
-        fetch( 'https://nominatim.openstreetmap.org/?addressdetails=1&q=' + this.searchTerm + '&format=json&limit=10' )
+        fetch( 'https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=' + this.searchTerm + '&fi=weergavenaam,id,centroide_rd&rows=10' )
         .then( res => {
 
           if ( res.ok ) {
@@ -146,8 +146,11 @@ export default {
 
         })
         .then( json => {
-
-          this.searchResults = json.map( a => { return { id: a.place_id, name: a.display_name, bbox: a.boundingbox } } );
+          var re = /(\d+\.\d+)/g;
+          this.searchResults = json.response.docs.map( a => { 
+            let m = a.centroide_rd.match(re);
+            return { id: a.id, name: a.weergavenaam, rd_x: m[0], rd_y: m[1] } 
+          } );
 
         });
 
