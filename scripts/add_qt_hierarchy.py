@@ -67,7 +67,7 @@ def recursive_subdivide(range_x, range_y):
     dim = xmax-xmin
     h = int(dim/2)
     node = {}
-    print("Node h={}, xmin={}, xmax={}, ymin={}, ymax={}".format(h, xmin, xmax, ymin, ymax))
+    # print("Node h={}, xmin={}, xmax={}, ymin={}, ymax={}".format(h, xmin, xmax, ymin, ymax))
     # print(node)
     # input()
     #TODO: check if all cells in this range are empty
@@ -76,8 +76,6 @@ def recursive_subdivide(range_x, range_y):
     if h < 1:
         # return leafs
         tid = grid_index[xmin,ymin]
-        print(tid)
-        #if ()
         node = tile_index[tid]
         node["geometricError"]=10
     else:
