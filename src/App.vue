@@ -135,7 +135,7 @@ export default {
 
       if ( e.keyCode == 13 ) {
 
-        fetch( 'https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=' + this.searchTerm + '&fi=weergavenaam,id,centroide_rd&rows=10' )
+        fetch( 'https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=' + this.searchTerm + '&fq=bron:BAG&fl=weergavenaam,id,centroide_rd&rows=10' )
         .then( res => {
 
           if ( res.ok ) {
@@ -146,10 +146,10 @@ export default {
 
         })
         .then( json => {
-          var re = /(\d+\.\d+)/g;
+          var re = /\d+\.?\d*/g;
           this.searchResults = json.response.docs.map( a => { 
             let m = a.centroide_rd.match(re);
-            return { id: a.id, name: a.weergavenaam, rd_x: m[0], rd_y: m[1] } 
+            return { id: a.id, name: a.weergavenaam, rd_x: parseFloat(m[0]), rd_y: parseFloat(m[1]) } 
           } );
 
         });
