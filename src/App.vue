@@ -4,15 +4,11 @@
       <h1>3D BAG</h1>
       <input type="text" id="search" v-model="searchTerm" @keyup="doSearch">
       <ul>
-        <li v-for="res in searchResults" :key="res.id"><a :href="'#' + res.rd_x + ',' + res.rd_y" @click="geoPositionX=res.rd_x; geoPositionY=res.rd_y">{{ res.name }}</a></li>
+        <li v-for="res in searchResults" :key="res.id">
+          <router-link :to="{path:'/', query: {rdx:res.rd_x, rdy:res.rd_y, ox: camOffset.x, oy: camOffset.y, oz: camOffset.z}}">{{ res.name }}</router-link>
+        </li>
       </ul>
-      <div>
-        <label for="geoPosX">geoPosX: </label>
-        <input type="number" id="geoPosX" v-model.number="geoPositionX">
-        <br>
-        <label for="geoPosY">geoPosY: </label>
-        <input type="number" id="geoPosY" v-model.number="geoPositionY">
-      </div>
+
       <h3>Selection information</h3>
       <div>
         <label for="batchId">Batch ID: </label>
@@ -71,9 +67,8 @@
         :tiles-url="tilesUrl"
         :cast-on-hover="castOnHover"
         :wms-options="wmsOptions"
-        :geo-position-x="geoPositionX"
-        :geo-position-y="geoPositionY"
         @object-picked="objectPicked"
+        @cam-offset="onCamOffset"
       />
     </div>
   </div>
@@ -101,8 +96,11 @@ export default {
       errorTarget: 50,
       errorThreshold: 60,
 
-      geoPositionX: 85391,
-      geoPositionY: 446460,
+      camOffset : {
+        x : 400,
+        y : 400,
+        z : 400
+      },
 
       wmsPreset: 'top10nl',
 
@@ -125,6 +123,12 @@ export default {
 
   methods: {
 
+    onCamOffset: function( event ) {
+      
+      this.camOffset = event;
+
+    },
+
     objectPicked: function( event ) {
 
       this.selectedInfo = event;
@@ -137,8 +141,8 @@ export default {
 
         fetch( 'https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=' + this.searchTerm + '&fq=bron:BAG&fl=weergavenaam,id,centroide_rd&rows=10' )
         .then( res => {
-
-          if ( res.ok ) {
+          const contentType = res.headers.get("content-type");
+          if ( res.ok && contentType && contentType.indexOf("application/json") !== -1) {
 
             return res.json();
 
