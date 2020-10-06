@@ -16,6 +16,10 @@
         <input type="text" id="identificatie" readonly v-model="selectedInfo.identificatie">
       </div>
       <div>
+        <label for="rmse">RMSE: </label>
+        <input type="text" id="rmse" readonly v-model="selectedInfo.rmse">
+      </div>
+      <div>
         <input type="checkbox" id="selectOnHover" v-model="castOnHover">
         <label for="selectOnHover"> Select on hover</label>
       </div>
@@ -23,6 +27,7 @@
       <div>
         <label for="lod">Active LoD: </label>
         <select id="lod" v-model="tileset">
+          <option value="nl_lod22_attr">LoD2.2 (NL+attributes)</option>
           <option value="nl_lod22">LoD2.2 (NL)</option>
           <option value="nl_lod13">LoD1.3 (NL)</option>
           <option value="zh_lod22">LoD2.2 (ZH)</option>
@@ -82,7 +87,7 @@ export default {
 
     return {
 
-      tileset: 'nl_lod22',
+      tileset: 'nl_lod22_attr',
       customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
       errorTarget: 50,
       errorThreshold: 60,
@@ -92,7 +97,8 @@ export default {
       selectedInfo: {
 
         batchID: "-",
-        identificatie: "-"
+        identificatie: "-",
+        rmse: "-"
 
       },
 
@@ -153,8 +159,8 @@ export default {
         zh_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json',
         zh_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
         nl_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
-        nl_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/lod13_kadaster/tileset1.json'
-
+        nl_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/lod13_kadaster/tileset1.json',
+        nl_lod22_attr: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_allattrs/tileset1.json'
       }
 
       return sources[ this.tileset ];

@@ -20,7 +20,7 @@ import {
 } from 'three';
 import {
   TilesRenderer
-} from '../3d-tiles/index.js'
+} from '../../3DTilesRendererJS/src/index.js'
 import {
   WMSTilesRenderer
 } from '../wms-tiles'
@@ -90,6 +90,7 @@ export default {
     this.meshcolor = null;
 
     
+    this.needsRerender = 0;
   },
   mounted() {
     this.guiParams();
@@ -100,25 +101,25 @@ export default {
     errorTarget: function( val ) {
 
       this.tiles.errorTarget = val;
-      this.renderScene();
+      this.needsRerender = 1;
 
     },
     errorThreshold: function( val ) {
       this.tiles.errorThreshold = val;
-      this.renderScene();
+      this.needsRerender = 1;
 
     },
     tilesUrl: function( val ) {
 
       this.reinitTiles();
       this.wmsTiles.tiles = this.tiles;
-      this.renderScene();
+      this.needsRerender = 1;
 
     },
     wmsOptions: function( val ) {
 
       this.reinitWms();
-      this.renderScene();
+      this.needsRerender = 1;
 
     }
   },
@@ -136,12 +137,14 @@ export default {
       this.tiles.errorThreshold = this.errorThreshold;
       this.tiles.loadSiblings = false;
       this.tiles.maxDepth = 15;
+      this.tiles.showEmptyTiles = true;
 
       this.tiles.downloadQueue.priorityCallback = tile => 1 / tile.cached.distance;
 
       this.tiles.setCamera( this.camera );
       this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
 
+      this.tiles.onLoadTileSet = () => this.needsRerender = 2;
       this.tiles.onLoadModel = ( s ) => {
 
         s.traverse( c => {
@@ -160,6 +163,9 @@ export default {
           }
 
         } );
+
+        this.needsRerender = 1;
+
       }
 
       this.offsetParent.add( this.tiles.group );
@@ -183,7 +189,7 @@ export default {
 
       this.offsetParent.add( this.wmsTiles.group );
 
-      this.wmsTiles.onLoadTile = this.renderScene;
+      this.wmsTiles.onLoadTile = () => this.needsRerender = 1;
     },
     initScene() {
       this.scene = new Scene();
@@ -221,7 +227,7 @@ export default {
       this.controls.screenSpacePanning = false;
       this.controls.minDistance = 1;
       this.controls.maxDistance = 10000;
-      this.controls.addEventListener( "change", this.renderScene );
+      this.controls.addEventListener( "change", () => this.needsRerender = 1 );
 
       this.renderer.domElement.addEventListener( 'mousemove', this.onMouseMove, false );
       this.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown, false );
@@ -253,6 +259,7 @@ export default {
 
       this.reinitWms();
 
+      this.needsRerender = 1;
       this.renderScene();
 
       window.addEventListener( 'resize', this.onWindowResize, false );
@@ -266,7 +273,7 @@ export default {
       this.camera.updateProjectionMatrix();
       this.renderer.setPixelRatio( window.devicePixelRatio );
 
-      this.renderScene();
+      this.needsRerender = 1;
 
     },
     onMouseMove( e ) {
@@ -303,31 +310,41 @@ export default {
         const stride = object.geometry.attributes._batchid.data.stride;
         const batch_id = object.geometry.attributes._batchid.data.array[ b_offset + stride * idx ];
 
-        if ( 'identificatie' in object.parent.batchAttributes ) {
+        if ( object.parent.batchTable.getKeys().includes( "identificatie" ) ) {
 
-          const identificatie = object.parent.batchAttributes.identificatie[ batch_id ];
-          this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie } );
+          const identificatie = object.parent.batchTable.getData( "identificatie" )[ batch_id ];
+          this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie, "rmse": "-" } );
 
+        }
+        else if ( object.parent.batchTable.getKeys().includes( "attrs" ) ) {
+
+          const attrs = JSON.parse( object.parent.batchTable.getData( "attrs" )[ batch_id ] );
+          this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": attrs.identificatie, "rmse": attrs.rmse } );
+
+          // eslint-disable-next-line no-console
+          console.log( attrs );
         }
 
       }
     },
     renderScene() {
 
-      // update tiles center
-      if ( this.tiles.getBounds( this.box ) ) {
+      requestAnimationFrame( this.renderScene );
 
-        this.box.getCenter( this.tiles.group.position );
-        this.tiles.group.position.multiplyScalar( - 1 );
+      if ( this.needsRerender > 0 ) {
 
-      }
+        this.needsRerender--;
 
-      // Only update tiles if camera moved sufficiently
-      var camera_delta = [ Math.abs(this.camera.position.x - this.cameraTileFocus.x),
-       Math.abs(this.camera.position.y - this.cameraTileFocus.y),
-       Math.abs(this.camera.position.z - this.cameraTileFocus.z) ]
+        // update tiles center
+        if ( this.tiles.getBounds( this.box ) ) {
+  
+          this.box.getCenter( this.tiles.group.position );
+          this.tiles.group.position.multiplyScalar( - 1 );
+  
+        }
 
-       if (camera_delta.some(n => n > 500)){
+        this.camera.updateMatrixWorld();
+  
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
         this.tiles.update();
         this.wmsTiles.update();
