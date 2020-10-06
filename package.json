@@ -28,7 +28,7 @@
     "babel-jest": "^25.4.0",
     "eslint-config-mdcs": "^4.2.3",
     "eslint-plugin-jest": "^23.8.2",
-    "jest": "^25.4.0",
+    "jest": "^26.4.2",
     "jest-cli": "^25.4.0"
   },
   "eslintConfig": {
