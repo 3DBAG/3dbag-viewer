@@ -11,7 +11,7 @@
     "3d-tiles-renderer": "^0.1.4",
     "core-js": "^3.6.5",
     "jest": "^26.4.2",
-    "three": "^0.119.1",
+    "three": "^0.121.1",
     "vue": "^2.6.11",
     "vue-router": "^3.4.5"
   },
@@ -28,7 +28,7 @@
     "babel-jest": "^25.4.0",
     "eslint-config-mdcs": "^4.2.3",
     "eslint-plugin-jest": "^23.8.2",
-    "jest": "^25.4.0",
+    "jest": "^26.4.2",
     "jest-cli": "^25.4.0"
   },
   "eslintConfig": {

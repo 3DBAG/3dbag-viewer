@@ -1,3 +1,3 @@
-import { WMSTilesRenderer } from './base/WMSTilesRenderer.js'
+import { WMSTilesRenderer } from './base/WMSTilesRenderer.js';
 
 export { WMSTilesRenderer };
