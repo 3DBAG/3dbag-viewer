@@ -200,7 +200,7 @@ export default {
 
       let canvas = document.getElementById("canvas");
 
-      this.renderer = new WebGLRenderer( { antialias: true } );
+      this.renderer = new WebGLRenderer( { antialias: false } );
       this.renderer.setPixelRatio( window.devicePixelRatio );
       this.renderer.setSize( canvas.clientWidth, canvas.clientHeight );
       this.renderer.setClearColor( 0xd9eefc );
@@ -393,19 +393,19 @@ export default {
         .name("AmbientLight")
         .onChange( function(value){
           _this.ambLight.intensity = value;
-          _this.renderScene(); });
+          _this.needsRerender=1; });
 
       intensityFolder.add(params, "dirlight", 0, 2, 0.01)
         .name("DirectionalLight")
         .onChange( function(value){
         _this.dirLight.intensity = value;
-        _this.renderScene(); });
+        _this.needsRerender=1; });
 
       intensityFolder.add(params, "plight", 0, 2, 0.01)
         .name("PointLight")
         .onChange( function(value){
         _this.pLight.intensity = value;
-        _this.renderScene(); });
+        _this.needsRerender=1; });
 
       var dirFolder = gui.addFolder("DirectionalLight direction")
 
@@ -413,28 +413,28 @@ export default {
         .onChange( function(value){
         _this.dirX = value;
         _this.dirLight.position.set(_this.dirX, _this.dirY, _this.dirZ)
-        _this.renderScene(); 
+        _this.needsRerender=1; 
         });
 
       dirFolder.add(params, "dirY", 0, 1, 0.01)
         .onChange( function(value){
         _this.dirY = value;
         _this.dirLight.position.set(_this.dirX, _this.dirY, _this.dirZ)
-        _this.renderScene(); 
+        _this.needsRerender=1; 
         });
 
       dirFolder.add(params, "dirZ", 0, 1, 0.01)
         .onChange( function(value){
         _this.dirZ = value;
         _this.dirLight.position.set(_this.dirX, _this.dirY, _this.dirZ)
-        _this.renderScene(); 
+        _this.needsRerender=1; 
         });
 
       gui.add(params, "shading", { normal: "normal", SSAO: "ssao"})
         .name("Shading")
         .onChange( function(value){
         _this.meshShading = value;
-        _this.renderScene(); });
+        _this.needsRerender=1; });
 
 
       gui.addColor(params, 'meshcolor')
@@ -442,7 +442,7 @@ export default {
         .onChange(function(value) {
           _this.meshcolor = value;
           _this.material.color.set(value);
-          _this.renderScene();
+          _this.needsRerender=1;
         });   
     }
   }
