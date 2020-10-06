@@ -22,6 +22,9 @@ import {
 import {
   WMSTilesRenderer
 } from '../wms-tiles'
+import {
+  WMTSTilesRenderer
+} from '../wmts-tiles'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 export default {
@@ -51,6 +54,22 @@ export default {
           layer: 'top10nlv2',
           style: '',
           imageFormat: 'image/png'
+        }
+      }
+    },
+    wmtsOptions: {
+      type: Object,
+      default: function() {
+        return {
+          url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
+          layer: 'brtachtergrondkaart',
+          style: 'default',
+          tilematrixset: "EPSG:28992",
+          Service: "WMTS",
+          Request: "GetTile",
+          Version: "1.0.0",
+          Format: "image/png",
+          TileMatrix: "EPSG:28992:5"
         }
       }
     }
@@ -171,6 +190,13 @@ export default {
 
       this.wmsTiles.onLoadTile = () => this.needsRerender = 1;
     },
+    reinitWmts() {
+
+      this.wmtsTiles = new WMTSTilesRenderer( this.wmtsOptions );
+
+      this.offsetParent.add( this.wmtsTiles.group );
+      
+    },
     initScene() {
       this.scene = new Scene();
 
@@ -224,6 +250,8 @@ export default {
       this.offsetParent.rotation.x = - Math.PI / 2;
 
       this.reinitWms();
+
+      this.reinitWmts();
 
       this.needsRerender = 1;
       this.renderScene();
@@ -308,12 +336,13 @@ export default {
           this.tiles.group.position.multiplyScalar( - 1 );
   
         }
-
         this.camera.updateMatrixWorld();
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
         this.tiles.update();
-        this.wmsTiles.update();
+        // this.wmsTiles.update();
+
+        this.wmtsTiles.update(this.tiles.cameraInfo, new Vector2(145763.78681838885, 459753.83407714777));
   
         this.renderer.render( this.scene, this.camera );
 
