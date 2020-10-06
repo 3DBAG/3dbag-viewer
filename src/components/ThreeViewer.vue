@@ -31,6 +31,9 @@ import {
 import {
   WMSTilesRenderer
 } from '../wms-tiles'
+import {
+  WMTSTilesRenderer
+} from '../wmts-tiles'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
@@ -100,6 +103,22 @@ export default {
         }
       }
     },
+    wmtsOptions: {
+      type: Object,
+      default: function() {
+        return {
+          url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
+          layer: 'brtachtergrondkaart',
+          style: 'default',
+          tilematrixset: "EPSG:28992",
+          Service: "WMTS",
+          Request: "GetTile",
+          Version: "1.0.0",
+          Format: "image/png",
+          TileMatrix: "EPSG:28992:5"
+        }
+      }
+    }
   },
   beforeCreate() {
     this.renderer = null;
@@ -382,6 +401,13 @@ export default {
 
       this.wmsTiles.onLoadTile = () => this.needsRerender = 1;
     },
+    reinitWmts() {
+
+      this.wmtsTiles = new WMTSTilesRenderer( this.wmtsOptions );
+
+      this.offsetParent.add( this.wmtsTiles.group );
+      
+    },
     initScene() {
       this.scene = new Scene();
       this.scene.background = new Color( this.fogColor );
@@ -463,6 +489,8 @@ export default {
       this.offsetParent.rotation.x = - Math.PI / 2;
 
       this.reinitWms();
+
+      this.reinitWmts();
 
       this.needsRerender = 1;
       this.renderScene();
@@ -578,6 +606,7 @@ export default {
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
         this.tiles.update();  
+        
         if(this.enableWMS && this.wmsTiles != null) this.wmsTiles.update();
       
         if (this.meshShading == "normal"){    
@@ -586,6 +615,14 @@ export default {
         else if (this.meshShading == "ssao"){
           this.composer.render();
         }
+        
+        this.tiles.update();
+        // this.wmsTiles.update();
+
+        this.wmtsTiles.update(this.tiles.cameraInfo, new Vector2(145763.78681838885, 459753.83407714777));
+  
+        this.renderer.render( this.scene, this.camera );
+
       }
 
     },

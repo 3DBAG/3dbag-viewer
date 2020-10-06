@@ -47,12 +47,20 @@
           <option value="luchfoto2018">Orthophotos 2018</option>
         </select>
       </div>
+      <div>
+        <label for="wmtsPreset">Preset: </label>
+        <select id="wmtsPreset" v-model="wmtsPreset">
+          <option value="brtachtergrondkaart">BRT achtergrondkaart</option>
+          <option value="brtachtergrondkaartgrijs">BRT achtergrondkaart grijs</option>
+        </select>
+      </div>
     </div>
     <div id="viewer">
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
       <ThreeViewer
         :tiles-url="tilesUrl"
         :wms-options="wmsOptions"
+        :wmts-options="wmtsOptions"
         @object-picked="objectPicked"
         @cam-offset="onCamOffset"
       />
@@ -87,6 +95,7 @@ export default {
       },
 
       wmsPreset: 'top10nl',
+      wmtsPreset: 'brtachtergrondkaart',
 
       selectedInfo: {
 
@@ -193,6 +202,43 @@ export default {
       }
 
       return wms_sources[ this.wmsPreset ];
+
+    },
+
+      wmtsOptions: function () {
+
+      const wmts_sources = {
+
+        brtachtergrondkaart: {
+
+          url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
+          layer: 'brtachtergrondkaart',
+          style: 'default',
+          tileMatrixSet: "EPSG:28992",
+          service: "WMTS",
+          request: "GetTile",
+          version: "1.0.0",
+          format: "image/png",
+          tileMatrix: "EPSG:28992"
+
+        },
+        brtachtergrondkaartgrijs: {
+
+            url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
+            layer: 'brtachtergrondkaartgrijs',
+            style: 'default',
+            tileMatrixSet: "EPSG:28992",
+            service: "WMTS",
+            request: "GetTile",
+            version: "1.0.0",
+            format: "image/png",
+            tileMatrix: "EPSG:28992"
+
+        }
+
+      }
+
+      return wmts_sources[ this.wmtsPreset ];
 
     }
 
