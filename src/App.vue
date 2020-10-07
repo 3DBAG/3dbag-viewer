@@ -39,14 +39,6 @@
         <label for="customTileset">Custom URL: </label>
         <input type="text" id="customTileset" v-model="customTilesUrl">
       </div>
-      <div>
-        Error Target:
-        <input type="number" name="" id="" v-model.number="errorTarget">
-      </div>
-      <div>
-        Error Threshold:
-        <input type="number" name="" id="" v-model.number="errorThreshold">
-      </div>
       <h3>WMS settings</h3>
       <div>
         <label for="wmsPreset">Preset: </label>
@@ -59,8 +51,6 @@
     <div id="viewer">
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
       <ThreeViewer
-        :error-target="errorTarget"
-        :error-threshold="errorThreshold"
         :tiles-url="tilesUrl"
         :cast-on-hover="castOnHover"
         :wms-options="wmsOptions"

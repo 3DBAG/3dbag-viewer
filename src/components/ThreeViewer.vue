@@ -28,11 +28,19 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 
-import * as dat from 'dat.gui';
+const Tweakpane = require('tweakpane');
 
 export default {
   name: 'ThreeViewer',
   props: {
+    nearPlane: {
+      type: Number,
+      default: 1
+    },
+    farPlane: {
+      type: Number,
+      default: 10000
+    },
     errorTarget: {
       type: Number,
       default: 50
@@ -42,6 +50,10 @@ export default {
       default: 60
     },
     castOnHover: {
+      type: Boolean,
+      default: false
+    },
+    enableWMS: {
       type: Boolean,
       default: false
     },
@@ -91,24 +103,15 @@ export default {
 
     
     this.needsRerender = 0;
+
+    this.pane = new Tweakpane();
   },
   mounted() {
-    this.guiParams();
+    // this.guiParams();
 
     this.initScene();
   },
   watch: {
-    errorTarget: function( val ) {
-
-      this.tiles.errorTarget = val;
-      this.needsRerender = 1;
-
-    },
-    errorThreshold: function( val ) {
-      this.tiles.errorThreshold = val;
-      this.needsRerender = 1;
-
-    },
     tilesUrl: function( val ) {
 
       this.reinitTiles();
@@ -119,9 +122,43 @@ export default {
     wmsOptions: function( val ) {
 
       this.reinitWms();
+      this.wmsTiles.tiles = this.tiles;
       this.needsRerender = 1;
 
-    }
+    },
+    $route(to , from) {
+      // console.log(to.query);
+      this.setCameraPosFromRoute(to.query);
+    },
+
+    // debug watchers:
+    errorTarget: function( val ) {
+
+      this.tiles.errorTarget = val;
+
+    },
+    errorThreshold: function( val ) {
+
+      this.tiles.errorThreshold = val;
+
+    },
+    enableWMS: function( val ) {
+
+      this.reinitWms();
+
+    },
+    nearPlane: function( val ) {
+
+      this.camera.near = val
+      this.camera.updateProjectionMatrix();
+
+    },
+    farPlane: function( val ) {
+
+      this.camera.far = val
+      this.camera.updateProjectionMatrix();
+
+    },
   },
   methods: {
     reinitTiles() {
@@ -208,7 +245,7 @@ export default {
 
       canvas.appendChild( this.renderer.domElement );
 
-      this.camera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, 1, 40000 );
+      this.camera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.farPlane );
       this.camera.position.set( 400, 400, 400 );
       this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
 
@@ -263,6 +300,30 @@ export default {
       this.renderScene();
 
       window.addEventListener( 'resize', this.onWindowResize, false );
+
+      // tweakpane (debug)
+      // see https://cocopon.github.io/tweakpane/
+      const f1 = this.pane.addFolder({
+        expanded: true,
+        title: '3DTiles',
+      });
+      f1.addInput(this, "errorTarget");
+      f1.addInput(this, "errorThreshold");
+      
+      const f2 = this.pane.addFolder({
+        expanded: true,
+        title: 'Terrain tiles',
+      });
+      f2.addInput(this, "enableWMS");
+      
+      const f3 = this.pane.addFolder({
+        expanded: true,
+        title: 'Rendering',
+      })
+      f3.addInput(this, "nearPlane", {min: 1, max:1000});
+      f3.addInput(this, "farPlane", {min: 100, max:20000});
+
+      this.pane.on("change", (val) => this.needsRerender=1 )
     },
     onWindowResize() {
 
@@ -346,18 +407,16 @@ export default {
         this.camera.updateMatrixWorld();
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
-        this.tiles.update();
-        this.wmsTiles.update();
-       }
-
-      this.camera.updateMatrixWorld();
-      if (this.meshShading == "normal"){
-        this.renderer.render( this.scene, this.camera );
-      }
-      else if (this.meshShading == "ssao"){
-        this.composer.render();
-      }
+        this.tiles.update();  
+        if(this.enableWMS && this.wmsTiles != null) this.wmsTiles.update();
       
+        if (this.meshShading == "normal"){    
+          this.renderer.render( this.scene, this.camera );
+        }
+        else if (this.meshShading == "ssao"){
+          this.composer.render();
+        }
+      }
 
     },
 
