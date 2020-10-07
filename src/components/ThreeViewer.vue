@@ -334,10 +334,10 @@ export default {
       this.controls.addEventListener( "change", () => this.needsRerender = 1 );
       this.controls.addEventListener( "end", this.setRouteFromCameraPos );
 
-      this.renderer.domElement.addEventListener( 'mousemove', this.onMouseMove, false );
-      this.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown, false );
-      this.renderer.domElement.addEventListener( 'mouseup', this.onMouseUp, false );
-      this.renderer.domElement.addEventListener( 'mouseleave', this.onMouseLeave, false );
+      this.renderer.domElement.addEventListener( 'pointermove', this.onPointerMove, false );
+      this.renderer.domElement.addEventListener( 'pointerdown', this.onPointerDown, false );
+      this.renderer.domElement.addEventListener( 'pointerup', this.onPointerUp, false );
+      this.renderer.domElement.addEventListener( 'pointerleave', this.onPointerLeave, false );
 
 
       this.composer = new EffectComposer( this.renderer );
@@ -381,21 +381,21 @@ export default {
       this.needsRerender = 1;
 
     },
-    onMouseMove( e ) {
+    onPointerMove( e ) {
       if ( this.castOnHover ) {
 
         this.castRay();
 
       }
     },
-    onMouseDown() {
+    onPointerDown() {
     },
-    onMouseUp() {
+    onPointerUp() {
 
       this.castRay();
 
     },
-    onMouseLeave() {
+    onPointerLeave() {
 
     },
     castRay() {
