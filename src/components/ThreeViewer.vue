@@ -16,6 +16,7 @@ import {
   AmbientLight,
   HemisphereLight,
   Vector2,
+  Vector3,
   Raycaster
 } from 'three';
 import {
@@ -71,7 +72,7 @@ export default {
           imageFormat: 'image/png'
         }
       }
-    }
+    },
   },
   beforeCreate() {
     this.renderer = null;
@@ -161,6 +162,53 @@ export default {
     },
   },
   methods: {
+    setCameraPosFromRoute(q) {
+      let rd_x = parseFloat(q.rdx); 
+      let rd_y = parseFloat(q.rdy);
+      let ox = parseFloat(q.ox);
+      let oy = parseFloat(q.oy);
+      let oz = parseFloat(q.oz);
+      // compute local tileset coordinates
+      let tileset_offset_x = this.tiles.root.cached.transform.elements[12];
+      let tileset_offset_y = this.tiles.root.cached.transform.elements[13];
+      let local_x = rd_x - tileset_offset_x;
+      let local_y = 0;
+      let local_z = -(rd_y - tileset_offset_y);
+
+      // move target and maintain the relative camera position
+      this.controls.target.x = local_x;
+      this.controls.target.z = local_z;
+      this.camera.position.x = local_x+ox;
+      this.camera.position.y = local_y+oy;
+      this.camera.position.z = local_z+oz;
+
+      this.controls.update();
+    },
+    setRouteFromCameraPos() {
+      // compute current camera position relative to target
+      let local_x = this.controls.target.x;
+      let local_z = this.controls.target.z;
+      let tileset_offset_x = this.tiles.root.cached.transform.elements[12];
+      let tileset_offset_y = this.tiles.root.cached.transform.elements[13];
+
+      // compute RD coordinates
+      let RdX = local_x + tileset_offset_x;
+      let RdY = (-local_z) + tileset_offset_y;
+
+      let cam_offset = { 
+        x: this.camera.position.x - this.controls.target.x, 
+        y: this.camera.position.y - this.controls.target.y, 
+        z: this.camera.position.z - this.controls.target.z};
+
+      // emit camera offset for url generation in the parent app
+      this.$emit( 'cam-offset', cam_offset );
+      // push values to url, catch errors (ie NavigationDuplicated, when pushin a route that is equal to the current route)
+      this.$router.push(
+        {url:'/', query: {rdx:RdX, rdy: RdY, ox: cam_offset.x, oy: cam_offset.y, oz: cam_offset.z}}
+      ).catch(err => {});
+
+      // console.log( {rdx: RdX, rdy: RdY, cam_offset: cam_offset} );
+    },
     reinitTiles() {
       if ( this.tiles ) {
 
@@ -181,7 +229,17 @@ export default {
       this.tiles.setCamera( this.camera );
       this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
 
-      this.tiles.onLoadTileSet = () => this.needsRerender = 2;
+      this.tiles.onLoadTileSet = () => {
+        
+        // Ensure the tileset is loaded prior to setting the position form the url parameters (we need the tileset transform to do that)
+        let q = this.$router.currentRoute.query;
+        if("rdx" in q && "rdy" in q && "ox" in q && "oy" in q && "oz" in q) {
+          this.setCameraPosFromRoute(q);
+        }
+
+        this.needsRerender = 2
+
+      };
       this.tiles.onLoadModel = ( s ) => {
 
         s.traverse( c => {
@@ -265,6 +323,7 @@ export default {
       this.controls.minDistance = 1;
       this.controls.maxDistance = 10000;
       this.controls.addEventListener( "change", () => this.needsRerender = 1 );
+      this.controls.addEventListener( "end", this.setRouteFromCameraPos );
 
       this.renderer.domElement.addEventListener( 'mousemove', this.onMouseMove, false );
       this.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown, false );

@@ -4,8 +4,11 @@
       <h1>3D BAG</h1>
       <input type="text" id="search" v-model="searchTerm" @keyup="doSearch">
       <ul>
-        <li v-for="res in searchResults" :key="res.id"><a :href="'#' + res.bbox[2] + ',' + res.bbox[0]">{{ res.name }}</a></li>
+        <li v-for="res in searchResults" :key="res.id">
+          <router-link :to="{path:'/', query: {rdx:res.rd_x, rdy:res.rd_y, ox: camOffset.x, oy: camOffset.y, oz: camOffset.z}}">{{ res.name }}</router-link>
+        </li>
       </ul>
+
       <h3>Selection information</h3>
       <div>
         <label for="batchId">Batch ID: </label>
@@ -55,6 +58,7 @@
         :cast-on-hover="castOnHover"
         :wms-options="wmsOptions"
         @object-picked="objectPicked"
+        @cam-offset="onCamOffset"
       />
     </div>
   </div>
@@ -82,6 +86,12 @@ export default {
       errorTarget: 50,
       errorThreshold: 60,
 
+      camOffset : {
+        x : 400,
+        y : 400,
+        z : 400
+      },
+
       wmsPreset: 'top10nl',
 
       selectedInfo: {
@@ -103,6 +113,12 @@ export default {
 
   methods: {
 
+    onCamOffset: function( event ) {
+      
+      this.camOffset = event;
+
+    },
+
     objectPicked: function( event ) {
 
       this.selectedInfo = event;
@@ -113,10 +129,10 @@ export default {
 
       if ( e.keyCode == 13 ) {
 
-        fetch( 'https://nominatim.openstreetmap.org/?addressdetails=1&q=' + this.searchTerm + '&format=json&limit=10' )
+        fetch( 'https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=' + this.searchTerm + '&fq=bron:BAG&fl=weergavenaam,id,centroide_rd&rows=10' )
         .then( res => {
-
-          if ( res.ok ) {
+          const contentType = res.headers.get("content-type");
+          if ( res.ok && contentType && contentType.indexOf("application/json") !== -1) {
 
             return res.json();
 
@@ -124,8 +140,11 @@ export default {
 
         })
         .then( json => {
-
-          this.searchResults = json.map( a => { return { id: a.place_id, name: a.display_name, bbox: a.boundingbox } } );
+          var re = /\d+\.?\d*/g;
+          this.searchResults = json.response.docs.map( a => { 
+            let m = a.centroide_rd.match(re);
+            return { id: a.id, name: a.weergavenaam, rd_x: parseFloat(m[0]), rd_y: parseFloat(m[1]) } 
+          } );
 
         });
 
