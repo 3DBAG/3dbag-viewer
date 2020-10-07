@@ -22,10 +22,6 @@
         <label for="rmse">RMSE: </label>
         <input type="text" id="rmse" readonly v-model="selectedInfo.rmse">
       </div>
-      <div>
-        <input type="checkbox" id="selectOnHover" v-model="castOnHover">
-        <label for="selectOnHover"> Select on hover</label>
-      </div>
       <h3>Tiles settings</h3>
       <div>
         <label for="lod">Active LoD: </label>
@@ -55,7 +51,6 @@
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
       <ThreeViewer
         :tiles-url="tilesUrl"
-        :cast-on-hover="castOnHover"
         :wms-options="wmsOptions"
         @object-picked="objectPicked"
         @cam-offset="onCamOffset"
@@ -83,8 +78,6 @@ export default {
 
       tileset: 'nl_lod22_attr',
       customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
-      errorTarget: 50,
-      errorThreshold: 60,
 
       camOffset : {
         x : 400,
@@ -101,8 +94,6 @@ export default {
         rmse: "-"
 
       },
-
-      castOnHover: false,
 
       searchTerm: null,
       searchResults: []

@@ -34,30 +34,6 @@ const Tweakpane = require('tweakpane');
 export default {
   name: 'ThreeViewer',
   props: {
-    nearPlane: {
-      type: Number,
-      default: 1
-    },
-    farPlane: {
-      type: Number,
-      default: 10000
-    },
-    errorTarget: {
-      type: Number,
-      default: 50
-    },
-    errorThreshold: {
-      type: Number,
-      default: 60
-    },
-    castOnHover: {
-      type: Boolean,
-      default: false
-    },
-    enableWMS: {
-      type: Boolean,
-      default: false
-    },
     tilesUrl: {
       type: String,
       default: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
@@ -89,28 +65,35 @@ export default {
 
     this.tiles = null;
     this.cameraTileFocus = null;
-
-    this.pLight = null;
-    this.dirLight = null;
-    this.ambLight = null;
-    //this.hemLight = null;
-
-    this.dirX = null;
-    this.dirY = null;
-    this.dirZ = null;
-
-    this.meshShading = null;
-    this.meshcolor = null;
-
     
     this.needsRerender = 0;
 
+    // debug
+    this.pointIntensity = 1,
+    this.directionalIntensity = 1,
+    this.ambientIntensity = 1,
+
+    this.dirX = 0,
+    this.dirY = 1,
+    this.dirZ = 0,
+
+    this.meshShading = "normal",
+    this.meshColor = "#7a0000",
+
+    this.nearPlane = 1,
+    this.farPlane = 10000,
+    this.errorTarget = 50,
+    this.errorThreshold = 60,
+    this.castOnHover = false,
+
+    this.enableWMS = false,
     this.pane = new Tweakpane();
   },
   mounted() {
-    // this.guiParams();
 
     this.initScene();
+    this.initTweakPane();
+    
   },
   watch: {
     tilesUrl: function( val ) {
@@ -131,37 +114,56 @@ export default {
       // console.log(to.query);
       this.setCameraPosFromRoute(to.query);
     },
-
-    // debug watchers:
-    errorTarget: function( val ) {
-
-      this.tiles.errorTarget = val;
-
-    },
-    errorThreshold: function( val ) {
-
-      this.tiles.errorThreshold = val;
-
-    },
-    enableWMS: function( val ) {
-
-      this.reinitWms();
-
-    },
-    nearPlane: function( val ) {
-
-      this.camera.near = val
-      this.camera.updateProjectionMatrix();
-
-    },
-    farPlane: function( val ) {
-
-      this.camera.far = val
-      this.camera.updateProjectionMatrix();
-
-    },
   },
   methods: {
+    initTweakPane(){
+      // tweakpane (for debugging)
+      // see https://cocopon.github.io/tweakpane/
+
+      // 3DTiles
+      const f1 = this.pane.addFolder({
+        expanded: true,
+        title: '3DTiles',
+      });
+      f1.addInput(this, "errorTarget").on( 'change', (val) => this.tiles.errorTarget = val );
+      f1.addInput(this, "errorThreshold").on( 'change', (val) => this.tiles.errorThreshold = val );
+      
+      // Terrain tiles
+      const f2 = this.pane.addFolder({
+        expanded: true,
+        title: 'Terrain tiles',
+      });
+      f2.addInput(this, "enableWMS").on( 'change', (val) => this.reinitWms() );
+      
+      // Camera
+      const f3 = this.pane.addFolder({
+        expanded: true,
+        title: 'Camera',
+      })
+      f3.addInput(this, "nearPlane", {min: 1, max:1000}).on( 'change', (val) => {this.camera.near = val; this.camera.updateProjectionMatrix();} );
+      f3.addInput(this, "farPlane", {min: 100, max:20000}).on( 'change', (val) => {this.camera.far = val; this.camera.updateProjectionMatrix();} );
+
+      // Appearance
+      const f4 = this.pane.addFolder({
+        expanded: true,
+        title: 'Appearance',
+      })
+      f4.addInput(this, "ambientIntensity", {min: 0, max:2, step:0.1}).on('change', (val) => {this.ambLight.intensity = val});
+      f4.addInput(this, "directionalIntensity", {min: 0, max:2, step:0.1}).on('change', (val) => {this.dirLight.intensity = val});
+      f4.addInput(this, "pointIntensity", {min: 0, max:2, step:0.1}).on('change', (val) => {this.pLight.intensity = val});
+      const f5  = f4.addFolder({
+          expanded: true,
+          title: 'PointLight dir',
+      }).on('change', (val) => this.dirLight.position.set(this.dirX, this.dirY, this.dirZ))
+      f5.addInput(this, "dirX", {min: 0, max:1, step:0.01});
+      f5.addInput(this, "dirY", {min: 0, max:1, step:0.01});
+      f5.addInput(this, "dirZ", {min: 0, max:1, step:0.01});
+      
+      f4.addInput(this, "meshShading", {options: { normal: "normal", SSAO: "ssao" }});
+      f4.addInput(this, "meshColor").on('change', (val) => this.material.color.set(val) );
+
+      this.pane.on("change", (val) => this.needsRerender=1 )
+    },
     setCameraPosFromRoute(q) {
       let rd_x = parseFloat(q.rdx); 
       let rd_y = parseFloat(q.rdy);
@@ -291,7 +293,7 @@ export default {
 
       this.material = new MeshLambertMaterial();
 
-      this.material.color.set( this.meshcolor );
+      this.material.color.set( this.meshColor );
 
       let canvas = document.getElementById("canvas");
 
@@ -359,30 +361,6 @@ export default {
       this.renderScene();
 
       window.addEventListener( 'resize', this.onWindowResize, false );
-
-      // tweakpane (debug)
-      // see https://cocopon.github.io/tweakpane/
-      const f1 = this.pane.addFolder({
-        expanded: true,
-        title: '3DTiles',
-      });
-      f1.addInput(this, "errorTarget");
-      f1.addInput(this, "errorThreshold");
-      
-      const f2 = this.pane.addFolder({
-        expanded: true,
-        title: 'Terrain tiles',
-      });
-      f2.addInput(this, "enableWMS");
-      
-      const f3 = this.pane.addFolder({
-        expanded: true,
-        title: 'Rendering',
-      })
-      f3.addInput(this, "nearPlane", {min: 1, max:1000});
-      f3.addInput(this, "farPlane", {min: 100, max:20000});
-
-      this.pane.on("change", (val) => this.needsRerender=1 )
     },
     onWindowResize() {
 
@@ -478,91 +456,6 @@ export default {
       }
 
     },
-
-    guiParams(){
-      var _this = this;
-      
-        var params = {
-          meshcolor: 0x7a0000,  //RED
-          amblight: 1,
-          dirlight: 1,
-          plight: 1,
-          shading: "normal", 
-          dirX: 0,
-          dirY: 1,
-          dirZ: 0
-
-      }
-
-      this.ambientIntensity = params.amblight;
-      this.directionalIntensity = params.dirlight;
-      this.pointIntensity = params.plight;
-      this.meshShading = params.shading;
-      this.meshcolor = params.meshcolor;
-      this.dirX = params.dirX;
-      this.dirY = params.dirY;
-      this.dirZ = params.dirZ;
-
-      const gui = new dat.GUI();
-
-      var intensityFolder = gui.addFolder("Light intensities")
-
-      intensityFolder.add(params, "amblight", 0, 2, 0.01)
-        .name("AmbientLight")
-        .onChange( function(value){
-          _this.ambLight.intensity = value;
-          _this.needsRerender=1; });
-
-      intensityFolder.add(params, "dirlight", 0, 2, 0.01)
-        .name("DirectionalLight")
-        .onChange( function(value){
-        _this.dirLight.intensity = value;
-        _this.needsRerender=1; });
-
-      intensityFolder.add(params, "plight", 0, 2, 0.01)
-        .name("PointLight")
-        .onChange( function(value){
-        _this.pLight.intensity = value;
-        _this.needsRerender=1; });
-
-      var dirFolder = gui.addFolder("DirectionalLight direction")
-
-      dirFolder.add(params, "dirX", 0, 1, 0.01)
-        .onChange( function(value){
-        _this.dirX = value;
-        _this.dirLight.position.set(_this.dirX, _this.dirY, _this.dirZ)
-        _this.needsRerender=1; 
-        });
-
-      dirFolder.add(params, "dirY", 0, 1, 0.01)
-        .onChange( function(value){
-        _this.dirY = value;
-        _this.dirLight.position.set(_this.dirX, _this.dirY, _this.dirZ)
-        _this.needsRerender=1; 
-        });
-
-      dirFolder.add(params, "dirZ", 0, 1, 0.01)
-        .onChange( function(value){
-        _this.dirZ = value;
-        _this.dirLight.position.set(_this.dirX, _this.dirY, _this.dirZ)
-        _this.needsRerender=1; 
-        });
-
-      gui.add(params, "shading", { normal: "normal", SSAO: "ssao"})
-        .name("Shading")
-        .onChange( function(value){
-        _this.meshShading = value;
-        _this.needsRerender=1; });
-
-
-      gui.addColor(params, 'meshcolor')
-        .name('Mesh color')
-        .onChange(function(value) {
-          _this.meshcolor = value;
-          _this.material.color.set(value);
-          _this.needsRerender=1;
-        });   
-    }
   }
 }
 </script>
