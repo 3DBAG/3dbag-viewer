@@ -69,31 +69,31 @@ export default {
     this.needsRerender = 0;
 
     // debug
-    this.pointIntensity = 1,
-    this.directionalIntensity = 1,
-    this.ambientIntensity = 1,
+    this.pointIntensity = 1;
+    this.directionalIntensity = 1;
+    this.ambientIntensity = 1;
 
-    this.dirX = 0,
-    this.dirY = 1,
-    this.dirZ = 0,
+    this.dirX = 0;
+    this.dirY = 1;
+    this.dirZ = 0;
 
-    this.meshShading = "normal",
-    this.meshColor = "#7a0000",
+    this.meshShading = "normal";
+    this.meshColor = "#7a0000";
 
-    this.nearPlane = 1,
-    this.farPlane = 10000,
-    this.errorTarget = 50,
-    this.errorThreshold = 60,
-    this.castOnHover = false,
+    this.nearPlane = 1;
+    this.farPlane = 10000;
+    this.errorTarget = 50;
+    this.errorThreshold = 60;
+    this.castOnHover = false;
 
-    this.enableWMS = false,
+    this.enableWMS = false;
     this.pane = new Tweakpane();
   },
   mounted() {
 
     this.initScene();
     this.initTweakPane();
-    
+
   },
   watch: {
     tilesUrl: function( val ) {
@@ -162,7 +162,14 @@ export default {
       f4.addInput(this, "meshShading", {options: { normal: "normal", SSAO: "ssao" }});
       f4.addInput(this, "meshColor").on('change', (val) => this.material.color.set(val) );
 
-      this.pane.on("change", (val) => this.needsRerender=1 )
+      // Misc
+      const f6 = this.pane.addFolder({
+        expanded: true,
+        title: 'Misc',
+      })
+      f6.addInput(this, "castOnHover");
+
+      this.pane.on("change", (val) => this.needsRerender=1 );
     },
     setCameraPosFromRoute(q) {
       let rd_x = parseFloat(q.rdx); 
@@ -382,10 +389,11 @@ export default {
       }
     },
     onMouseDown() {
-      
     },
     onMouseUp() {
+
       this.castRay();
+
     },
     onMouseLeave() {
 
