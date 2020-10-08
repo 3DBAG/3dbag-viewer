@@ -77,7 +77,7 @@ export default {
     return {
 
       tileset: 'nl_lod22_attr',
-      customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
+      customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_allattrs/tileset2.json',
 
       camOffset : {
         x : 400,
@@ -160,7 +160,7 @@ export default {
         zh_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
         nl_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
         nl_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/lod13_kadaster/tileset1.json',
-        nl_lod22_attr: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_allattrs/tileset1.json'
+        nl_lod22_attr: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_allattrs/tileset2.json'
       }
 
       return sources[ this.tileset ];

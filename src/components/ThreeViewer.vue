@@ -83,8 +83,8 @@ export default {
 
     this.nearPlane = 1;
     this.farPlane = 10000;
-    this.dummyFarPlane = 1000;
-    this.errorTarget = 50;
+    this.dummyFarPlane = 4000;
+    this.errorTarget = 0;
     this.errorThreshold = 60;
     this.castOnHover = false;
 
@@ -319,7 +319,7 @@ export default {
       this.camera.position.set( 400, 400, 400 );
       this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
 
-      this.dummyCamera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.farPlane );
+      this.dummyCamera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.dummyFarPlane );
 
       this.offsetParent = new Group();
       this.scene.add( this.offsetParent );
@@ -456,7 +456,10 @@ export default {
 
         this.camera.updateMatrixWorld();
 
-        // this.dummyCamera.copy( this.camera );
+        this.dummyCamera.matrixWorld.copy( this.camera.matrixWorld );
+        this.dummyCamera.position.copy( this.camera.position );
+        this.dummyCamera.quaternion.copy( this.camera.quaternion );
+        this.dummyCamera.scale.copy( this.camera.scale );
         this.dummyCamera.far = this.dummyFarPlane;
         this.dummyCamera.updateMatrixWorld();
   
