@@ -5,6 +5,8 @@
 <script>
 import {
   Scene,
+  Color,
+  FogExp2,
   MeshLambertMaterial,
   WebGLRenderer,
   sRGBEncoding,
@@ -82,8 +84,15 @@ export default {
 
     this.nearPlane = 1;
     this.farPlane = 10000;
+
+    this.fog = null;
+    this.enableFog = false;
+    this.fogDensity = 0.0008;
+    this.fogColor = '#eeeeee';
+
     this.errorTarget = 50;
     this.errorThreshold = 60;
+
     this.castOnHover = false;
 
     this.enableWMS = false;
@@ -142,6 +151,9 @@ export default {
       })
       f3.addInput(this, "nearPlane", {min: 1, max:1000}).on( 'change', (val) => {this.camera.near = val; this.camera.updateProjectionMatrix();} );
       f3.addInput(this, "farPlane", {min: 100, max:20000}).on( 'change', (val) => {this.camera.far = val; this.camera.updateProjectionMatrix();} );
+      f3.addInput(this, "enableFog").on( 'change', (val) => val ? this.scene.fog = this.fog : this.scene.fog = null );
+      f3.addInput(this, "fogDensity", {min: 0.0001, max:0.01}).on( 'change', (val) => this.fog.density=val );
+      f3.addInput(this, "fogColor").on( 'change', (val) => {this.fog.color.set(val); this.scene.background.set(val)} );
 
       // Appearance
       const f4 = this.pane.addFolder({
@@ -297,8 +309,11 @@ export default {
     },
     initScene() {
       this.scene = new Scene();
+      this.scene.background = new Color( this.fogColor );
+      this.fog = new FogExp2( this.fogColor, this.fogDensity );
 
       this.material = new MeshLambertMaterial();
+      // this.material.wireframe = true;
 
       this.material.color.set( this.meshColor );
 
@@ -341,9 +356,6 @@ export default {
 
 
       this.composer = new EffectComposer( this.renderer );
-      var ssaoPass = new SSAOPass(this.scene, this.camera, canvas.cliendWidth, canvas.clientHeight);
-      ssaoPass.kernelRadius = 16;
-      this.composer.addPass(ssaoPass);
 
       // lights
       this.pLight = new PointLight( 0xffffff, this.pointIntensity, 0, 1 );
