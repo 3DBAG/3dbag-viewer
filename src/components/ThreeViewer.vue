@@ -55,6 +55,7 @@ export default {
     this.scene = null;
     this.offsetParent = null;
     this.camera = null;
+    this.dummyCamera = null;
     this.controls = null;
     this.material = null;
 
@@ -82,6 +83,7 @@ export default {
 
     this.nearPlane = 1;
     this.farPlane = 10000;
+    this.dummyFarPlane = 1000;
     this.errorTarget = 50;
     this.errorThreshold = 60;
     this.castOnHover = false;
@@ -142,6 +144,7 @@ export default {
       })
       f3.addInput(this, "nearPlane", {min: 1, max:1000}).on( 'change', (val) => {this.camera.near = val; this.camera.updateProjectionMatrix();} );
       f3.addInput(this, "farPlane", {min: 100, max:20000}).on( 'change', (val) => {this.camera.far = val; this.camera.updateProjectionMatrix();} );
+      f3.addInput(this, "dummyFarPlane", {min: 100, max:20000}).on( 'change', (val) => {this.dummyCamera.far = val; this.dummyCamera.updateProjectionMatrix();} );
 
       // Appearance
       const f4 = this.pane.addFolder({
@@ -235,8 +238,8 @@ export default {
 
       this.tiles.downloadQueue.priorityCallback = tile => 1 / tile.cached.distance;
 
-      this.tiles.setCamera( this.camera );
-      this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
+      this.tiles.setCamera( this.dummyCamera );
+      this.tiles.setResolutionFromRenderer( this.dummyCamera, this.renderer );
 
       this.tiles.onLoadTileSet = () => {
         
@@ -315,6 +318,8 @@ export default {
       this.camera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.farPlane );
       this.camera.position.set( 400, 400, 400 );
       this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
+
+      this.dummyCamera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.farPlane );
 
       this.offsetParent = new Group();
       this.scene.add( this.offsetParent );
@@ -450,6 +455,10 @@ export default {
         }
 
         this.camera.updateMatrixWorld();
+
+        // this.dummyCamera.copy( this.camera );
+        this.dummyCamera.far = this.dummyFarPlane;
+        this.dummyCamera.updateMatrixWorld();
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
         this.tiles.update();  
