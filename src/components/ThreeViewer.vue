@@ -366,7 +366,7 @@ export default {
 
       this.renderer.domElement.addEventListener( 'pointermove', this.onPointerMove, false );
       this.renderer.domElement.addEventListener( 'pointerdown', this.onPointerDown, false );
-      this.renderer.domElement.addEventListener( 'pointerup', this.onPointerUp, false );
+      this.renderer.domElement.addEventListener( 'dblclick', this.onDblClick, false );
       this.renderer.domElement.addEventListener( 'pointerleave', this.onPointerLeave, false );
 
       this.composer = new EffectComposer( this.renderer );
@@ -419,7 +419,7 @@ export default {
     },
     onPointerDown() {
     },
-    onPointerUp() {
+    onDblClick() {
 
       this.castRay();
 
