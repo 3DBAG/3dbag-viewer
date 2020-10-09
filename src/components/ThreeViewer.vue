@@ -90,12 +90,12 @@ export default {
     this.fogDensity = 0.0008;
     this.fogColor = '#eeeeee';
 
-    this.errorTarget = 50;
+    this.errorTarget = 10;
     this.errorThreshold = 60;
 
     this.castOnHover = false;
 
-    this.enableWMS = false;
+    this.enableWMS = true;
     this.pane = new Tweakpane();
   },
   mounted() {
