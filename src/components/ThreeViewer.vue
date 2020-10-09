@@ -20,7 +20,10 @@ import {
   Vector2,
   Vector3,
   Raycaster,
-  MOUSE
+  MOUSE,
+  ShaderMaterial,
+  ShaderLib,
+  UniformsUtils
 } from 'three';
 import {
   TilesRenderer
@@ -33,6 +36,51 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 
 const Tweakpane = require('tweakpane');
+
+// Adjusts the three.js standard shader to include batchid highlight
+function batchIdHighlightShaderMixin( shader ) {
+
+	const newShader = { ...shader };
+	newShader.uniforms = {
+		highlightedBatchId: { value: - 1 },
+		highlightColor: { value: new Color( 0xFFC107 ).convertSRGBToLinear() },
+		...UniformsUtils.clone( shader.uniforms ),
+	};
+	newShader.extensions = {
+		derivatives: true,
+	};
+	newShader.lights = true;
+	newShader.vertexShader =
+		`
+			attribute float _batchid;
+			varying float batchid;
+		` +
+		newShader.vertexShader.replace(
+			/#include <uv_vertex>/,
+			`
+			#include <uv_vertex>
+			batchid = _batchid;
+			`
+		);
+	newShader.fragmentShader =
+		`
+			varying float batchid;
+			uniform float highlightedBatchId;
+			uniform vec3 highlightColor;
+		` +
+		newShader.fragmentShader.replace(
+			/vec4 diffuseColor = vec4\( diffuse, opacity \);/,
+			`
+			vec4 diffuseColor =
+				abs( batchid - highlightedBatchId ) < 0.5 ?
+				vec4( highlightColor, opacity ) :
+				vec4( diffuse, opacity );
+			`
+		);
+
+	return newShader;
+
+}
 
 export default {
   name: 'ThreeViewer',
@@ -100,6 +148,8 @@ export default {
 
     this.enableWMS = true;
     this.pane = new Tweakpane({title: 'debug'});
+
+    this.selectedObject = null;
   },
   mounted() {
 
@@ -272,7 +322,8 @@ export default {
 
           if ( c.material ) {
 
-            c.material = this.material;
+            c.material = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
+            c.material.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
 
             if ( c.geometry ) {
 
@@ -428,6 +479,7 @@ export default {
 
     },
     castRay() {
+
       const rect = this.renderer.domElement.getBoundingClientRect();
       this.mouse.x = ( (event.clientX - rect.left) / this.renderer.domElement.clientWidth) * 2 - 1;
       this.mouse.y = -( (event.clientY - rect.top) / this.renderer.domElement.clientHeight) * 2 + 1;
@@ -438,29 +490,43 @@ export default {
       
       if ( results.length ) {
 
-        const object = results[ 0 ].object;
+        const { face, object } = results[ 0 ];
 
-        const idx = results[ 0 ].face.a;
-        const b_offset = object.geometry.attributes._batchid.offset;
-        const stride = object.geometry.attributes._batchid.data.stride;
-        const batch_id = object.geometry.attributes._batchid.data.array[ b_offset + stride * idx ];
+        // Get info from batchTable
+        const batch_id_table = object.geometry.getAttribute( '_batchid' );
+        const batch_id = batch_id_table.getX( face.a );
 
-        if ( object.parent.batchTable.getKeys().includes( "identificatie" ) ) {
+        const batchTable = object.parent.batchTable;
+        const keys = batchTable.getKeys();
 
-          const identificatie = object.parent.batchTable.getData( "identificatie" )[ batch_id ];
+        if ( keys.includes( "identificatie" ) ) {
+
+          const identificatie = batchTable.getData( "identificatie" )[ batch_id ];
           this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie, "rmse": "-" } );
 
         }
-        else if ( object.parent.batchTable.getKeys().includes( "attrs" ) ) {
+        else if ( keys.includes( "attrs" ) ) {
 
-          const attrs = JSON.parse( object.parent.batchTable.getData( "attrs" )[ batch_id ] );
+          const attrs = JSON.parse( batchTable.getData( "attrs" )[ batch_id ] );
           this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": attrs.identificatie, "rmse": attrs.rmse } );
 
           // eslint-disable-next-line no-console
           console.log( attrs );
         }
 
+        // Set up the highlighted batchid to the material of new object
+        if ( this.selectedObject ) {
+
+          this.selectedObject.material.uniforms.highlightedBatchId.value = -1;
+
+        }
+        object.material.uniforms.highlightedBatchId.value = batch_id;
+        this.selectedObject = object;
+
+        this.needsRerender = 1;
+
       }
+
     },
     renderScene() {
 
