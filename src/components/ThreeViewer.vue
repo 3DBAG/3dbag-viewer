@@ -19,7 +19,8 @@ import {
   HemisphereLight,
   Vector2,
   Vector3,
-  Raycaster
+  Raycaster,
+  MOUSE
 } from 'three';
 import {
   TilesRenderer
@@ -57,6 +58,7 @@ export default {
     this.scene = null;
     this.offsetParent = null;
     this.camera = null;
+    this.dummyCamera = null;
     this.controls = null;
     this.material = null;
 
@@ -71,32 +73,33 @@ export default {
     this.needsRerender = 0;
 
     // debug
-    this.pointIntensity = 1;
-    this.directionalIntensity = 1;
-    this.ambientIntensity = 1;
+    this.pointIntensity = 0.4;
+    this.directionalIntensity = 0.8;
+    this.ambientIntensity = 0.5;
 
-    this.dirX = 0;
+    this.dirX = 0.63;
     this.dirY = 1;
     this.dirZ = 0;
 
     this.meshShading = "normal";
-    this.meshColor = "#7a0000";
+    this.meshColor = "#697275";
 
     this.nearPlane = 1;
     this.farPlane = 10000;
+    this.dummyFarPlane = 3500;
 
     this.fog = null;
     this.enableFog = false;
-    this.fogDensity = 0.0008;
+    this.fogDensity = 0.0004;
     this.fogColor = '#eeeeee';
 
-    this.errorTarget = 10;
+    this.errorTarget = 0;
     this.errorThreshold = 60;
 
     this.castOnHover = false;
 
     this.enableWMS = true;
-    this.pane = new Tweakpane();
+    this.pane = new Tweakpane({title: 'debug'});
   },
   mounted() {
 
@@ -132,7 +135,7 @@ export default {
       // 3DTiles
       const f1 = this.pane.addFolder({
         expanded: true,
-        title: '3DTiles',
+        title: '3DTile render',
       });
       f1.addInput(this, "errorTarget").on( 'change', (val) => this.tiles.errorTarget = val );
       f1.addInput(this, "errorThreshold").on( 'change', (val) => this.tiles.errorThreshold = val );
@@ -151,6 +154,8 @@ export default {
       })
       f3.addInput(this, "nearPlane", {min: 1, max:1000}).on( 'change', (val) => {this.camera.near = val; this.camera.updateProjectionMatrix();} );
       f3.addInput(this, "farPlane", {min: 100, max:20000}).on( 'change', (val) => {this.camera.far = val; this.camera.updateProjectionMatrix();} );
+      f3.addInput(this, "dummyFarPlane", {min: 100, max:5000}).on( 'change', (val) => {this.dummyCamera.far = val; this.dummyCamera.updateProjectionMatrix();} );
+
       f3.addInput(this, "enableFog").on( 'change', (val) => val ? this.scene.fog = this.fog : this.scene.fog = null );
       f3.addInput(this, "fogDensity", {min: 0.0001, max:0.01}).on( 'change', (val) => this.fog.density=val );
       f3.addInput(this, "fogColor").on( 'change', (val) => {this.fog.color.set(val); this.scene.background.set(val)} );
@@ -247,8 +252,8 @@ export default {
 
       this.tiles.downloadQueue.priorityCallback = tile => 1 / tile.cached.distance;
 
-      this.tiles.setCamera( this.camera );
-      this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
+      this.tiles.setCamera( this.dummyCamera );
+      this.tiles.setResolutionFromRenderer( this.dummyCamera, this.renderer );
 
       this.tiles.onLoadTileSet = () => {
         
@@ -331,6 +336,8 @@ export default {
       this.camera.position.set( 400, 400, 400 );
       this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
 
+      this.dummyCamera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.dummyFarPlane );
+
       this.offsetParent = new Group();
       this.scene.add( this.offsetParent );
 
@@ -344,8 +351,16 @@ export default {
 
       this.controls = new OrbitControls( this.camera, this.renderer.domElement );
       this.controls.screenSpacePanning = false;
-      this.controls.minDistance = 1;
-      this.controls.maxDistance = 10000;
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.1;
+      this.controls.minDistance = 20;
+      this.controls.maxDistance = 3000;
+      this.controls.maxPolarAngle = 1.5;
+      this.controls.mouseButtons = {
+        LEFT: MOUSE.PAN,
+        MIDDLE: MOUSE.DOLLY,
+        RIGHT: MOUSE.ROTATE
+      }
       this.controls.addEventListener( "change", () => this.needsRerender = 1 );
       this.controls.addEventListener( "end", this.setRouteFromCameraPos );
 
@@ -354,8 +369,10 @@ export default {
       this.renderer.domElement.addEventListener( 'pointerup', this.onPointerUp, false );
       this.renderer.domElement.addEventListener( 'pointerleave', this.onPointerLeave, false );
 
-
       this.composer = new EffectComposer( this.renderer );
+      var ssaoPass = new SSAOPass(this.scene, this.camera, canvas.cliendWidth, canvas.clientHeight);
+      ssaoPass.kernelRadius = 16;
+      this.composer.addPass(ssaoPass);
 
       // lights
       this.pLight = new PointLight( 0xffffff, this.pointIntensity, 0, 1 );
@@ -461,7 +478,16 @@ export default {
   
         }
 
+        this.controls.update();
+
         this.camera.updateMatrixWorld();
+
+        this.dummyCamera.matrixWorld.copy( this.camera.matrixWorld );
+        this.dummyCamera.position.copy( this.camera.position );
+        this.dummyCamera.quaternion.copy( this.camera.quaternion );
+        this.dummyCamera.scale.copy( this.camera.scale );
+        this.dummyCamera.far = this.dummyFarPlane;
+        this.dummyCamera.updateMatrixWorld();
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
         this.tiles.update();  
