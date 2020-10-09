@@ -109,6 +109,7 @@ export default {
     this.dummyCamera = null;
     this.controls = null;
     this.material = null;
+    this.highlightMaterial = null;
 
     this.raycaster = null;
     this.mouse = null;
@@ -227,7 +228,12 @@ export default {
       f5.addInput(this, "dirZ", {min: 0, max:1, step:0.01});
       
       f4.addInput(this, "meshShading", {options: { normal: "normal", SSAO: "ssao" }});
-      f4.addInput(this, "meshColor").on('change', (val) => this.material.color.set(val) );
+      f4.addInput(this, "meshColor").on('change', (val) => {
+        
+        this.material.color.set(val);
+        this.highlightMaterial.uniforms.diffuse.value = new Color( val ).convertSRGBToLinear();
+      
+      });
 
       // Misc
       const f6 = this.pane.addFolder({
@@ -322,8 +328,7 @@ export default {
 
           if ( c.material ) {
 
-            c.material = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
-            c.material.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
+            c.material = this.material;
 
             if ( c.geometry ) {
 
@@ -368,10 +373,11 @@ export default {
       this.scene.background = new Color( this.fogColor );
       this.fog = new FogExp2( this.fogColor, this.fogDensity );
 
-      this.material = new MeshLambertMaterial();
-      // this.material.wireframe = true;
+      this.material = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
+      this.material.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
 
-      this.material.color.set( this.meshColor );
+      this.highlightMaterial = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
+      this.highlightMaterial.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
 
       let canvas = document.getElementById("canvas");
 
@@ -517,10 +523,11 @@ export default {
         // Set up the highlighted batchid to the material of new object
         if ( this.selectedObject ) {
 
-          this.selectedObject.material.uniforms.highlightedBatchId.value = -1;
+          this.selectedObject.material = this.material;
 
         }
-        object.material.uniforms.highlightedBatchId.value = batch_id;
+        object.material = this.highlightMaterial;
+        this.highlightMaterial.uniforms.highlightedBatchId.value = batch_id;
         this.selectedObject = object;
 
         this.needsRerender = 1;
