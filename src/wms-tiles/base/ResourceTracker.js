@@ -26,7 +26,7 @@ export class ResourceTracker {
 
 	dispose() {
 
-    for ( const resource of this.resources ) {
+		for ( const resource of this.resources ) {
 
 			resource.dispose();
 

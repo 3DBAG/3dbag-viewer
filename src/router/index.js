@@ -1,15 +1,15 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import ThreeViewer from '@/components/ThreeViewer'
+import Vue from 'vue';
+import Router from 'vue-router';
+import ThreeViewer from '@/components/ThreeViewer';
 
-Vue.use(Router)
+Vue.use( Router );
 
-export default new Router({
-  routes: [
-    {
-      path: '/',
-      name: 'ThreeViewer',
-      component: ThreeViewer
-    }
-  ]
-})
+export default new Router( {
+	routes: [
+		{
+			path: '/',
+			name: 'ThreeViewer',
+			component: ThreeViewer
+		}
+	]
+} );
