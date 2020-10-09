@@ -26,6 +26,7 @@
       <div>
         <label for="lod">Active LoD: </label>
         <select id="lod" v-model="tileset">
+          <option value="nl_lod22_opt">LoD2.2 (Quadtree)</option>
           <option value="nl_lod22_attr">LoD2.2 (NL+attributes)</option>
           <option value="nl_lod22">LoD2.2 (NL)</option>
           <option value="nl_lod13">LoD1.3 (NL)</option>
