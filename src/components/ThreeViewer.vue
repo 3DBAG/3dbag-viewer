@@ -39,7 +39,6 @@ const Tweakpane = require('tweakpane');
 
 // Adjusts the three.js standard shader to include batchid highlight
 function batchIdHighlightShaderMixin( shader ) {
-
 	const newShader = { ...shader };
 	newShader.uniforms = {
 		highlightedBatchId: { value: - 1 },
@@ -50,6 +49,7 @@ function batchIdHighlightShaderMixin( shader ) {
 		derivatives: true,
 	};
 	newShader.lights = true;
+	newShader.fog = true;
 	newShader.vertexShader =
 		`
 			attribute float _batchid;
@@ -230,7 +230,7 @@ export default {
       f4.addInput(this, "meshShading", {options: { normal: "normal", SSAO: "ssao" }});
       f4.addInput(this, "meshColor").on('change', (val) => {
         
-        this.material.color.set(val);
+        this.material.uniforms.diffuse.value = new Color( val ).convertSRGBToLinear();
         this.highlightMaterial.uniforms.diffuse.value = new Color( val ).convertSRGBToLinear();
       
       });
