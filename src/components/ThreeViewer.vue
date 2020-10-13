@@ -23,7 +23,8 @@ import {
   MOUSE,
   ShaderMaterial,
   ShaderLib,
-  UniformsUtils
+  UniformsUtils,
+  Float32BufferAttribute
 } from 'three';
 import {
   TilesRenderer
@@ -53,28 +54,33 @@ function batchIdHighlightShaderMixin( shader ) {
 	newShader.vertexShader =
 		`
 			attribute float _batchid;
+      attribute float rmse;
 			varying float batchid;
+			varying float rmse_v;
 		` +
 		newShader.vertexShader.replace(
 			/#include <uv_vertex>/,
 			`
 			#include <uv_vertex>
 			batchid = _batchid;
+			rmse_v = rmse;
 			`
 		);
 	newShader.fragmentShader =
 		`
 			varying float batchid;
+			varying float rmse_v;
 			uniform float highlightedBatchId;
 			uniform vec3 highlightColor;
 		` +
 		newShader.fragmentShader.replace(
 			/vec4 diffuseColor = vec4\( diffuse, opacity \);/,
 			`
+      vec3 diffuse_ = rmse_v > 0.3 ? vec3(1,0,0) : vec3(0,1,0);
 			vec4 diffuseColor =
 				abs( batchid - highlightedBatchId ) < 0.5 ?
 				vec4( highlightColor, opacity ) :
-				vec4( diffuse, opacity );
+				vec4( diffuse_, opacity );
 			`
 		);
 
@@ -337,6 +343,15 @@ export default {
               c.position.y = - c.geometry.boundingBox.min.y;
 
             }
+
+            const batch_ids = c.geometry.getAttribute( '_batchid' );
+            const attrs = s.batchTable.getData('attrs');
+            const new_attr_buffer = new Float32Array(batch_ids.count);
+            for(let i = 0; i < batch_ids.count; i++){
+              const bid = batch_ids.getX(i);
+              new_attr_buffer[i] = JSON.parse(attrs[bid]).rmse;
+            }
+            c.geometry.setAttribute("rmse", new Float32BufferAttribute(new_attr_buffer, 1));
 
           }
 
