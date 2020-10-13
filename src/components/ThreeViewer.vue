@@ -328,6 +328,7 @@ export default {
 
           if ( c.material ) {
 
+            c.material.dispose();
             c.material = this.material;
 
             if ( c.geometry ) {
@@ -344,6 +345,19 @@ export default {
         this.needsRerender = 1;
 
       }
+      // this.tiles.onDisposeModel = ( s ) => {
+        
+      //   scene.traverse( c => {
+
+      //     if ( c.isMesh ) {
+
+      //       c.material.dispose();
+
+      //     }
+
+      //   } );
+
+      // }
 
       this.offsetParent.add( this.tiles.group );
 
