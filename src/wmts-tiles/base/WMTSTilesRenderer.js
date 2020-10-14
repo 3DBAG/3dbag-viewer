@@ -5,7 +5,10 @@ import {
     MeshBasicMaterial,
     Mesh,
     Group,
-    Vector2
+    Vector2,
+    Vector3,
+    Frustum,
+    Matrix4
 } from 'three';
 import {
     ResourceTracker
@@ -21,8 +24,8 @@ export class WMTSTilesRenderer {
         this.service = wmtsOptions.service;
         this.tileMatrixSet = wmtsOptions.tileMatrixSet;
         this.url = wmtsOptions.url;
-        this.tileLevel = 10;
-        this.tileMatrix += ":" + this.tileLevel;
+        this.tileLevel = 8;
+        this.tileMatrix = wmtsOptions.tileMatrix + ":" + this.tileLevel;
 
         this.capabilitiesURL = this.url + "request=GetCapabilities&service=WMTS"
         this.tileMatrixLevels = null;
@@ -77,14 +80,14 @@ export class WMTSTilesRenderer {
 
     }
 
-    update( cameraInfo, sceneCenter ){
+    update( cameraInfo, sceneCenter, camera ){
 
-        //console.log(cameraInfo);
+        if (typeof this.tileMatrixLayer == "undefined"){
+            return;
+        }
 
         // todo: determine which tile level you want to load (which should depend on the SSE?)
         var tileLayer = this.tileMatrixLayer[this.tileLevel];
-
-        console.log(tileLayer);
 
         var matrixHeight = tileLayer["MatrixHeight"];
         var matrixWidth = tileLayer["MatrixWidth"];
@@ -111,18 +114,24 @@ export class WMTSTilesRenderer {
 
         var tileIndex = [xTile, yTile];
 
-        var tileIndices = [];
-        for (var i = tileIndex[0] - 5; i <= tileIndex[0] + 5; i ++){
 
-            for (var j = tileIndex[1] - 5; j <= tileIndex[1] + 5; j ++){
 
-                tileIndices.push( [i,j] );
+        var tiles = this.grow_region(tileIndex, camera, matrixHeight, matrixWidth, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter);
 
-            }
+
+
+        // var tileIndices = [];
+        // for (var i = tileIndex[0] - 5; i <= tileIndex[0] + 5; i ++){
+
+        //     for (var j = tileIndex[1] - 5; j <= tileIndex[1] + 5; j ++){
+
+        //         tileIndices.push( [i,j] );
+
+        //     }
             
-        }
+        // }
 
-        tileIndices.forEach(function (ti){
+        tiles.forEach(function (ti){
 
             if (JSON.stringify(this.activeTiles).indexOf(JSON.stringify(ti)) == -1){
 
@@ -136,8 +145,101 @@ export class WMTSTilesRenderer {
 
         }, this)
 
+        
+
+
+
+
+
 
     }
+
+    get_tile_neighbours(tileIndex){
+        var neighbours = [];
+
+        [-1, 0, 1].forEach(function (i){
+
+            [-1, 0, 1].forEach(function (j){
+
+                if( !(i==0 && j==0) ){
+
+                    neighbours.push([tileIndex[0] + i, tileIndex[1] + j]);
+
+                }
+
+            })
+
+        })
+
+        // console.log(tileIndex);
+        // console.log(neighbours);
+
+        return neighbours;
+
+    }
+
+    grow_region(tileIndex, camera, tileSetWidth, tileSetHeight, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter){
+
+        var frustum = new Frustum();
+        var projScreenMatrix = new Matrix4();
+
+        projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
+
+        frustum.setFromProjectionMatrix( new Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
+
+        var visited = [];
+        var queue = [];
+        var tilesInView = [];
+
+
+        queue.push(tileIndex);
+        tilesInView.push(tileIndex);
+
+        var test = 0;
+
+        while (queue.length != 0){
+
+            var index = queue.pop();
+            var neighbours = this.get_tile_neighbours(index);
+
+            neighbours.forEach( function(n) {
+
+                if(JSON.stringify(visited).indexOf(n) != -1){
+                    //console.log("ja")
+                    return;
+                }
+
+                var scenePosition = new Vector3();
+                scenePosition.x = tileMatrixMinX + n[0] * xWidth + xWidth / 2 - sceneCenter.x;
+                scenePosition.y = tileMatrixMaxY - n[1] * yWidth - yWidth / 2 - sceneCenter.y;
+                scenePosition.z = 0;
+
+                if(frustum.containsPoint( scenePosition )){
+                    queue.push(n);
+                    visited.push(n);
+                    tilesInView.push(n);
+                }
+
+
+
+            })
+
+            test += 1;
+            if (test == 10000){
+                //console.log("break")
+                break;
+            }
+
+
+        }
+        //console.log(test);
+        console.log(tilesInView);
+        return(tilesInView);
+
+
+    }
+
+    
 
     create_tile( tileIndex, tileSpanX, tileSpanY, scenePosition ){
 
@@ -152,6 +254,8 @@ export class WMTSTilesRenderer {
 
         requestURL += "&TileCol=" + tileIndex[0].toString();
         requestURL += "&TileRow=" + tileIndex[1].toString();
+
+        //console.log(requestURL);
 
         var loader = new TextureLoader();
     
