@@ -10,6 +10,7 @@ import {
   MeshLambertMaterial,
   WebGLRenderer,
   sRGBEncoding,
+  RGBFormat,
   PerspectiveCamera,
   Group,
   Box3,
@@ -24,11 +25,15 @@ import {
   ShaderMaterial,
   ShaderLib,
   UniformsUtils,
-  Float32BufferAttribute
+  Float32BufferAttribute,
+  DataTexture
 } from 'three';
 import {
+  Lut
+} from 'three/examples/jsm/math/Lut';
+import {
   TilesRenderer
-} from '../../3DTilesRendererJS/src/index.js'
+} from '../../3DTilesRendererJS/src/index.js';
 import {
   WMSTilesRenderer
 } from '../wms-tiles'
@@ -41,7 +46,25 @@ const Tweakpane = require('tweakpane');
 // Adjusts the three.js standard shader to include batchid highlight
 function batchIdHighlightShaderMixin( shader ) {
 	const newShader = { ...shader };
+  const cmlut = new Lut('rainbow', 512);
+  const cm_data = new Uint8Array(3*512);
+  cmlut.lut.forEach( (col, i) => {
+    var r = Math.floor( col.r * 255 );
+    var g = Math.floor( col.g * 255 );
+    var b = Math.floor( col.b * 255 );
+
+    var stride = i * 3;
+
+    cm_data[ stride ] = r;
+    cm_data[ stride + 1 ] = g;
+    cm_data[ stride + 2 ] = b;
+  });
+  const cm = new DataTexture(cm_data, 512, 1, RGBFormat);
+
 	newShader.uniforms = {
+    valMin: {value: 0.0},
+    valMax: {value: 0.5},
+    colormap: { type: "t", value: cm },
 		highlightedBatchId: { value: - 1 },
 		highlightColor: { value: new Color( 0xFFC107 ).convertSRGBToLinear() },
 		...UniformsUtils.clone( shader.uniforms ),
@@ -70,13 +93,17 @@ function batchIdHighlightShaderMixin( shader ) {
 		`
 			varying float batchid;
 			varying float rmse_v;
+			uniform float valMin;
+			uniform float valMax;
 			uniform float highlightedBatchId;
 			uniform vec3 highlightColor;
+      uniform sampler2D colormap;
 		` +
 		newShader.fragmentShader.replace(
 			/vec4 diffuseColor = vec4\( diffuse, opacity \);/,
 			`
-      vec3 diffuse_ = rmse_v > 0.3 ? vec3(1,0,0) : vec3(0,1,0);
+      float texCoord = (rmse_v - valMin)/(valMax-valMin);
+      vec3 diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
 			vec4 diffuseColor =
 				abs( batchid - highlightedBatchId ) < 0.5 ?
 				vec4( highlightColor, opacity ) :
@@ -126,6 +153,8 @@ export default {
     this.cameraTileFocus = null;
     
     this.needsRerender = 0;
+
+    this.colormap = null;
 
     // debug
     this.pointIntensity = 0.4;
@@ -330,7 +359,7 @@ export default {
       };
       this.tiles.onLoadModel = ( s ) => {
 
-        s.traverse( c => {
+        s.traverse( ( c ) => {
 
           if ( c.material ) {
 
@@ -344,14 +373,7 @@ export default {
 
             }
 
-            const batch_ids = c.geometry.getAttribute( '_batchid' );
-            const attrs = s.batchTable.getData('attrs');
-            const new_attr_buffer = new Float32Array(batch_ids.count);
-            for(let i = 0; i < batch_ids.count; i++){
-              const bid = batch_ids.getX(i);
-              new_attr_buffer[i] = JSON.parse(attrs[bid]).rmse;
-            }
-            c.geometry.setAttribute("rmse", new Float32BufferAttribute(new_attr_buffer, 1));
+            this.setTileAttributes( s, c );
 
           }
 
@@ -376,6 +398,16 @@ export default {
 
       this.offsetParent.add( this.tiles.group );
 
+    },
+    setTileAttributes( s, c ) {
+      const batch_ids = c.geometry.getAttribute( '_batchid' );
+      const attrs = s.batchTable.getData('attrs');
+      const new_attr_buffer = new Float32Array(batch_ids.count);
+      for(let i = 0; i < batch_ids.count; i++){
+        const bid = batch_ids.getX(i);
+        new_attr_buffer[i] = JSON.parse(attrs[bid]).rmse;
+      }
+      c.geometry.setAttribute("rmse", new Float32BufferAttribute(new_attr_buffer, 1));
     },
     reinitWms() {
       if ( this.wmsTiles ) {
