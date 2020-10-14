@@ -451,7 +451,7 @@ export default {
       this.controls.enableDamping = true;
       this.controls.dampingFactor = 0.1;
       this.controls.minDistance = 20;
-      this.controls.maxDistance = 3000;
+      this.controls.maxDistance = 10000;
       this.controls.maxPolarAngle = 1.5;
       this.controls.mouseButtons = {
         LEFT: MOUSE.PAN,
@@ -606,8 +606,8 @@ export default {
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
         this.tiles.update();  
-        
-        if(this.enableWMS && this.wmsTiles != null) this.wmsTiles.update();
+
+        // if(this.enableWMS && this.wmsTiles != null) this.wmsTiles.update();
       
         if (this.meshShading == "normal"){    
           this.renderer.render( this.scene, this.camera );

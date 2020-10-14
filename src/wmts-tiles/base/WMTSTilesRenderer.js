@@ -114,9 +114,7 @@ export class WMTSTilesRenderer {
 
         var tileIndex = [xTile, yTile];
 
-
-
-        var tiles = this.grow_region(tileIndex, camera, matrixHeight, matrixWidth, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter);
+        var tiles = this.grow_region(tileIndex, camera, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter);
 
 
 
@@ -130,6 +128,8 @@ export class WMTSTilesRenderer {
         //     }
             
         // }
+
+        //console.log(tiles);
 
         tiles.forEach(function (ti){
 
@@ -146,24 +146,23 @@ export class WMTSTilesRenderer {
         }, this)
 
         
-
-
-
-
-
-
     }
 
     get_tile_neighbours(tileIndex){
+        // var neighbours = {};
+        // var directions = ["nw", "w", "sw", "n", "c", "s", "ne", "e", "se"];
         var neighbours = [];
 
-        [-1, 0, 1].forEach(function (i){
+        [-1, 0, 1].forEach(function (i, i_i){
 
-            [-1, 0, 1].forEach(function (j){
+            [-1, 0, 1].forEach(function (j, j_i){
 
                 if( !(i==0 && j==0) ){
 
-                    neighbours.push([tileIndex[0] + i, tileIndex[1] + j]);
+                   //  var dir = directions[i_i*3 + j_i]
+
+                   //  neighbours[dir] = [tileIndex[0] + i, tileIndex[1] + j];
+                   neighbours.push([tileIndex[0] + i, tileIndex[1] + j]);
 
                 }
 
@@ -178,7 +177,7 @@ export class WMTSTilesRenderer {
 
     }
 
-    grow_region(tileIndex, camera, tileSetWidth, tileSetHeight, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter){
+    grow_region(tileIndex, camera, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter){ 
 
         var frustum = new Frustum();
         var projScreenMatrix = new Matrix4();
@@ -187,13 +186,9 @@ export class WMTSTilesRenderer {
 
         frustum.setFromProjectionMatrix( new Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
 
-        var visited = [];
-        var queue = [];
-        var tilesInView = [];
-
-
-        queue.push(tileIndex);
-        tilesInView.push(tileIndex);
+        var visited = [tileIndex];
+        var queue = [tileIndex];
+        var tilesInView = [tileIndex];
 
         var test = 0;
 
@@ -209,33 +204,69 @@ export class WMTSTilesRenderer {
                     return;
                 }
 
-                var scenePosition = new Vector3();
-                scenePosition.x = tileMatrixMinX + n[0] * xWidth + xWidth / 2 - sceneCenter.x;
-                scenePosition.y = tileMatrixMaxY - n[1] * yWidth - yWidth / 2 - sceneCenter.y;
-                scenePosition.z = 0;
+                var upperLeft = new Vector3();
+                upperLeft.x = tileMatrixMinX + n[0] * xWidth - sceneCenter.x;
+                upperLeft.y = tileMatrixMaxY - n[1] * yWidth - sceneCenter.y;
+                upperLeft.z = 0;
+                
+                var upperRight = new Vector3( upperLeft.x + xWidth, upperLeft.y, 0 );
+                var lowerLeft = new Vector3( upperLeft.x, upperLeft.y - yWidth, 0 );
+                var lowerRight = new Vector3( upperLeft.x + xWidth, upperLeft.y - yWidth, 0 );
+                var centre = new Vector3( upperLeft.x + xWidth / 2, upperLeft.y - yWidth / 2, 0 );
 
-                if(frustum.containsPoint( scenePosition )){
-                    queue.push(n);
-                    visited.push(n);
-                    tilesInView.push(n);
-                }
 
 
+                // var centre = new Vector3();
+                // centre.x = tileMatrixMinX + n[0] * xWidth + xWidth / 2 - sceneCenter.x;
+                // centre.y = tileMatrixMaxY - n[1] * yWidth - yWidth / 2 - sceneCenter.y;
+                // centre.z = 0;
+
+
+                // var upperRight = new Vector3();
+                // upperRight.x = tileMatrixMinX + n[0] * xWidth + xWidth - sceneCenter.x;
+                // upperRight.y = tileMatrixMaxY - n[1] * yWidth + yWidth - sceneCenter.y;
+                // upperRight.z = 0;
+
+                // var upperLeft = new Vector3();
+                // upperLeft.x = tileMatrixMinX + n[0] * xWidth - sceneCenter.x;
+                // upperLeft.y = tileMatrixMaxY - n[1] * yWidth + yWidth - sceneCenter.y;
+                // upperLeft.z = 0;
+
+                // var lowerRight = new Vector3();
+                // lowerRight.x = tileMatrixMinX + n[0] * xWidth + xWidth - sceneCenter.x;
+                // lowerRight.y = tileMatrixMaxY - n[1] * yWidth - sceneCenter.y;
+                // lowerRight.z = 0;
+
+                var positions = [lowerLeft, upperRight, upperLeft, lowerRight];
+
+                positions.forEach(function(v){
+
+                    if(frustum.containsPoint( v )){
+                        
+                        queue.push(n);
+                        visited.push(n);
+                        tilesInView.push(n);
+
+                        return;
+
+                    }
+
+                })
 
             })
 
+            // prevent infinite loop
             test += 1;
             if (test == 10000){
-                //console.log("break")
+                console.log("break")
                 break;
             }
 
-
         }
-        //console.log(test);
-        console.log(tilesInView);
-        return(tilesInView);
 
+        //console.log(test);
+        // console.log(JSON.parse(JSON.stringify(tilesInView)));
+        return(tilesInView);
 
     }
 
