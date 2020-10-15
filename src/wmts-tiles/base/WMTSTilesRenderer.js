@@ -8,7 +8,8 @@ import {
     Vector2,
     Vector3,
     Frustum,
-    Matrix4
+    Matrix4,
+    SphereGeometry
 } from 'three';
 import {
     ResourceTracker
@@ -37,6 +38,9 @@ export class WMTSTilesRenderer {
         this.group = new Group();
         this.resourceTracker = new ResourceTracker();
         this.track = this.resourceTracker.track.bind( this.resourceTracker );
+
+        // for debugging
+        this.gridCreated = false;
 
         this.fetchCapabilities( this.capabilitiesURL ).then( capabilities => {
 
@@ -67,7 +71,7 @@ export class WMTSTilesRenderer {
     }
 
     fetchCapabilities ( url ){
-
+        // Fetch WMTS capabilities and convert to JSON
         var x2js = new X2JS();
 
         return fetch( url )
@@ -80,6 +84,34 @@ export class WMTSTilesRenderer {
 
     }
 
+    createGrid(tileMatrixMinX, tileMatrixMaxX, tileMatrixMinY, tileMatrixMaxY, xWidth, yWidth, matrixWidth, matrixHeight, sceneCenter){
+        // For debugging: create spheres at centers of tiles 
+
+        for (var i=120; i < 130; i++){
+            for (var j=120; j < 130; j++){
+
+                var scenePosition = new Vector2();
+                scenePosition.x = tileMatrixMinX + i * xWidth + xWidth / 2 - sceneCenter.x;
+                scenePosition.y = tileMatrixMaxY - j * yWidth - yWidth / 2 - sceneCenter.y;
+
+                var geometry = new SphereGeometry(100,100,100);
+                var material = new MeshBasicMaterial( {color: 0xffff00} );
+                var sphere = new Mesh( geometry, material );
+
+                this.group.add( sphere );
+    
+                sphere.position.x = scenePosition.x;
+                sphere.position.y = scenePosition.y;
+
+                sphere.updateMatrix();
+
+            }
+        }
+
+        this.gridCreated = true;
+
+    }
+
     update( cameraInfo, sceneCenter, camera ){
 
         if (typeof this.tileMatrixLayer == "undefined"){
@@ -89,6 +121,7 @@ export class WMTSTilesRenderer {
         // todo: determine which tile level you want to load (which should depend on the SSE?)
         var tileLayer = this.tileMatrixLayer[this.tileLevel];
 
+        // Calculations based on WMTS specs
         var matrixHeight = tileLayer["MatrixHeight"];
         var matrixWidth = tileLayer["MatrixWidth"];
         var scaleDenominator = tileLayer["ScaleDenominator"];
@@ -107,30 +140,25 @@ export class WMTSTilesRenderer {
         var xWidth = (tileMatrixMaxX - tileMatrixMinX) / matrixWidth;
         var yWidth = (tileMatrixMaxY - tileMatrixMinY) / matrixHeight;
 
+        // Calculate index of tile that is in the middle of the screen
         var position = cameraInfo[0]["position"];
-
         var xTile = Math.floor((position.x - tileMatrixMinX) / xWidth);
         var yTile = Math.floor(matrixHeight - (position.y - tileMatrixMinY) / yWidth);
 
         var tileIndex = [xTile, yTile];
 
+
+        // For debugging
+        if (this.gridCreated == false){
+
+            this.createGrid(tileMatrixMinX, tileMatrixMaxX, tileMatrixMinY, tileMatrixMaxY, xWidth, yWidth, matrixWidth, matrixHeight, sceneCenter);
+
+        }
+                
+        // Get indices of all tiles that are in view
         var tiles = this.grow_region(tileIndex, camera, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter);
 
-
-
-        // var tileIndices = [];
-        // for (var i = tileIndex[0] - 5; i <= tileIndex[0] + 5; i ++){
-
-        //     for (var j = tileIndex[1] - 5; j <= tileIndex[1] + 5; j ++){
-
-        //         tileIndices.push( [i,j] );
-
-        //     }
-            
-        // }
-
-        //console.log(tiles);
-
+        // Create tiles that hadn't been created yet
         tiles.forEach(function (ti){
 
             if (JSON.stringify(this.activeTiles).indexOf(JSON.stringify(ti)) == -1){
@@ -170,9 +198,6 @@ export class WMTSTilesRenderer {
 
         })
 
-        // console.log(tileIndex);
-        // console.log(neighbours);
-
         return neighbours;
 
     }
@@ -181,9 +206,7 @@ export class WMTSTilesRenderer {
 
         var frustum = new Frustum();
         var projScreenMatrix = new Matrix4();
-
         projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
-
         frustum.setFromProjectionMatrix( new Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
 
         var visited = [tileIndex];
@@ -199,11 +222,16 @@ export class WMTSTilesRenderer {
 
             neighbours.forEach( function(n) {
 
+                // Continue if tile already visited
                 if(JSON.stringify(visited).indexOf(n) != -1){
-                    //console.log("ja")
+
                     return;
+                    
                 }
 
+                visited.push(n);
+
+                // Calculate tile bounds and center
                 var upperLeft = new Vector3();
                 upperLeft.x = tileMatrixMinX + n[0] * xWidth - sceneCenter.x;
                 upperLeft.y = tileMatrixMaxY - n[1] * yWidth - sceneCenter.y;
@@ -214,37 +242,14 @@ export class WMTSTilesRenderer {
                 var lowerRight = new Vector3( upperLeft.x + xWidth, upperLeft.y - yWidth, 0 );
                 var centre = new Vector3( upperLeft.x + xWidth / 2, upperLeft.y - yWidth / 2, 0 );
 
+                var positions = [centre, lowerLeft, upperRight, upperLeft, lowerRight];
 
-
-                // var centre = new Vector3();
-                // centre.x = tileMatrixMinX + n[0] * xWidth + xWidth / 2 - sceneCenter.x;
-                // centre.y = tileMatrixMaxY - n[1] * yWidth - yWidth / 2 - sceneCenter.y;
-                // centre.z = 0;
-
-
-                // var upperRight = new Vector3();
-                // upperRight.x = tileMatrixMinX + n[0] * xWidth + xWidth - sceneCenter.x;
-                // upperRight.y = tileMatrixMaxY - n[1] * yWidth + yWidth - sceneCenter.y;
-                // upperRight.z = 0;
-
-                // var upperLeft = new Vector3();
-                // upperLeft.x = tileMatrixMinX + n[0] * xWidth - sceneCenter.x;
-                // upperLeft.y = tileMatrixMaxY - n[1] * yWidth + yWidth - sceneCenter.y;
-                // upperLeft.z = 0;
-
-                // var lowerRight = new Vector3();
-                // lowerRight.x = tileMatrixMinX + n[0] * xWidth + xWidth - sceneCenter.x;
-                // lowerRight.y = tileMatrixMaxY - n[1] * yWidth - sceneCenter.y;
-                // lowerRight.z = 0;
-
-                var positions = [lowerLeft, upperRight, upperLeft, lowerRight];
-
+                // If any of these positions lies in frustum, tile is in view
                 positions.forEach(function(v){
 
                     if(frustum.containsPoint( v )){
                         
                         queue.push(n);
-                        visited.push(n);
                         tilesInView.push(n);
 
                         return;
@@ -257,15 +262,13 @@ export class WMTSTilesRenderer {
 
             // prevent infinite loop
             test += 1;
-            if (test == 10000){
+            if (test == 1000){
                 console.log("break")
                 break;
             }
 
         }
 
-        //console.log(test);
-        // console.log(JSON.parse(JSON.stringify(tilesInView)));
         return(tilesInView);
 
     }
