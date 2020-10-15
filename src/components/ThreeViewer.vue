@@ -122,6 +122,10 @@ export default {
     this.needsRerender = 0;
 
     // debug
+    this.lruCacheSize = 0;
+    this.lruCacheMinSize = 175;
+    this.lruCacheMaxSize = 250;
+
     this.pointIntensity = 0.4;
     this.directionalIntensity = 0.8;
     this.ambientIntensity = 0.5;
@@ -184,23 +188,23 @@ export default {
       // see https://cocopon.github.io/tweakpane/
 
       // 3DTiles
-      const f1 = this.pane.addFolder({
-        expanded: true,
-        title: '3DTile render',
-      });
-      f1.addInput(this, "errorTarget").on( 'change', (val) => this.tiles.errorTarget = val );
-      f1.addInput(this, "errorThreshold").on( 'change', (val) => this.tiles.errorThreshold = val );
+      // const f1 = this.pane.addFolder({
+      //   expanded: true,
+      //   title: '3DTile render',
+      // });
+      // f1.addInput(this, "errorTarget").on( 'change', (val) => this.tiles.errorTarget = val );
+      // f1.addInput(this, "errorThreshold").on( 'change', (val) => this.tiles.errorThreshold = val );
       
       // Terrain tiles
       const f2 = this.pane.addFolder({
-        expanded: true,
+        expanded: false,
         title: 'Terrain tiles',
       });
       f2.addInput(this, "enableWMS").on( 'change', (val) => this.reinitWms() );
       
       // Camera
       const f3 = this.pane.addFolder({
-        expanded: true,
+        expanded: false,
         title: 'Camera',
       })
       f3.addInput(this, "nearPlane", {min: 1, max:1000}).on( 'change', (val) => {this.camera.near = val; this.camera.updateProjectionMatrix();} );
@@ -213,14 +217,14 @@ export default {
 
       // Appearance
       const f4 = this.pane.addFolder({
-        expanded: true,
+        expanded: false,
         title: 'Appearance',
       })
       f4.addInput(this, "ambientIntensity", {min: 0, max:2, step:0.1}).on('change', (val) => {this.ambLight.intensity = val});
       f4.addInput(this, "directionalIntensity", {min: 0, max:2, step:0.1}).on('change', (val) => {this.dirLight.intensity = val});
       f4.addInput(this, "pointIntensity", {min: 0, max:2, step:0.1}).on('change', (val) => {this.pLight.intensity = val});
       const f5  = f4.addFolder({
-          expanded: true,
+          expanded: false,
           title: 'PointLight dir',
       }).on('change', (val) => this.dirLight.position.set(this.dirX, this.dirY, this.dirZ))
       f5.addInput(this, "dirX", {min: 0, max:1, step:0.01});
@@ -237,10 +241,28 @@ export default {
 
       // Misc
       const f6 = this.pane.addFolder({
-        expanded: true,
+        expanded: false,
         title: 'Misc',
       })
       f6.addInput(this, "castOnHover");
+      
+      // stats
+      const f7 = this.pane.addFolder({
+        expanded: true,
+        title: 'Stats',
+      })
+      f7.addMonitor(this.tiles.stats, "parsing");
+      f7.addMonitor(this.tiles.stats, "downloading");
+      f7.addMonitor(this.tiles.stats, "failed");
+      f7.addMonitor(this.tiles.stats, "inFrustum");
+      f7.addMonitor(this.tiles.stats, "used");
+      f7.addMonitor(this.tiles.stats, "active");
+      f7.addMonitor(this.tiles.stats, "visible");
+      f7.addMonitor(this, "lruCacheSize");
+      f7.addInput(this, "lruCacheMinSize", {min: 10, max: 500, step: 1})
+        .on('change', (val) => {this.tiles.lruCache.minSize = val} );
+      f7.addInput(this, "lruCacheMaxSize", {min: 10, max: 500, step: 1})
+        .on('change', (val) => {this.tiles.lruCache.maxSize = val} );
 
       this.pane.on("change", (val) => this.needsRerender=1 );
     },
@@ -299,6 +321,8 @@ export default {
       }
 
       this.tiles = new TilesRenderer( this.tilesUrl );
+      this.tiles.lruCache.minSize = this.lruCacheMinSize;
+      this.tiles.lruCache.maxSize = this.lruCacheMaxSize;
 
       this.tiles.errorTarget = this.errorTarget;
       this.tiles.errorThreshold = this.errorThreshold;
@@ -577,7 +601,8 @@ export default {
         this.dummyCamera.updateMatrixWorld();
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
-        this.tiles.update();  
+        this.tiles.update();
+        this.lruCacheSize = this.tiles.lruCache.itemSet.size;
         if(this.enableWMS && this.wmsTiles != null) this.wmsTiles.update();
       
         if (this.meshShading == "normal"){    
