@@ -552,10 +552,10 @@ export default {
         else if ( keys.includes( "attrs" ) ) {
 
           const attrs = JSON.parse( batchTable.getData( "attrs" )[ batch_id ] );
-          this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": attrs.identificatie, "rmse": attrs.rmse } );
-
           // eslint-disable-next-line no-console
           console.log( attrs );
+          this.$emit( 'object-picked', { "batchID": batch_id, "attributes": attrs } );
+          
         }
 
         // Set up the highlighted batchid to the material of new object

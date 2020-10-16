@@ -6,6 +6,12 @@
           <b-button @click="showSidebar=true"
                     icon-right="menu" />
         </div>
+        <div class="control">
+          <b-button @click="showSidebar=true"
+                    icon-right="cog">LoD</b-button>
+          <b-button @click="showSidebar=true"
+                    icon-right="cog">Map</b-button>
+        </div>
         <b-autocomplete
           id="search-input"
           class="control"
@@ -40,10 +46,6 @@
                       <small>
                           {{ props.option.type }} ({{ props.option.bron }})
                       </small>
-                      <br>
-                      <small>
-                          {{ props.option.id }})
-                      </small>
                     </p>
                   </div>
               </div>
@@ -51,8 +53,8 @@
         </b-autocomplete>
       </div>
     </section>
-    <b-message id="picking-msg" title="Building information" v-model="showBuildingInfo" aria-close-label="Close message">
-      <table class="table">
+    <b-message type="is-warning" id="picking-msg" size="is-small" title="Building information" v-model="showBuildingInfo" aria-close-label="Close message">
+      <table class="table has-text-left">
         <thead>
           <tr>
             <th>Attribute</th>
@@ -62,15 +64,11 @@
         <tbody>
           <tr>
             <td>Batch ID</td>
-            <td>{{selectedInfo.batchID}}</td>
+            <td>{{pickedBuilding.batchID}}</td>
           </tr>
-          <tr>
-            <td>identificatie</td>
-            <td>{{selectedInfo.identificatie}}</td>
-          </tr>
-          <tr>
-            <td>RMSE</td>
-            <td>{{selectedInfo.rmse}}</td>
+          <tr v-for="[name, val] in Object.entries(pickedBuilding.attributes)">
+            <td>{{ name }}</td>
+            <td>{{ val }}</td>
           </tr>
         </tbody>
       </table>
@@ -150,11 +148,10 @@ export default {
 
       wmsPreset: 'top10nl',
 
-      selectedInfo: {
+      pickedBuilding: {
 
         batchID: "-",
-        identificatie: "-",
-        rmse: "-"
+        attributes: []
 
       },
 
@@ -178,7 +175,7 @@ export default {
 
     objectPicked: function( event ) {
 
-      this.selectedInfo = event;
+      this.pickedBuilding = event;
       this.showBuildingInfo = true;
 
     },
