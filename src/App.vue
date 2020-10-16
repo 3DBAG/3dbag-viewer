@@ -1,53 +1,114 @@
 <template>
   <div id="app">
-    <div id="sidebar">
-      <h1>3D BAG</h1>
-      <input type="text" id="search" v-model="searchTerm" @keyup="doSearch">
-      <ul>
-        <li v-for="res in searchResults" :key="res.id">
-          <router-link :to="{path:'/', query: {rdx:res.rd_x, rdy:res.rd_y, ox: camOffset.x, oy: camOffset.y, oz: camOffset.z}}">{{ res.name }}</router-link>
-        </li>
-      </ul>
-
-      <h3>Selection information</h3>
-      <div>
-        <label for="batchId">Batch ID: </label>
-        <input type="text" id="batchId" readonly v-model="selectedInfo.batchID">
+    <section id="search">
+      <div class="field has-addons">
+        <div class="control">
+          <b-button @click="showSidebar=true"
+                    icon-right="menu" />
+        </div>
+        <b-autocomplete
+          id="search-input"
+          class="control"
+          field="weergavenaam"
+          :data="geocodeResult"
+          :loading="isGeocoding"
+          placeholder="Search"
+          icon-right="magnify"
+          @typing="doGeocode"
+          @select="(res) => {
+            if(res){
+              $router.push( {
+                path:'/', 
+                query: {rdx:res.rd_x, rdy:res.rd_y, ox: camOffset.x, oy: camOffset.y, oz: camOffset.z}
+              })
+            }
+          }"
+          >
+          <template slot="empty">No results found</template>
+          <template slot-scope="props">
+              <div class="media">
+                  <div class="media-left">
+                    <b-icon
+                        icon="map-marker"
+                        size="is-small">
+                    </b-icon>
+                  </div>
+                  <div class="media-content">
+                    <p class="has-text-left">
+                      {{ props.option.weergavenaam }}
+                      <br>
+                      <small>
+                          {{ props.option.type }} ({{ props.option.bron }})
+                      </small>
+                      <br>
+                      <small>
+                          {{ props.option.id }})
+                      </small>
+                    </p>
+                  </div>
+              </div>
+          </template>
+        </b-autocomplete>
       </div>
-      <div>
-        <label for="identificatie">Identificatie: </label>
-        <input type="text" id="identificatie" readonly v-model="selectedInfo.identificatie">
+    </section>
+    <b-message id="picking-msg" title="Building information" v-model="showBuildingInfo" aria-close-label="Close message">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Attribute</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Batch ID</td>
+            <td>{{selectedInfo.batchID}}</td>
+          </tr>
+          <tr>
+            <td>identificatie</td>
+            <td>{{selectedInfo.identificatie}}</td>
+          </tr>
+          <tr>
+            <td>RMSE</td>
+            <td>{{selectedInfo.rmse}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </b-message>
+    <b-sidebar
+      type="is-light"
+      :fullheight=true
+      v-model="showSidebar"
+    >
+      <div style="padding:0.25rem">
+        <h1 class="title">3D BAG</h1>
+        <h3>Tiles settings</h3>
+        <div>
+          <label for="lod">Active LoD: </label>
+          <select id="lod" v-model="tileset">
+            <option value="nl_lod22_opt">LoD2.2 (Quadtree)</option>
+            <option value="nl_lod22_attr">LoD2.2 (NL+attributes)</option>
+            <option value="nl_lod22">LoD2.2 (NL)</option>
+            <option value="nl_lod13">LoD1.3 (NL)</option>
+            <option value="zh_lod22">LoD2.2 (ZH)</option>
+            <option value="zh_lod13">LoD1.3 (ZH)</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div v-if="tileset == 'custom'">
+          <label for="customTileset">Custom URL: </label>
+          <input type="text" id="customTileset" v-model="customTilesUrl">
+        </div>
+        <h3>WMS settings</h3>
+        <div>
+          <label for="wmsPreset">Preset: </label>
+          <select id="wmsPreset" v-model="wmsPreset">
+            <option value="top10nl">TOP10NL</option>
+            <option value="luchfoto2018">Orthophotos 2018</option>
+          </select>
+        </div>
       </div>
-      <div>
-        <label for="rmse">RMSE: </label>
-        <input type="text" id="rmse" readonly v-model="selectedInfo.rmse">
-      </div>
-      <h3>Tiles settings</h3>
-      <div>
-        <label for="lod">Active LoD: </label>
-        <select id="lod" v-model="tileset">
-          <option value="nl_lod22_opt">LoD2.2 (Quadtree)</option>
-          <option value="nl_lod22_attr">LoD2.2 (NL+attributes)</option>
-          <option value="nl_lod22">LoD2.2 (NL)</option>
-          <option value="nl_lod13">LoD1.3 (NL)</option>
-          <option value="zh_lod22">LoD2.2 (ZH)</option>
-          <option value="zh_lod13">LoD1.3 (ZH)</option>
-          <option value="custom">Custom</option>
-        </select>
-      </div>
-      <div v-if="tileset == 'custom'">
-        <label for="customTileset">Custom URL: </label>
-        <input type="text" id="customTileset" v-model="customTilesUrl">
-      </div>
-      <h3>WMS settings</h3>
-      <div>
-        <label for="wmsPreset">Preset: </label>
-        <select id="wmsPreset" v-model="wmsPreset">
-          <option value="top10nl">TOP10NL</option>
-          <option value="luchfoto2018">Orthophotos 2018</option>
-        </select>
-      </div>
-    </div>
+    </b-sidebar>
     <div id="viewer">
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
       <ThreeViewer
@@ -61,7 +122,8 @@
 </template>
 
 <script>
-import ThreeViewer from './components/ThreeViewer.vue'
+import ThreeViewer from './components/ThreeViewer.vue';
+import debounce from 'debounce';
 
 export default {
 
@@ -96,8 +158,11 @@ export default {
 
       },
 
-      searchTerm: null,
-      searchResults: []
+      geocodeResult: [],
+      isGeocoding: false,
+
+      showSidebar: false,
+      showBuildingInfo: false,
 
     }
 
@@ -114,39 +179,61 @@ export default {
     objectPicked: function( event ) {
 
       this.selectedInfo = event;
+      this.showBuildingInfo = true;
 
     },
 
-    doSearch: function ( e ) {
+    doGeocode: debounce(function ( name ) {
 
-      if ( e.keyCode == 13 ) {
-
-        fetch( 'https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=' + this.searchTerm + '&fq=bron:BAG&fl=weergavenaam,id,centroide_rd&rows=10' )
-        .then( res => {
-          const contentType = res.headers.get("content-type");
-          if ( res.ok && contentType && contentType.indexOf("application/json") !== -1) {
-
-            return res.json();
-
-          }
-
-        })
-        .then( json => {
-          var re = /\d+\.?\d*/g;
-          this.searchResults = json.response.docs.map( a => { 
-            let m = a.centroide_rd.match(re);
-            return { id: a.id, name: a.weergavenaam, rd_x: parseFloat(m[0]), rd_y: parseFloat(m[1]) } 
-          } );
-
-        });
-
+      if (!name.length) {
+        this.geocodeResult = []
+        return
       }
 
-    }
+      this.isGeocoding = true;
+      fetch( 'https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=' + name + '&fl=weergavenaam,bron,type,bron,id,centroide_rd&rows=10' )
+      .then( res => {
+        const contentType = res.headers.get("content-type");
+        if ( res.ok && contentType && contentType.indexOf("application/json") !== -1) {
+
+          return res.json();
+
+        }
+
+      })
+      .catch((error) => {
+        this.geocodeResult = [];
+        throw error;
+      })
+      .then( json => {
+        var re = /\d+\.?\d*/g;
+        this.geocodeResult = json.response.docs.map( a => { 
+          let m = a.centroide_rd.match(re);
+          a.rd_x = parseFloat(m[0]);
+          a.rd_y = parseFloat(m[1]);
+          return a; 
+        } );
+
+      })
+      .finally( () => {
+        this.isGeocoding = false;
+      });
+
+
+    })
 
   },
 
   computed: {
+
+    filteredDataArray() {
+        return this.data.filter((option) => {
+            return option
+                .toString()
+                .toLowerCase()
+                .indexOf(this.name.toLowerCase()) >= 0
+        })
+    },
 
     tilesUrl: function () {
 
@@ -215,16 +302,26 @@ export default {
 
 }
 
-#sidebar {
+#search {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
 
-  width: 20%;
-  padding: 10px;
+#picking-msg {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+}
 
+
+#search-input {
+  width: 400px;
 }
 
 #viewer {
 
-  width: 80%;
+  width: 100%;
   height: 100%;
 
 }

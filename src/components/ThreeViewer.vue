@@ -152,7 +152,7 @@ export default {
     this.castOnHover = false;
 
     this.enableWMS = true;
-    this.pane = new Tweakpane({title: 'debug'});
+    this.pane = new Tweakpane({title: 'debug', expanded: false});
 
     this.selectedObject = null;
   },
