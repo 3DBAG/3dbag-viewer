@@ -7,10 +7,70 @@
                     icon-right="menu" />
         </div>
         <div class="control">
-          <b-button @click="showSidebar=true"
-                    icon-right="cog">LoD</b-button>
-          <b-button @click="showSidebar=true"
-                    icon-right="cog">Map</b-button>
+          <b-dropdown v-model="wmsPreset" aria-role="list">
+              <button class="button is-primary" type="button" slot="trigger">
+                  <template v-if="wmsPreset=='top10nl'">
+                      <b-icon icon="map"></b-icon>
+                      <span>TOP10NL</span>
+                  </template>
+                  <template v-else>
+                      <b-icon icon="map"></b-icon>
+                      <span>Orthophotos</span>
+                  </template>
+                  <b-icon icon="menu-down"></b-icon>
+              </button>
+
+              <b-dropdown-item :value="'top10nl'" aria-role="listitem">
+                  <div class="media">
+                      <b-icon class="media-left" icon="map"></b-icon>
+                      <div class="media-content">
+                          <p>TOP10NL</p>
+                      </div>
+                  </div>
+              </b-dropdown-item>
+
+              <b-dropdown-item :value="'luchfoto2018'" aria-role="listitem">
+                  <div class="media">
+                      <b-icon class="media-left" icon="map"></b-icon>
+                      <div class="media-content">
+                          <p>Orthophotos</p>
+                      </div>
+                  </div>
+              </b-dropdown-item>
+          </b-dropdown>
+        </div>
+        <div class="control">
+          <b-dropdown v-model="tileset" aria-role="list">
+              <button class="button is-info" type="button" slot="trigger">
+                <template v-if="tileset=='nl_lod22_opt'">
+                    <b-icon icon="home-floor-2"></b-icon>
+                    <span>LoD 2.2</span>
+                </template>
+                <template v-else>
+                    <b-icon icon="home-floor-1"></b-icon>
+                    <span>LoD 1.3</span>
+                </template>
+                <b-icon icon="menu-down"></b-icon>
+              </button>
+
+              <b-dropdown-item :value="'nl_lod22_opt'" aria-role="listitem">
+                  <div class="media">
+                      <b-icon class="media-left" icon="home-floor-2"></b-icon>
+                      <div class="media-content">
+                          <p>LoD 2.2</p>
+                      </div>
+                  </div>
+              </b-dropdown-item>
+
+              <b-dropdown-item :value="'nl_lod13'" aria-role="listitem">
+                  <div class="media">
+                      <b-icon class="media-left" icon="home-floor-1"></b-icon>
+                      <div class="media-content">
+                          <p>LoD1.3</p>
+                      </div>
+                  </div>
+              </b-dropdown-item>
+          </b-dropdown>
         </div>
         <b-autocomplete
           id="search-input"
@@ -78,34 +138,16 @@
       :fullheight=true
       v-model="showSidebar"
     >
-      <div style="padding:0.25rem">
-        <h1 class="title">3D BAG</h1>
-        <h3>Tiles settings</h3>
-        <div>
-          <label for="lod">Active LoD: </label>
-          <select id="lod" v-model="tileset">
-            <option value="nl_lod22_opt">LoD2.2 (Quadtree)</option>
-            <option value="nl_lod22_attr">LoD2.2 (NL+attributes)</option>
-            <option value="nl_lod22">LoD2.2 (NL)</option>
-            <option value="nl_lod13">LoD1.3 (NL)</option>
-            <option value="zh_lod22">LoD2.2 (ZH)</option>
-            <option value="zh_lod13">LoD1.3 (ZH)</option>
-            <option value="custom">Custom</option>
-          </select>
-        </div>
-        <div v-if="tileset == 'custom'">
-          <label for="customTileset">Custom URL: </label>
-          <input type="text" id="customTileset" v-model="customTilesUrl">
-        </div>
-        <h3>WMS settings</h3>
-        <div>
-          <label for="wmsPreset">Preset: </label>
-          <select id="wmsPreset" v-model="wmsPreset">
-            <option value="top10nl">TOP10NL</option>
-            <option value="luchfoto2018">Orthophotos 2018</option>
-          </select>
-        </div>
-      </div>
+      <b-menu>
+        <b-menu-list>
+          <b-menu-item label="3D Viewer" icon="video-3d-variant" tag="router-link" target="_blank" to="/expo"></b-menu-item>
+        </b-menu-list>
+        <b-menu-list label="Docs">
+          <b-menu-item icon="file-document" label="Attribute specification" />
+          <b-menu-item icon="frequently-asked-questions" label="FAQ" />
+        </b-menu-list>
+
+      </b-menu>
     </b-sidebar>
     <div id="viewer">
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
