@@ -6,72 +6,6 @@
           <b-button @click="showSidebar=true"
                     icon-right="menu" />
         </div>
-        <div class="control">
-          <b-dropdown v-model="wmsPreset" aria-role="list">
-              <button class="button is-primary" type="button" slot="trigger">
-                  <template v-if="wmsPreset=='top10nl'">
-                      <b-icon icon="map"></b-icon>
-                      <span>TOP10NL</span>
-                  </template>
-                  <template v-else>
-                      <b-icon icon="map"></b-icon>
-                      <span>Orthophotos</span>
-                  </template>
-                  <b-icon icon="menu-down"></b-icon>
-              </button>
-
-              <b-dropdown-item :value="'top10nl'" aria-role="listitem">
-                  <div class="media">
-                      <b-icon class="media-left" icon="map"></b-icon>
-                      <div class="media-content">
-                          <p>TOP10NL</p>
-                      </div>
-                  </div>
-              </b-dropdown-item>
-
-              <b-dropdown-item :value="'luchfoto2018'" aria-role="listitem">
-                  <div class="media">
-                      <b-icon class="media-left" icon="map"></b-icon>
-                      <div class="media-content">
-                          <p>Orthophotos</p>
-                      </div>
-                  </div>
-              </b-dropdown-item>
-          </b-dropdown>
-        </div>
-        <div class="control">
-          <b-dropdown v-model="tileset" aria-role="list">
-              <button class="button is-info" type="button" slot="trigger">
-                <template v-if="tileset=='nl_lod22_opt'">
-                    <b-icon icon="home-floor-2"></b-icon>
-                    <span>LoD 2.2</span>
-                </template>
-                <template v-else>
-                    <b-icon icon="home-floor-1"></b-icon>
-                    <span>LoD 1.3</span>
-                </template>
-                <b-icon icon="menu-down"></b-icon>
-              </button>
-
-              <b-dropdown-item :value="'nl_lod22_opt'" aria-role="listitem">
-                  <div class="media">
-                      <b-icon class="media-left" icon="home-floor-2"></b-icon>
-                      <div class="media-content">
-                          <p>LoD 2.2</p>
-                      </div>
-                  </div>
-              </b-dropdown-item>
-
-              <b-dropdown-item :value="'nl_lod13'" aria-role="listitem">
-                  <div class="media">
-                      <b-icon class="media-left" icon="home-floor-1"></b-icon>
-                      <div class="media-content">
-                          <p>LoD1.3</p>
-                      </div>
-                  </div>
-              </b-dropdown-item>
-          </b-dropdown>
-        </div>
         <b-autocomplete
           id="search-input"
           class="control"
@@ -113,6 +47,74 @@
         </b-autocomplete>
       </div>
     </section>
+    <section id="map-options" class="field has-addons">
+      <div class="control">
+        <b-dropdown position="is-top-right" v-model="wmsPreset" aria-role="list">
+            <button class="button is-primary" type="button" slot="trigger">
+                <template v-if="wmsPreset=='top10nl'">
+                    <b-icon icon="map"></b-icon>
+                    <span>TOP10NL</span>
+                </template>
+                <template v-else>
+                    <b-icon icon="map"></b-icon>
+                    <span>Orthophotos</span>
+                </template>
+                <b-icon icon="menu-up"></b-icon>
+            </button>
+
+            <b-dropdown-item :value="'top10nl'" aria-role="listitem">
+                <div class="media">
+                    <b-icon class="media-left" icon="map"></b-icon>
+                    <div class="media-content">
+                        <p>TOP10NL</p>
+                    </div>
+                </div>
+            </b-dropdown-item>
+
+            <b-dropdown-item :value="'luchfoto2018'" aria-role="listitem">
+                <div class="media">
+                    <b-icon class="media-left" icon="map"></b-icon>
+                    <div class="media-content">
+                        <p>Orthophotos</p>
+                    </div>
+                </div>
+            </b-dropdown-item>
+        </b-dropdown>
+      </div>
+      <div class="control">
+        <b-dropdown position="is-top-right" v-model="tileset" aria-role="list">
+            <button class="button is-info" type="button" slot="trigger">
+              <template v-if="tileset=='nl_lod22_opt'">
+                  <b-icon icon="home-floor-2"></b-icon>
+                  <span>LoD 2.2</span>
+              </template>
+              <template v-else>
+                  <b-icon icon="home-floor-1"></b-icon>
+                  <span>LoD 1.3</span>
+              </template>
+              <b-icon icon="menu-up"></b-icon>
+            </button>
+
+            <b-dropdown-item :value="'nl_lod22_opt'" aria-role="listitem">
+                <div class="media">
+                    <b-icon class="media-left" icon="home-floor-2"></b-icon>
+                    <div class="media-content">
+                        <p>LoD 2.2</p>
+                    </div>
+                </div>
+            </b-dropdown-item>
+
+            <b-dropdown-item :value="'nl_lod13'" aria-role="listitem">
+                <div class="media">
+                    <b-icon class="media-left" icon="home-floor-1"></b-icon>
+                    <div class="media-content">
+                        <p>LoD1.3</p>
+                    </div>
+                </div>
+            </b-dropdown-item>
+          </b-dropdown>
+        </div>
+    </section>
     <b-message type="is-warning" id="picking-msg" size="is-small" title="Building information" v-model="showBuildingInfo" aria-close-label="Close message">
       <table class="table has-text-left">
         <thead>
@@ -138,15 +140,29 @@
       :fullheight=true
       v-model="showSidebar"
     >
+      <h1 class="title">3D BAG</h1>
+      <b-button style="width: fit-content"
+                class="is-pulled-right is-overlay"
+                icon-right="close" />
       <b-menu>
-        <b-menu-list>
-          <b-menu-item label="3D Viewer" icon="video-3d-variant" tag="router-link" target="_blank" to="/expo"></b-menu-item>
+        <b-menu-list label="Base Layer">
+          <b-menu-item label="TOP10NL" icon="map" />
+          <b-menu-item label="Orthophoto" icon="camera" />
         </b-menu-list>
-        <b-menu-list label="Docs">
+      </b-menu>
+      <b-menu>
+        <b-menu-list label="Level of Detail">
+          <b-menu-item label="LoD 2.2" icon="home-floor-2" />
+          <b-menu-item label="LoD 1.3" icon="home-floor-1" />
+        </b-menu-list>
+      </b-menu>
+      <hr />
+      <b-menu>
+        <b-menu-list label="Menu">
+          <b-menu-item label="3D Viewer" :active=true :expanded=true icon="video-3d-variant" />
           <b-menu-item icon="file-document" label="Attribute specification" />
           <b-menu-item icon="frequently-asked-questions" label="FAQ" />
         </b-menu-list>
-
       </b-menu>
     </b-sidebar>
     <div id="viewer">
@@ -353,6 +369,11 @@ export default {
   left: 20px;
 }
 
+#map-options {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+}
 
 #search-input {
   width: 400px;
