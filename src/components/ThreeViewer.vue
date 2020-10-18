@@ -430,6 +430,8 @@ export default {
       this.wmtsTiles = new WMTSTilesRenderer( this.wmtsOptions );
 
       this.offsetParent.add( this.wmtsTiles.group );
+
+      this.wmtsTiles.onLoadTile = () => this.needsRerender = 1;
       
     },
     initScene() {

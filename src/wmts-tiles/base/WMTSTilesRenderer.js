@@ -39,6 +39,8 @@ export class WMTSTilesRenderer {
 		this.resourceTracker = new ResourceTracker();
 		this.track = this.resourceTracker.track.bind( this.resourceTracker );
 
+		this.onLoadTile = null;
+
 		// for debugging
 		this.gridCreated = false;
 
