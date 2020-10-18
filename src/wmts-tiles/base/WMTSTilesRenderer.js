@@ -27,6 +27,8 @@ export class WMTSTilesRenderer {
 		this.tileLevel = 8;
 		this.tileMatrix = wmtsOptions.tileMatrix + ":" + this.tileLevel;
 
+		this.resFactor = 10;
+
 		this.capabilitiesURL = this.url + "request=GetCapabilities&service=WMTS";
 		this.tileMatrixLevels = null;
 		this.activeTiles = [];
@@ -48,7 +50,6 @@ export class WMTSTilesRenderer {
 			this.setTileMatrixLayer();
 
 		} );
-
 
 	}
 
@@ -93,6 +94,37 @@ export class WMTSTilesRenderer {
 
 		}
 
+		const raycaster = new Raycaster();
+		raycaster.setFromCamera( { x: 0, y: 0 }, camera );
+		let position = new Vector3();
+		raycaster.ray.intersectPlane( new Plane( new Vector3( 0, 1, 0 ), 0 ), position );
+
+		const dist = camera.position.distanceTo( position );
+
+		position.x = position.x + sceneCenter.x;
+		position.y = - position.z + sceneCenter.y;
+
+		let new_level = 0;
+		for ( let i = 0; i < this.tileMatrixLayer.length; i ++ ) {
+
+			if ( this.tileMatrixLayer[ i ][ "ScaleDenominator" ] < dist * this.resFactor ) {
+
+				new_level = i;
+				break;
+
+			}
+
+		}
+
+		if ( new_level != this.tileLevel ) {
+
+			this.clean_tiles();
+			this.tileLevel = new_level;
+
+			this.wmtsOptions.tileMatrix = this.wmtsOptions.tileMatrix + ":" + this.tileLevel;
+
+		}
+
 		// todo: determine which tile level you want to load (which should depend on the SSE?)
 		var tileLayer = this.tileMatrixLayer[ this.tileLevel ];
 
@@ -116,13 +148,6 @@ export class WMTSTilesRenderer {
 		var yWidth = ( tileMatrixMaxY - tileMatrixMinY ) / matrixHeight;
 
 		// Calculate index of tile that is in the middle of the screen
-		const raycaster = new Raycaster();
-		raycaster.setFromCamera( { x: 0, y: 0 }, camera );
-		let position = raycaster.ray.intersectPlane( new Plane( new Vector3( 0, 1, 0 ), 0 ) );
-
-		position.x = position.x + sceneCenter.x;
-		position.y = - position.z + sceneCenter.y;
-
 		var xTile = Math.floor( ( position.x - tileMatrixMinX ) / xWidth );
 		var yTile = Math.floor( matrixHeight - ( position.y - tileMatrixMinY ) / yWidth );
 
@@ -255,7 +280,17 @@ export class WMTSTilesRenderer {
 
 	}
 
+	clean_tiles() {
 
+		while ( this.group.children.length ) {
+
+			this.group.remove( this.group.children[ 0 ] );
+
+		}
+
+		this.activeTiles = [];
+
+	}
 
 	create_tile( tileIndex, tileSpanX, tileSpanY, scenePosition ) {
 
