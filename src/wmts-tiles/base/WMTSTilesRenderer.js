@@ -8,7 +8,7 @@ import {
 	Vector2,
 	Vector3,
 	Frustum,
-	Matrix4
+	Matrix4, Raycaster, Plane
 } from 'three';
 import {
 	ResourceTracker
@@ -85,7 +85,7 @@ export class WMTSTilesRenderer {
 
 	}
 
-	update( cameraInfo, sceneCenter, camera ) {
+	update( sceneCenter, camera ) {
 
 		if ( typeof this.tileMatrixLayer == "undefined" ) {
 
@@ -116,7 +116,13 @@ export class WMTSTilesRenderer {
 		var yWidth = ( tileMatrixMaxY - tileMatrixMinY ) / matrixHeight;
 
 		// Calculate index of tile that is in the middle of the screen
-		var position = cameraInfo[ 0 ][ "position" ];
+		const raycaster = new Raycaster();
+		raycaster.setFromCamera( { x: 0, y: 0 }, camera );
+		let position = raycaster.ray.intersectPlane( new Plane( new Vector3( 0, 1, 0 ), 0 ) );
+
+		position.x = position.x + sceneCenter.x;
+		position.y = - position.z + sceneCenter.y;
+
 		var xTile = Math.floor( ( position.x - tileMatrixMinX ) / xWidth );
 		var yTile = Math.floor( matrixHeight - ( position.y - tileMatrixMinY ) / yWidth );
 

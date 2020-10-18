@@ -643,7 +643,7 @@ export default {
         this.tiles.update();
         // this.wmsTiles.update();
 
-        this.wmtsTiles.update(this.tiles.cameraInfo, new Vector2(145763.78681838885, 459753.83407714777), this.camera);
+        this.wmtsTiles.update( new Vector2(145763.78681838885, 459753.83407714777), this.camera );
   
         this.renderer.render( this.scene, this.camera );
 
