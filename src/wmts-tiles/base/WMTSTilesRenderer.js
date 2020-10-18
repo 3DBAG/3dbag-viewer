@@ -27,7 +27,7 @@ export class WMTSTilesRenderer {
 		this.tileLevel = 8;
 		this.tileMatrix = wmtsOptions.tileMatrix + ":" + this.tileLevel;
 
-		this.resFactor = 10;
+		this.resFactor = 50;
 
 		this.capabilitiesURL = this.url + "request=GetCapabilities&service=WMTS";
 		this.tileMatrixLevels = null;
@@ -50,6 +50,8 @@ export class WMTSTilesRenderer {
 			this.setTileMatrixLayer();
 
 		} );
+
+		this.tempMaterial = new MeshBasicMaterial( { color: 0xFFFFFF } );
 
 	}
 
@@ -134,11 +136,11 @@ export class WMTSTilesRenderer {
 
 	}
 
-	getTilePositionFromIndex( index, tileMatrixParams, offset ) {
+	getTilePositionFromIndex( tileIndex, tileMatrixParams, offset ) {
 
 		let scenePosition = new Vector2();
-		scenePosition.x = tileMatrixParams.minX + index[ 0 ] * tileMatrixParams.tileWidth + tileMatrixParams.tileWidth / 2 - offset.x;
-		scenePosition.y = tileMatrixParams.maxY - index[ 1 ] * tileMatrixParams.tileHeight - tileMatrixParams.tileHeight / 2 - offset.y;
+		scenePosition.x = tileMatrixParams.minX + tileIndex[ 0 ] * tileMatrixParams.tileWidth + tileMatrixParams.tileWidth / 2 - offset.x;
+		scenePosition.y = tileMatrixParams.maxY - tileIndex[ 1 ] * tileMatrixParams.tileHeight - tileMatrixParams.tileHeight / 2 - offset.y;
 
 		return scenePosition;
 
@@ -236,13 +238,13 @@ export class WMTSTilesRenderer {
 
 	}
 
-	getExtentPoints( n, tileLayerParams, sceneCenter ) {
+	getExtentPoints( tileIndex, tileLayerParams, sceneCenter ) {
 
 		// Calculate tile bounds and center
 		var upperLeft = new Vector3();
-		upperLeft.x = tileLayerParams.minX + n[ 0 ] * tileLayerParams.tileWidth - sceneCenter.x;
+		upperLeft.x = tileLayerParams.minX + tileIndex[ 0 ] * tileLayerParams.tileWidth - sceneCenter.x;
 		upperLeft.y = 0;
-		upperLeft.z = - ( tileLayerParams.maxY - n[ 1 ] * tileLayerParams.tileHeight - sceneCenter.y );
+		upperLeft.z = - ( tileLayerParams.maxY - tileIndex[ 1 ] * tileLayerParams.tileHeight - sceneCenter.y );
 
 		var upperRight = new Vector3( upperLeft.x + tileLayerParams.tileWidth, 0, upperLeft.z );
 		var lowerLeft = new Vector3( upperLeft.x, 0, upperLeft.z + tileLayerParams.tileHeight );
@@ -349,17 +351,22 @@ export class WMTSTilesRenderer {
 
 		//console.log(requestURL);
 
+		var geometry = this.track( new PlaneBufferGeometry( tileSpanX, tileSpanY ) );
+
+		var mesh = new Mesh( geometry, this.tempMaterial );
+		this.group.add( mesh );
+
 		var loader = new TextureLoader();
 
-		var diffuseMap = loader.load( requestURL, this.onLoadTile );
-		diffuseMap.minFilter = LinearFilter;
-		diffuseMap.generateMipmaps = false;
+		loader.load( requestURL, ( tex ) => {
 
-		var geometry = this.track( new PlaneBufferGeometry( tileSpanX, tileSpanY ) );
-		var material = new MeshBasicMaterial( { map: this.track( diffuseMap ) } );
+			tex.minFilter = LinearFilter;
+			tex.generateMipmaps = false;
+			var material = new MeshBasicMaterial( { map: this.track( tex ) } );
+			mesh.material = material;
+			this.onLoadTile();
 
-		var mesh = new Mesh( geometry, material );
-		this.group.add( mesh );
+		} );
 
 		mesh.position.x = scenePosition.x;
 		mesh.position.y = scenePosition.y;
