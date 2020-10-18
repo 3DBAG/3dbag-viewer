@@ -8,8 +8,7 @@ import {
 	Vector2,
 	Vector3,
 	Frustum,
-	Matrix4,
-	SphereGeometry
+	Matrix4
 } from 'three';
 import {
 	ResourceTracker
@@ -40,9 +39,6 @@ export class WMTSTilesRenderer {
 		this.track = this.resourceTracker.track.bind( this.resourceTracker );
 
 		this.onLoadTile = null;
-
-		// for debugging
-		this.gridCreated = false;
 
 		this.fetchCapabilities( this.capabilitiesURL ).then( capabilities => {
 
@@ -86,37 +82,6 @@ export class WMTSTilesRenderer {
 				return x2js.xml2js( xml );
 
 			} );
-
-	}
-
-	createGrid( tileMatrixMinX, tileMatrixMaxX, tileMatrixMinY, tileMatrixMaxY, xWidth, yWidth, matrixWidth, matrixHeight, sceneCenter ) {
-
-		// For debugging: create spheres at centers of tiles
-
-		for ( var i = 120; i < 130; i ++ ) {
-
-			for ( var j = 120; j < 130; j ++ ) {
-
-				var scenePosition = new Vector2();
-				scenePosition.x = tileMatrixMinX + i * xWidth + xWidth / 2 - sceneCenter.x;
-				scenePosition.y = tileMatrixMaxY - j * yWidth - yWidth / 2 - sceneCenter.y;
-
-				var geometry = new SphereGeometry( 100, 100, 100 );
-				var material = new MeshBasicMaterial( { color: 0xffff00 } );
-				var sphere = new Mesh( geometry, material );
-
-				this.group.add( sphere );
-
-				sphere.position.x = scenePosition.x;
-				sphere.position.y = scenePosition.y;
-
-				sphere.updateMatrix();
-
-			}
-
-		}
-
-		this.gridCreated = true;
 
 	}
 
