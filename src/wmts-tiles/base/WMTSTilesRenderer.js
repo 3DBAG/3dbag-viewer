@@ -27,7 +27,7 @@ export class WMTSTilesRenderer {
 		this.tileLevel = 8;
 		this.tileMatrix = wmtsOptions.tileMatrix + ":" + this.tileLevel;
 
-		this.resFactor = 50;
+		this.resFactor = 25;
 
 		this.capabilitiesURL = this.url + "request=GetCapabilities&service=WMTS";
 		this.tileMatrixLevels = null;
