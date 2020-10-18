@@ -86,6 +86,64 @@ export class WMTSTilesRenderer {
 
 	}
 
+	getTileMatrixParams( tileLayer ) {
+
+		// Calculations based on WMTS specs
+		var matrixHeight = tileLayer[ "MatrixHeight" ];
+		var matrixWidth = tileLayer[ "MatrixWidth" ];
+		var scaleDenominator = tileLayer[ "ScaleDenominator" ];
+		var tileWidth = tileLayer[ "TileWidth" ];
+		var tileHeight = tileLayer[ "TileHeight" ];
+		var topLeftCorner = tileLayer[ "TopLeftCorner" ].split( " " );
+		var tileMatrixMinX = parseFloat( topLeftCorner[ 0 ] );
+		var tileMatrixMaxY = parseFloat( topLeftCorner[ 1 ] );
+
+		var pixelSpan = scaleDenominator * 0.00028;
+		var tileSpanX = tileWidth * pixelSpan;
+		var tileSpanY = tileHeight * pixelSpan;
+		var tileMatrixMaxX = tileMatrixMinX + tileSpanX * matrixWidth;
+		var tileMatrixMinY = tileMatrixMaxY - tileSpanY * matrixHeight;
+
+		var xWidth = ( tileMatrixMaxX - tileMatrixMinX ) / matrixWidth;
+		var yWidth = ( tileMatrixMaxY - tileMatrixMinY ) / matrixHeight;
+
+		return {
+
+			minX: tileMatrixMinX,
+			maxX: tileMatrixMaxX,
+			minY: tileMatrixMinY,
+			maxY: tileMatrixMaxY,
+			tileWidth: xWidth,
+			tileHeight: yWidth,
+			pixelSpan: pixelSpan,
+			tileSpanX: tileSpanX,
+			tileSpanY: tileSpanY,
+			matrixWidth: matrixWidth,
+			matrixHeight: matrixHeight
+
+		};
+
+	}
+
+	getTileFromPosition( position, tileMatrixParams ) {
+
+		const xTile = Math.floor( ( position.x - tileMatrixParams.minX ) / tileMatrixParams.tileWidth );
+		const yTile = Math.floor( tileMatrixParams.matrixHeight - ( position.y - tileMatrixParams.minY ) / tileMatrixParams.tileHeight );
+
+		return [ xTile, yTile ];
+
+	}
+
+	getTilePositionFromIndex( index, tileMatrixParams, offset ) {
+
+		let scenePosition = new Vector2();
+		scenePosition.x = tileMatrixParams.minX + index[ 0 ] * tileMatrixParams.tileWidth + tileMatrixParams.tileWidth / 2 - offset.x;
+		scenePosition.y = tileMatrixParams.maxY - index[ 1 ] * tileMatrixParams.tileHeight - tileMatrixParams.tileHeight / 2 - offset.y;
+
+		return scenePosition;
+
+	}
+
 	update( sceneCenter, camera ) {
 
 		if ( typeof this.tileMatrixLayer == "undefined" ) {
@@ -118,7 +176,7 @@ export class WMTSTilesRenderer {
 
 		if ( new_level != this.tileLevel ) {
 
-			this.clean_tiles();
+			this.cleanTiles();
 			this.tileLevel = new_level;
 
 			this.wmtsOptions.tileMatrix = this.wmtsOptions.tileMatrix + ":" + this.tileLevel;
@@ -126,46 +184,23 @@ export class WMTSTilesRenderer {
 		}
 
 		// todo: determine which tile level you want to load (which should depend on the SSE?)
-		var tileLayer = this.tileMatrixLayer[ this.tileLevel ];
+		const tileLayer = this.tileMatrixLayer[ this.tileLevel ];
 
-		// Calculations based on WMTS specs
-		var matrixHeight = tileLayer[ "MatrixHeight" ];
-		var matrixWidth = tileLayer[ "MatrixWidth" ];
-		var scaleDenominator = tileLayer[ "ScaleDenominator" ];
-		var tileWidth = tileLayer[ "TileWidth" ];
-		var tileHeight = tileLayer[ "TileHeight" ];
-		var topLeftCorner = tileLayer[ "TopLeftCorner" ].split( " " );
-		var tileMatrixMinX = parseFloat( topLeftCorner[ 0 ] );
-		var tileMatrixMaxY = parseFloat( topLeftCorner[ 1 ] );
+		const tileLayerParams = this.getTileMatrixParams( tileLayer );
 
-		var pixelSpan = scaleDenominator * 0.00028;
-		var tileSpanX = tileWidth * pixelSpan;
-		var tileSpanY = tileHeight * pixelSpan;
-		var tileMatrixMaxX = tileMatrixMinX + tileSpanX * matrixWidth;
-		var tileMatrixMinY = tileMatrixMaxY - tileSpanY * matrixHeight;
-
-		var xWidth = ( tileMatrixMaxX - tileMatrixMinX ) / matrixWidth;
-		var yWidth = ( tileMatrixMaxY - tileMatrixMinY ) / matrixHeight;
-
-		// Calculate index of tile that is in the middle of the screen
-		var xTile = Math.floor( ( position.x - tileMatrixMinX ) / xWidth );
-		var yTile = Math.floor( matrixHeight - ( position.y - tileMatrixMinY ) / yWidth );
-
-		var tileIndex = [ xTile, yTile ];
+		const tileIndex = this.getTileFromPosition( position, tileLayerParams );
 
 		// Get indices of all tiles that are in view
-		var tiles = this.grow_region( tileIndex, camera, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter );
+		var tiles = this.growRegion( tileIndex, camera, tileLayerParams, sceneCenter );
 
 		// Create tiles that hadn't been created yet
 		tiles.forEach( function ( ti ) {
 
 			if ( JSON.stringify( this.activeTiles ).indexOf( JSON.stringify( ti ) ) == - 1 ) {
 
-				var scenePosition = new Vector2();
-				scenePosition.x = tileMatrixMinX + ti[ 0 ] * xWidth + xWidth / 2 - sceneCenter.x;
-				scenePosition.y = tileMatrixMaxY - ti[ 1 ] * yWidth - yWidth / 2 - sceneCenter.y;
+				const scenePosition = this.getTilePositionFromIndex( ti, tileLayerParams, sceneCenter );
 
-				this.create_tile( ti, tileSpanX, tileSpanY, scenePosition );
+				this.createTile( ti, tileLayerParams.tileSpanX, tileLayerParams.tileSpanY, scenePosition );
 
 			}
 
@@ -174,7 +209,7 @@ export class WMTSTilesRenderer {
 
 	}
 
-	get_tile_neighbours( tileIndex ) {
+	getTileNeighbours( tileIndex ) {
 
 		// var neighbours = {};
 		// var directions = ["nw", "w", "sw", "n", "c", "s", "ne", "e", "se"];
@@ -201,24 +236,24 @@ export class WMTSTilesRenderer {
 
 	}
 
-	get_extent_points( n, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter ) {
+	getExtentPoints( n, tileLayerParams, sceneCenter ) {
 
 		// Calculate tile bounds and center
 		var upperLeft = new Vector3();
-		upperLeft.x = tileMatrixMinX + n[ 0 ] * xWidth - sceneCenter.x;
+		upperLeft.x = tileLayerParams.minX + n[ 0 ] * tileLayerParams.tileWidth - sceneCenter.x;
 		upperLeft.y = 0;
-		upperLeft.z = - ( tileMatrixMaxY - n[ 1 ] * yWidth - sceneCenter.y );
+		upperLeft.z = - ( tileLayerParams.maxY - n[ 1 ] * tileLayerParams.tileHeight - sceneCenter.y );
 
-		var upperRight = new Vector3( upperLeft.x + xWidth, 0, upperLeft.z );
-		var lowerLeft = new Vector3( upperLeft.x, 0, upperLeft.z + yWidth );
-		var lowerRight = new Vector3( upperLeft.x + xWidth, 0, upperLeft.z + yWidth );
-		var centre = new Vector3( upperLeft.x + xWidth / 2, 0, upperLeft.z + yWidth / 2 );
+		var upperRight = new Vector3( upperLeft.x + tileLayerParams.tileWidth, 0, upperLeft.z );
+		var lowerLeft = new Vector3( upperLeft.x, 0, upperLeft.z + tileLayerParams.tileHeight );
+		var lowerRight = new Vector3( upperLeft.x + tileLayerParams.tileWidth, 0, upperLeft.z + tileLayerParams.tileHeight );
+		var centre = new Vector3( upperLeft.x + tileLayerParams.tileWidth / 2, 0, upperLeft.z + tileLayerParams.tileHeight / 2 );
 
 		return [ centre, lowerLeft, upperRight, upperLeft, lowerRight ];
 
 	}
 
-	grow_region( tileIndex, camera, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter ) {
+	growRegion( tileIndex, camera, tileLayerParams, sceneCenter ) {
 
 		var frustum = new Frustum();
 		var projScreenMatrix = new Matrix4();
@@ -234,7 +269,7 @@ export class WMTSTilesRenderer {
 		while ( queue.length != 0 ) {
 
 			var index = queue.pop();
-			var neighbours = this.get_tile_neighbours( index );
+			var neighbours = this.getTileNeighbours( index );
 
 			for ( const n of neighbours ) {
 
@@ -247,7 +282,7 @@ export class WMTSTilesRenderer {
 
 				visited.push( n );
 
-				const positions = this.get_extent_points( n, tileMatrixMinX, tileMatrixMaxY, xWidth, yWidth, sceneCenter );
+				const positions = this.getExtentPoints( n, tileLayerParams, sceneCenter );
 
 				// If any of these positions lies in frustum, tile is in view
 				for ( const v of positions ) {
@@ -280,7 +315,7 @@ export class WMTSTilesRenderer {
 
 	}
 
-	clean_tiles() {
+	cleanTiles() {
 
 		while ( this.group.children.length ) {
 
@@ -288,11 +323,13 @@ export class WMTSTilesRenderer {
 
 		}
 
+		this.resourceTracker.dispose();
+
 		this.activeTiles = [];
 
 	}
 
-	create_tile( tileIndex, tileSpanX, tileSpanY, scenePosition ) {
+	createTile( tileIndex, tileSpanX, tileSpanY, scenePosition ) {
 
 		var requestURL = this.url;
 
