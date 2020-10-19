@@ -29,8 +29,9 @@ import {
   TilesRenderer
 } from '../../3DTilesRendererJS/src/index.js'
 import {
-  WMSTilesRenderer
-} from '../wms-tiles'
+  WMSTilesRenderer,
+  WMTSTilesRenderer
+} from '../terrain-tiles'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
@@ -89,17 +90,24 @@ export default {
       type: String,
       default: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
     },
-    wmsOptions: {
+    basemapOptions: {
       type: Object,
       default: function() {
         return {
-          url: 'https://geodata.nationaalgeoregister.nl/top10nlv2/ows?',
-          layer: 'top10nlv2',
-          style: '',
-          imageFormat: 'image/png'
+          type: "wmts",
+          options: {
+            url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
+            layer: 'brtachtergrondkaart',
+            style: 'default',
+            tileMatrixSet: "EPSG:28992",
+            service: "WMTS",
+            request: "GetTile",
+            version: "1.0.0",
+            format: "image/png"
+          }
         }
       }
-    },
+    }
   },
   beforeCreate() {
     this.renderer = null;
@@ -166,42 +174,24 @@ export default {
     tilesUrl: function( val ) {
 
       this.reinitTiles();
-      this.wmsTiles.tiles = this.tiles;
       this.needsRerender = 1;
 
     },
-    wmsOptions: function( val ) {
+    basemapOptions: function( val ) {
 
-      this.reinitWms();
-      this.wmsTiles.tiles = this.tiles;
+      this.reinitBasemap();
       this.needsRerender = 1;
 
     },
     $route(to , from) {
-      // console.log(to.query);
+
       this.setCameraPosFromRoute(to.query);
+
     },
   },
   methods: {
     initTweakPane(){
-      // tweakpane (for debugging)
-      // see https://cocopon.github.io/tweakpane/
 
-      // 3DTiles
-      // const f1 = this.pane.addFolder({
-      //   expanded: true,
-      //   title: '3DTile render',
-      // });
-      // f1.addInput(this, "errorTarget").on( 'change', (val) => this.tiles.errorTarget = val );
-      // f1.addInput(this, "errorThreshold").on( 'change', (val) => this.tiles.errorThreshold = val );
-      
-      // Terrain tiles
-      const f2 = this.pane.addFolder({
-        expanded: false,
-        title: 'Terrain tiles',
-      });
-      f2.addInput(this, "enableWMS").on( 'change', (val) => this.reinitWms() );
-      
       // Camera
       const f3 = this.pane.addFolder({
         expanded: false,
@@ -369,42 +359,36 @@ export default {
         this.needsRerender = 1;
 
       }
-      // this.tiles.onDisposeModel = ( s ) => {
-        
-      //   scene.traverse( c => {
-
-      //     if ( c.isMesh ) {
-
-      //       c.material.dispose();
-
-      //     }
-
-      //   } );
-
-      // }
 
       this.offsetParent.add( this.tiles.group );
 
     },
-    reinitWms() {
-      if ( this.wmsTiles ) {
+    reinitBasemap() {
+      if ( this.terrainTiles ) {
 
-        this.offsetParent.remove( this.wmsTiles.group );
+        this.offsetParent.remove( this.terrainTiles.group );
 
       }
 
-      this.wmsTiles = new WMSTilesRenderer(
-        this.wmsOptions.url,
-        this.wmsOptions.layer,
-        this.wmsOptions.style,
-        this.tiles
-      );
+      if ( this.basemapOptions.type == "wms" ) {
 
-      this.wmsTiles.imageFormat = this.wmsOptions.imageFormat;
+        this.terrainTiles = new WMSTilesRenderer(
+          this.basemapOptions.options.url,
+          this.basemapOptions.options.layer,
+          this.basemapOptions.options.style
+        );
 
-      this.offsetParent.add( this.wmsTiles.group );
+        // this.terrainTiles.imageFormat = this.basemapOptions.imageFormat;
 
-      this.wmsTiles.onLoadTile = () => this.needsRerender = 1;
+      } else {
+
+        this.terrainTiles = new WMTSTilesRenderer( this.basemapOptions.options );
+
+      }
+
+      this.offsetParent.add( this.terrainTiles.group );
+
+      this.terrainTiles.onLoadTile = () => this.needsRerender = 1;
     },
     initScene() {
       this.scene = new Scene();
@@ -449,7 +433,7 @@ export default {
       this.controls.enableDamping = true;
       this.controls.dampingFactor = 0.1;
       this.controls.minDistance = 20;
-      this.controls.maxDistance = 3000;
+      this.controls.maxDistance = 10000;
       this.controls.maxPolarAngle = 1.5;
       this.controls.mouseButtons = {
         LEFT: MOUSE.PAN,
@@ -486,7 +470,9 @@ export default {
 
       this.offsetParent.rotation.x = - Math.PI / 2;
 
-      this.reinitWms();
+      // this.reinitWms();
+
+      this.reinitBasemap();
 
       this.needsRerender = 1;
       this.renderScene();
@@ -596,7 +582,6 @@ export default {
         }
 
         this.controls.update();
-
         this.camera.updateMatrixWorld();
 
         this.dummyCamera.matrixWorld.copy( this.camera.matrixWorld );
@@ -607,16 +592,26 @@ export default {
         this.dummyCamera.updateMatrixWorld();
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
-        this.tiles.update();
+
         this.lruCacheSize = this.tiles.lruCache.itemSet.size;
-        if(this.enableWMS && this.wmsTiles != null) this.wmsTiles.update();
-      
+        this.tiles.update();
+
+        if ( this.tiles.root ) {
+
+          const transform = this.tiles.root.cached.transform;
+          const sceneTransform = new Vector2( transform.elements[12], transform.elements[13] );
+  
+          this.terrainTiles.update( sceneTransform, this.camera );
+          
+        }
+  
         if (this.meshShading == "normal"){    
           this.renderer.render( this.scene, this.camera );
         }
         else if (this.meshShading == "ssao"){
           this.composer.render();
         }
+
       }
 
     },

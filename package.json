@@ -18,7 +18,8 @@
     "three": "^0.121.1",
     "tweakpane": "^1.5.5",
     "vue": "^2.6.11",
-    "vue-router": "^3.4.5"
+    "vue-router": "^3.4.5",
+    "x2js": "^3.4.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.4.0",
