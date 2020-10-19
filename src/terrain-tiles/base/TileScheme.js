@@ -25,8 +25,8 @@ class Tile {
 
 	getCenterPosition( offset = new Vector2() ) {
 
-		const x = this.tileMatrix.minX + this.col * this.tileMatrix.tileWidth + this.tileMatrix.tileWidth / 2 - offset.x;
-		const y = this.tileMatrix.maxY - this.row * this.tileMatrix.tileHeight - this.tileMatrix.tileHeight / 2 - offset.y;
+		const x = this.tileMatrix.minX + this.col * this.tileMatrix.tileSpanX + this.tileMatrix.tileSpanX / 2 - offset.x;
+		const y = this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY - this.tileMatrix.tileSpanY / 2 - offset.y;
 
 		return new Vector2( x, y );
 
@@ -58,16 +58,28 @@ class Tile {
 
 		// Calculate tile bounds and center
 		var upperLeft = new Vector3();
-		upperLeft.x = this.tileMatrix.minX + this.col * this.tileMatrix.tileWidth - transform.x;
+		upperLeft.x = this.tileMatrix.minX + this.col * this.tileMatrix.tileSpanX - transform.x;
 		upperLeft.y = 0;
-		upperLeft.z = - ( this.tileMatrix.maxY - this.row * this.tileMatrix.tileHeight - transform.y );
+		upperLeft.z = - ( this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY - transform.y );
 
-		var upperRight = new Vector3( upperLeft.x + this.tileMatrix.tileWidth, 0, upperLeft.z );
-		var lowerLeft = new Vector3( upperLeft.x, 0, upperLeft.z + this.tileMatrix.tileHeight );
-		var lowerRight = new Vector3( upperLeft.x + this.tileMatrix.tileWidth, 0, upperLeft.z + this.tileMatrix.tileHeight );
-		var centre = new Vector3( upperLeft.x + this.tileMatrix.tileWidth / 2, 0, upperLeft.z + this.tileMatrix.tileHeight / 2 );
+		var upperRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, 0, upperLeft.z );
+		var lowerLeft = new Vector3( upperLeft.x, 0, upperLeft.z + this.tileMatrix.tileSpanY );
+		var lowerRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, 0, upperLeft.z + this.tileMatrix.tileSpanY );
+		var centre = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX / 2, 0, upperLeft.z + this.tileMatrix.tileSpanY / 2 );
 
 		return [ centre, lowerLeft, upperRight, upperLeft, lowerRight ];
+
+	}
+
+	getBoundingBox() {
+
+		// Calculate tile bounds and center
+		const minX = this.tileMatrix.minX + this.col * this.tileMatrix.tileSpanX;
+		const maxY = this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY;
+		const maxX = minX + this.tileMatrix.tileSpanX;
+		const minY = maxY - this.tileMatrix.tileSpanY;
+
+		return [ minX, minY, maxX, maxY ];
 
 	}
 
@@ -108,8 +120,8 @@ class TileMatrix {
 		this.maxX = this.minX + tileSpanX * matrixWidth;
 		this.minY = this.maxY - tileSpanY * matrixHeight;
 
-		this.tileWidth = ( this.maxX - this.minX ) / matrixWidth;
-		this.tileHeight = ( this.maxY - this.minY ) / matrixHeight;
+		this.tileWidth = tileWidth;
+		this.tileHeight = tileHeight;
 		this.pixelSpan = pixelSpan;
 		this.tileSpanX = tileSpanX;
 		this.tileSpanY = tileSpanY;
@@ -121,8 +133,8 @@ class TileMatrix {
 
 	getTileAt( position ) {
 
-		const col = Math.floor( ( position.x - this.minX ) / this.tileWidth );
-		const row = Math.floor( this.matrixHeight - ( position.y - this.minY ) / this.tileHeight );
+		const col = Math.floor( ( position.x - this.minX ) / this.tileSpanX );
+		const row = Math.floor( this.matrixHeight - ( position.y - this.minY ) / this.tileSpanX );
 
 		return new Tile( this, col, row );
 

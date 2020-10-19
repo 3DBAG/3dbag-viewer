@@ -29,9 +29,7 @@ import {
   TilesRenderer
 } from '../../3DTilesRendererJS/src/index.js'
 import {
-  WMSTilesRenderer
-} from '../wms-tiles'
-import {
+  WMSTilesRenderer,
   WMTSTilesRenderer
 } from '../terrain-tiles'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -191,7 +189,7 @@ export default {
     wmsOptions: function( val ) {
 
       this.reinitWms();
-      this.wmsTiles.tiles = this.tiles;
+      this.terrainTiles.tiles = this.tiles;
       this.needsRerender = 1;
 
     },
@@ -204,21 +202,13 @@ export default {
     initTweakPane(){
       // tweakpane (for debugging)
       // see https://cocopon.github.io/tweakpane/
-
-      // 3DTiles
-      // const f1 = this.pane.addFolder({
-      //   expanded: true,
-      //   title: '3DTile render',
-      // });
-      // f1.addInput(this, "errorTarget").on( 'change', (val) => this.tiles.errorTarget = val );
-      // f1.addInput(this, "errorThreshold").on( 'change', (val) => this.tiles.errorThreshold = val );
       
       // Terrain tiles
-      const f2 = this.pane.addFolder({
-        expanded: false,
-        title: 'Terrain tiles',
-      });
-      f2.addInput(this, "enableWMS").on( 'change', (val) => this.reinitWms() );
+      // const f2 = this.pane.addFolder({
+      //   expanded: false,
+      //   title: 'Terrain tiles',
+      // });
+      // f2.addInput(this, "enableWMS").on( 'change', (val) => this.reinitWms() );
       
       // Camera
       const f3 = this.pane.addFolder({
@@ -405,32 +395,31 @@ export default {
 
     },
     reinitWms() {
-      if ( this.wmsTiles ) {
+      if ( this.terrainTiles ) {
 
-        this.offsetParent.remove( this.wmsTiles.group );
+        this.offsetParent.remove( this.terrainTiles.group );
 
       }
 
-      this.wmsTiles = new WMSTilesRenderer(
+      this.terrainTiles = new WMSTilesRenderer(
         this.wmsOptions.url,
         this.wmsOptions.layer,
-        this.wmsOptions.style,
-        this.tiles
+        this.wmsOptions.style
       );
 
-      this.wmsTiles.imageFormat = this.wmsOptions.imageFormat;
+      this.terrainTiles.imageFormat = this.wmsOptions.imageFormat;
 
-      this.offsetParent.add( this.wmsTiles.group );
+      this.offsetParent.add( this.terrainTiles.group );
 
-      this.wmsTiles.onLoadTile = () => this.needsRerender = 1;
+      this.terrainTiles.onLoadTile = () => this.needsRerender = 1;
     },
     reinitWmts() {
 
-      this.wmtsTiles = new WMTSTilesRenderer( this.wmtsOptions );
+      this.terrainTiles = new WMTSTilesRenderer( this.wmtsOptions );
 
-      this.offsetParent.add( this.wmtsTiles.group );
+      this.offsetParent.add( this.terrainTiles.group );
 
-      this.wmtsTiles.onLoadTile = () => this.needsRerender = 1;
+      this.terrainTiles.onLoadTile = () => this.needsRerender = 1;
       
     },
     initScene() {
@@ -513,7 +502,7 @@ export default {
 
       this.offsetParent.rotation.x = - Math.PI / 2;
 
-      this.reinitWms();
+      // this.reinitWms();
 
       this.reinitWmts();
 
@@ -630,7 +619,7 @@ export default {
 
         this.tiles.update();
         this.lruCacheSize = this.tiles.lruCache.itemSet.size;
-        // if(this.enableWMS && this.wmsTiles != null) this.wmsTiles.update();
+        // if(this.enableWMS && this.terrainTiles != null) this.terrainTiles.update();
       
         if (this.meshShading == "normal"){    
           this.renderer.render( this.scene, this.camera );
@@ -640,12 +629,16 @@ export default {
         }
         
         this.tiles.update();
-        // this.wmsTiles.update();
+        // this.terrainTiles.update();
 
-        const transform = this.tiles.root.cached.transform;
-        const sceneTransform = new Vector2( transform.elements[12], transform.elements[13] );
+        if ( this.tiles.root ) {
 
-        this.wmtsTiles.update( sceneTransform, this.camera );
+          const transform = this.tiles.root.cached.transform;
+          const sceneTransform = new Vector2( transform.elements[12], transform.elements[13] );
+  
+          this.terrainTiles.update( sceneTransform, this.camera );
+          
+        }
   
         this.renderer.render( this.scene, this.camera );
 
