@@ -49,11 +49,15 @@
     </section>
     <section id="map-options" class="field has-addons">
       <div class="control">
-        <b-dropdown position="is-top-right" v-model="wmsPreset" aria-role="list">
+        <b-dropdown position="is-top-right" v-model="basemapPreset" aria-role="list">
             <button class="button is-primary" type="button" slot="trigger">
-                <template v-if="wmsPreset=='top10nl'">
+                <template v-if="basemapPreset=='top10nl'">
                     <b-icon icon="map"></b-icon>
                     <span>TOP10NL</span>
+                </template>
+                <template v-else-if="basemapPreset=='brtachtergrondkaart'">
+                    <b-icon icon="map"></b-icon>
+                    <span>BRT Achergrond Kaart</span>
                 </template>
                 <template v-else>
                     <b-icon icon="map"></b-icon>
@@ -61,6 +65,15 @@
                 </template>
                 <b-icon icon="menu-up"></b-icon>
             </button>
+
+            <b-dropdown-item :value="'brtachtergrondkaart'" aria-role="listitem">
+                <div class="media">
+                    <b-icon class="media-left" icon="map"></b-icon>
+                    <div class="media-content">
+                        <p>BRT Achergrond Kaart</p>
+                    </div>
+                </div>
+            </b-dropdown-item>
 
             <b-dropdown-item :value="'top10nl'" aria-role="listitem">
                 <div class="media">
@@ -169,8 +182,7 @@
       <img id="logo" alt="Vue logo" src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png">
       <ThreeViewer
         :tiles-url="tilesUrl"
-        :wms-options="wmsOptions"
-        :wmts-options="wmtsOptions"
+        :basemap-options="basemapOptions"
         @object-picked="objectPicked"
         @cam-offset="onCamOffset"
       />
@@ -205,8 +217,7 @@ export default {
         z : 400
       },
 
-      wmsPreset: 'top10nl',
-      wmtsPreset: 'brtachtergrondkaart',
+      basemapPreset: 'brtachtergrondkaart',
 
       pickedBuilding: {
 
@@ -313,51 +324,49 @@ export default {
 
     },
 
-    wmsOptions: function () {
+    basemapOptions: function () {
 
-      const wms_sources = {
+      const sources = {
 
         top10nl: {
 
-          url: 'https://geodata.nationaalgeoregister.nl/top10nlv2/ows?',
-          layer: 'top10nlv2',
-          style: '',
-          imageFormat: 'image/png'
+          type: "wms",
+          options: {
+            url: 'https://geodata.nationaalgeoregister.nl/top10nlv2/ows?',
+            layer: 'top10nlv2',
+            style: '',
+            imageFormat: 'image/png'
+          }
 
         },
-        luchfoto2018: {
 
+        luchfoto2018: {
+          type: "wms",
+          options: {
             url: 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts?',
             layer: '2018_ortho25',
             style: 'default',
             imageFormat: 'image/png'
-  
-        }
-
-      }
-
-      return wms_sources[ this.wmsPreset ];
-
-    },
-
-    wmtsOptions: function () {
-
-      const wmts_sources = {
+          }
+        },
 
         brtachtergrondkaart: {
-
-          url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
-          layer: 'brtachtergrondkaart',
-          style: 'default',
-          tileMatrixSet: "EPSG:28992",
-          service: "WMTS",
-          request: "GetTile",
-          version: "1.0.0",
-          format: "image/png"
-
+          type: "wmts",
+          options: {
+            url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
+            layer: 'brtachtergrondkaart',
+            style: 'default',
+            tileMatrixSet: "EPSG:28992",
+            service: "WMTS",
+            request: "GetTile",
+            version: "1.0.0",
+            format: "image/png"
+          }
         },
+        
         brtachtergrondkaartgrijs: {
-
+          type: "wmts",
+          option: {
             url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
             layer: 'brtachtergrondkaartgrijs',
             style: 'default',
@@ -366,12 +375,12 @@ export default {
             request: "GetTile",
             version: "1.0.0",
             format: "image/png"
-
+          }
         }
 
       }
 
-      return wmts_sources[ this.wmtsPreset ];
+      return sources[ this.basemapPreset ];
 
     }
 

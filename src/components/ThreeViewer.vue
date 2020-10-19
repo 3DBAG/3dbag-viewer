@@ -90,30 +90,21 @@ export default {
       type: String,
       default: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
     },
-    wmsOptions: {
+    basemapOptions: {
       type: Object,
       default: function() {
         return {
-          url: 'https://geodata.nationaalgeoregister.nl/top10nlv2/ows?',
-          layer: 'top10nlv2',
-          style: '',
-          imageFormat: 'image/png'
-        }
-      }
-    },
-    wmtsOptions: {
-      type: Object,
-      default: function() {
-        return {
-          url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
-          layer: 'brtachtergrondkaart',
-          style: 'default',
-          tilematrixset: "EPSG:28992",
-          Service: "WMTS",
-          Request: "GetTile",
-          Version: "1.0.0",
-          Format: "image/png",
-          TileMatrix: "EPSG:28992:5"
+          type: "wmts",
+          options: {
+            url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
+            layer: 'brtachtergrondkaart',
+            style: 'default',
+            tileMatrixSet: "EPSG:28992",
+            service: "WMTS",
+            request: "GetTile",
+            version: "1.0.0",
+            format: "image/png"
+          }
         }
       }
     }
@@ -186,30 +177,21 @@ export default {
       this.needsRerender = 1;
 
     },
-    wmsOptions: function( val ) {
+    basemapOptions: function( val ) {
 
-      this.reinitWms();
-      this.terrainTiles.tiles = this.tiles;
+      this.reinitBasemap();
       this.needsRerender = 1;
 
     },
     $route(to , from) {
-      // console.log(to.query);
+
       this.setCameraPosFromRoute(to.query);
+
     },
   },
   methods: {
     initTweakPane(){
-      // tweakpane (for debugging)
-      // see https://cocopon.github.io/tweakpane/
-      
-      // Terrain tiles
-      // const f2 = this.pane.addFolder({
-      //   expanded: false,
-      //   title: 'Terrain tiles',
-      // });
-      // f2.addInput(this, "enableWMS").on( 'change', (val) => this.reinitWms() );
-      
+
       // Camera
       const f3 = this.pane.addFolder({
         expanded: false,
@@ -377,50 +359,36 @@ export default {
         this.needsRerender = 1;
 
       }
-      // this.tiles.onDisposeModel = ( s ) => {
-        
-      //   scene.traverse( c => {
-
-      //     if ( c.isMesh ) {
-
-      //       c.material.dispose();
-
-      //     }
-
-      //   } );
-
-      // }
 
       this.offsetParent.add( this.tiles.group );
 
     },
-    reinitWms() {
+    reinitBasemap() {
       if ( this.terrainTiles ) {
 
         this.offsetParent.remove( this.terrainTiles.group );
 
       }
 
-      this.terrainTiles = new WMSTilesRenderer(
-        this.wmsOptions.url,
-        this.wmsOptions.layer,
-        this.wmsOptions.style
-      );
+      if ( this.basemapOptions.type == "wms" ) {
 
-      this.terrainTiles.imageFormat = this.wmsOptions.imageFormat;
+        this.terrainTiles = new WMSTilesRenderer(
+          this.basemapOptions.options.url,
+          this.basemapOptions.options.layer,
+          this.basemapOptions.options.style
+        );
+
+        // this.terrainTiles.imageFormat = this.basemapOptions.imageFormat;
+
+      } else {
+
+        this.terrainTiles = new WMTSTilesRenderer( this.basemapOptions.options );
+
+      }
 
       this.offsetParent.add( this.terrainTiles.group );
 
       this.terrainTiles.onLoadTile = () => this.needsRerender = 1;
-    },
-    reinitWmts() {
-
-      this.terrainTiles = new WMTSTilesRenderer( this.wmtsOptions );
-
-      this.offsetParent.add( this.terrainTiles.group );
-
-      this.terrainTiles.onLoadTile = () => this.needsRerender = 1;
-      
     },
     initScene() {
       this.scene = new Scene();
@@ -504,7 +472,7 @@ export default {
 
       // this.reinitWms();
 
-      this.reinitWmts();
+      this.reinitBasemap();
 
       this.needsRerender = 1;
       this.renderScene();
