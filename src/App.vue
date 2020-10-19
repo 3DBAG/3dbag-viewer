@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <search-bar @select-place="moveToPlace">
+    <search-bar
+      @menu-clicked="showSidebar = true;"
+      @select-place="moveToPlace">
     </search-bar>
     <section id="map-options" class="field has-addons">
       <div class="control">

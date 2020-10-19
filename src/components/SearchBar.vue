@@ -1,43 +1,43 @@
 <template>
 	<section id="search">
-	  <div class="field has-addons">
-		<div class="control">
-		  <b-button @click="showSidebar=true"
-					icon-right="menu" />
+		<div class="field has-addons">
+			<div class="control">
+			<b-button @click="$emit( 'menu-clicked' );"
+						icon-right="menu" />
+			</div>
+			<b-autocomplete
+				id="search-input"
+				class="control"
+				field="weergavenaam"
+				:data="geocodeResult"
+				:loading="isGeocoding"
+				placeholder="Search"
+				icon-right="magnify"
+				@typing="doGeocode"
+				@select="selectPlace"
+				>
+				<template slot="empty">No results found</template>
+				<template slot-scope="props">
+					<div class="media">
+						<div class="media-left">
+						<b-icon
+							icon="map-marker"
+							size="is-small">
+						</b-icon>
+						</div>
+						<div class="media-content">
+						<p class="has-text-left">
+							{{ props.option.weergavenaam }}
+							<br>
+							<small>
+								{{ props.option.type }} ({{ props.option.bron }})
+							</small>
+						</p>
+						</div>
+					</div>
+				</template>
+			</b-autocomplete>
 		</div>
-		<b-autocomplete
-		  id="search-input"
-		  class="control"
-		  field="weergavenaam"
-		  :data="geocodeResult"
-		  :loading="isGeocoding"
-		  placeholder="Search"
-		  icon-right="magnify"
-		  @typing="doGeocode"
-		  @select="selectPlace"
-		  >
-		  <template slot="empty">No results found</template>
-		  <template slot-scope="props">
-			  <div class="media">
-				  <div class="media-left">
-					<b-icon
-						icon="map-marker"
-						size="is-small">
-					</b-icon>
-				  </div>
-				  <div class="media-content">
-					<p class="has-text-left">
-					  {{ props.option.weergavenaam }}
-					  <br>
-					  <small>
-						  {{ props.option.type }} ({{ props.option.bron }})
-					  </small>
-					</p>
-				  </div>
-			  </div>
-		  </template>
-		</b-autocomplete>
-	  </div>
 	</section>
 </template>
 
