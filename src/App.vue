@@ -353,8 +353,7 @@ export default {
           service: "WMTS",
           request: "GetTile",
           version: "1.0.0",
-          format: "image/png",
-          tileMatrix: "EPSG:28992"
+          format: "image/png"
 
         },
         brtachtergrondkaartgrijs: {
@@ -366,8 +365,7 @@ export default {
             service: "WMTS",
             request: "GetTile",
             version: "1.0.0",
-            format: "image/png",
-            tileMatrix: "EPSG:28992"
+            format: "image/png"
 
         }
 

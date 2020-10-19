@@ -185,7 +185,6 @@ export default {
     tilesUrl: function( val ) {
 
       this.reinitTiles();
-      this.wmsTiles.tiles = this.tiles;
       this.needsRerender = 1;
 
     },
@@ -643,7 +642,10 @@ export default {
         this.tiles.update();
         // this.wmsTiles.update();
 
-        this.wmtsTiles.update( new Vector2(145763.78681838885, 459753.83407714777), this.camera );
+        const transform = this.tiles.root.cached.transform;
+        const sceneTransform = new Vector2( transform.elements[12], transform.elements[13] );
+
+        this.wmtsTiles.update( sceneTransform, this.camera );
   
         this.renderer.render( this.scene, this.camera );
 
