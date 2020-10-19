@@ -4,39 +4,20 @@ import {
 	PlaneBufferGeometry,
 	MeshBasicMaterial,
 	Mesh,
-	Group,
-	Vector3,
-	Frustum,
-	Matrix4, Raycaster, Plane
+	Group
 } from 'three';
+
 import {
 	ResourceTracker
 } from './ResourceTracker.js';
-import {
-	Tile,
-	TileMatrix
-} from './TileScheme.js';
-import {
-	WMTSTileScheme
-} from '../wmts/WMTSTileScheme.js';
 
-export class WMTSTilesRenderer {
+export class TilesRenderer {
 
-	constructor( wmtsOptions ) {
-
-		this.format = wmtsOptions.format;
-		this.request = wmtsOptions.request;
-		this.service = wmtsOptions.service;
-		this.tileMatrixSet = wmtsOptions.tileMatrixSet;
-		this.url = wmtsOptions.url;
-
-		this.wmtsOptions = wmtsOptions;
+	constructor() {
 
 		this.tileLevel = 0;
 
 		this.resFactor = 25;
-
-		this.tileScheme = new WMTSTileScheme( this.url, this.tileMatrixSet );
 
 		this.tileMatrixLevels = null;
 		this.activeTiles = [];
@@ -91,26 +72,11 @@ export class WMTSTilesRenderer {
 
 	}
 
+	getRequestURL( tile ) {
+
+	}
+
 	createTile( tile, transform ) {
-
-		var requestURL = this.url;
-
-		for ( const [ k, v ] of Object.entries( this.wmtsOptions ) ) {
-
-			if ( k != Object.keys( this.wmtsOptions )[ 0 ] ) {
-
-				requestURL += "&";
-
-			}
-			requestURL += k + "=" + v;
-
-		}
-
-		requestURL += "&TileCol=" + tile.col.toString();
-		requestURL += "&TileRow=" + tile.row.toString();
-		requestURL += "&tileMatrix=" + tile.tileMatrix.level.toString();
-
-		//console.log(requestURL);
 
 		var geometry = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
 
@@ -118,6 +84,8 @@ export class WMTSTilesRenderer {
 		this.group.add( mesh );
 
 		var loader = new TextureLoader();
+
+		const requestURL = this.getRequestURL( tile );
 
 		loader.load( requestURL, ( tex ) => {
 

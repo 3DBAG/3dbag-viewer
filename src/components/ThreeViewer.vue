@@ -33,7 +33,7 @@ import {
 } from '../wms-tiles'
 import {
   WMTSTilesRenderer
-} from '../wmts-tiles'
+} from '../terrain-tiles'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
