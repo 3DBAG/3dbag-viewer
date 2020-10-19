@@ -585,19 +585,8 @@ export default {
   
         this.cameraTileFocus = JSON.parse(JSON.stringify(this.camera.position));
 
-        this.tiles.update();
         this.lruCacheSize = this.tiles.lruCache.itemSet.size;
-        // if(this.enableWMS && this.terrainTiles != null) this.terrainTiles.update();
-      
-        if (this.meshShading == "normal"){    
-          this.renderer.render( this.scene, this.camera );
-        }
-        else if (this.meshShading == "ssao"){
-          this.composer.render();
-        }
-        
         this.tiles.update();
-        // this.terrainTiles.update();
 
         if ( this.tiles.root ) {
 
@@ -608,7 +597,12 @@ export default {
           
         }
   
-        this.renderer.render( this.scene, this.camera );
+        if (this.meshShading == "normal"){    
+          this.renderer.render( this.scene, this.camera );
+        }
+        else if (this.meshShading == "ssao"){
+          this.composer.render();
+        }
 
       }
 
