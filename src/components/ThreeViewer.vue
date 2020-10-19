@@ -574,6 +574,8 @@ export default {
           this.tiles.group.position.multiplyScalar( - 1 );
   
         }
+
+        this.controls.update();
         this.camera.updateMatrixWorld();
 
         this.dummyCamera.matrixWorld.copy( this.camera.matrixWorld );
