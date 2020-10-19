@@ -141,19 +141,20 @@
       v-model="showSidebar"
     >
       <h1 class="title">3D BAG</h1>
-      <b-button style="width: fit-content"
-                class="is-pulled-right is-overlay"
-                icon-right="close" />
+      <b-button style="width: min-content; position: absolute; top: 0; left: 220px;"
+                class="is-light"
+                icon-right="close" 
+                @click="showSidebar=false" />
       <b-menu>
         <b-menu-list label="Base Layer">
-          <b-menu-item label="TOP10NL" icon="map" />
-          <b-menu-item label="Orthophoto" icon="camera" />
+          <b-menu-item v-on:click="wmsPreset='top10nl'" active label="TOP10NL" icon="map" />
+          <b-menu-item v-on:click="wmsPreset='luchfoto2018'" label="Orthophoto" icon="camera" />
         </b-menu-list>
       </b-menu>
       <b-menu>
         <b-menu-list label="Level of Detail">
-          <b-menu-item label="LoD 2.2" icon="home-floor-2" />
-          <b-menu-item label="LoD 1.3" icon="home-floor-1" />
+          <b-menu-item v-on:click="tileset='nl_lod22_opt'" active label="LoD 2.2" icon="home-floor-2" />
+          <b-menu-item v-on:click="tileset='nl_lod13'" label="LoD 1.3" icon="home-floor-1" />
         </b-menu-list>
       </b-menu>
       <hr />
