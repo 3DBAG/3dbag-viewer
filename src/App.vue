@@ -128,7 +128,7 @@
             <td>Batch ID</td>
             <td>{{pickedBuilding.batchID}}</td>
           </tr>
-          <tr v-for="[name, val] in Object.entries(pickedBuilding.attributes)">
+          <tr v-for="[name, val] in Object.entries(pickedBuilding.attributes)" :key="name">
             <td>{{ name }}</td>
             <td>{{ val }}</td>
           </tr>
@@ -234,8 +234,16 @@ export default {
 
     objectPicked: function( event ) {
 
-      this.pickedBuilding = event;
-      this.showBuildingInfo = true;
+      if ( event ) {
+
+        this.pickedBuilding = event;
+        this.showBuildingInfo = true;
+
+      } else {
+
+        this.showBuildingInfo = false;
+
+      }
 
     },
 

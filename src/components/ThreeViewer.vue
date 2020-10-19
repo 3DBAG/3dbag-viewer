@@ -531,6 +531,14 @@ export default {
       this.raycaster.setFromCamera( this.mouse, this.camera );
       
       const results = this.raycaster.intersectObject( this.tiles.group, true );
+
+      // Set up the highlighted batchid to the material of new object
+      if ( this.selectedObject ) {
+
+        this.selectedObject.material = this.material;
+        this.selectedObject = undefined;
+
+      }
       
       if ( results.length ) {
 
@@ -558,19 +566,17 @@ export default {
           
         }
 
-        // Set up the highlighted batchid to the material of new object
-        if ( this.selectedObject ) {
-
-          this.selectedObject.material = this.material;
-
-        }
         object.material = this.highlightMaterial;
         this.highlightMaterial.uniforms.highlightedBatchId.value = batch_id;
         this.selectedObject = object;
 
-        this.needsRerender = 1;
+      } else {
 
+        this.$emit( 'object-picked', undefined );
+        
       }
+
+      this.needsRerender = 1;
 
     },
     renderScene() {
