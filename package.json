@@ -23,20 +23,20 @@
     "x2js": "^3.4.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@babel/preset-env": "^7.7.1",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-plugin-eslint": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
     "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.2.2",
-    "vue-template-compiler": "^2.6.11",
-    "@babel/core": "^7.7.2",
-    "@babel/preset-env": "^7.7.1",
     "babel-jest": "^25.4.0",
+    "eslint": "^6.8.0",
     "eslint-config-mdcs": "^4.2.3",
     "eslint-plugin-jest": "^23.8.2",
+    "eslint-plugin-vue": "^6.2.2",
     "jest": "^26.4.2",
-    "jest-cli": "^25.4.0"
+    "jest-cli": "^25.4.0",
+    "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
     "root": true,
