@@ -49,6 +49,8 @@ export class TilesRenderer {
 
 			if ( ! this.activeTiles.includes( ti.getId() ) ) {
 
+				this.activeTiles.push( ti.getId() );
+
 				this.createTile( ti, sceneCenter );
 
 			}
@@ -102,8 +104,6 @@ export class TilesRenderer {
 		mesh.position.x = scenePosition.x;
 		mesh.position.y = scenePosition.y;
 		mesh.updateMatrix();
-
-		this.activeTiles.push( tile.getId() );
 
 	}
 

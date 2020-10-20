@@ -35,6 +35,8 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
+import debounce from 'debounce';
+import throttle from 'lodash/throttle';
 
 const Tweakpane = require('tweakpane');
 
@@ -565,6 +567,14 @@ export default {
       this.needsRerender = 1;
 
     },
+    updateTerrain: throttle( function() {
+
+      const transform = this.tiles.root.cached.transform;
+      const sceneTransform = new Vector2( transform.elements[12], transform.elements[13] );
+      
+      this.terrainTiles.update( sceneTransform, this.camera );
+      
+    }, 200 ),
     renderScene() {
 
       requestAnimationFrame( this.renderScene );
@@ -597,11 +607,8 @@ export default {
         this.tiles.update();
 
         if ( this.tiles.root ) {
-
-          const transform = this.tiles.root.cached.transform;
-          const sceneTransform = new Vector2( transform.elements[12], transform.elements[13] );
   
-          this.terrainTiles.update( sceneTransform, this.camera );
+          this.updateTerrain();
           
         }
   
