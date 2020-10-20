@@ -163,6 +163,8 @@ class BaseTileScheme {
 
 		}
 
+		return this.tileMatrixSet[ this.tileMatrixSet.length - 1 ];
+
 	}
 
 	getTilesInView( camera, resFactor, transform ) {
