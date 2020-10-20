@@ -431,10 +431,10 @@ export default {
       this.controls = new OrbitControls( this.camera, this.renderer.domElement );
       this.controls.screenSpacePanning = false;
       this.controls.enableDamping = true;
-      this.controls.dampingFactor = 0.1;
+      this.controls.dampingFactor = 0.15;
       this.controls.minDistance = 20;
-      this.controls.maxDistance = 10000;
-      this.controls.maxPolarAngle = 1.5;
+      this.controls.maxDistance = 3000;
+      this.controls.maxPolarAngle = 0.8;
       this.controls.mouseButtons = {
         LEFT: MOUSE.PAN,
         MIDDLE: MOUSE.DOLLY,
