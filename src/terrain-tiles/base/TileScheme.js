@@ -4,7 +4,8 @@ import {
 	Plane,
 	Raycaster,
 	Frustum,
-	Matrix4
+	Matrix4,
+	Sphere
 } from 'three';
 
 class Tile {
@@ -83,22 +84,19 @@ class Tile {
 
 	}
 
+	getBoundingSphere( transform ) {
+
+		const center = this.getCenterPosition( transform );
+
+		return new Sphere( new Vector3( center.x, 0, - center.y ), Math.max( this.tileMatrix.tileSpanX, this.tileMatrix.tileSpanY ) );
+
+	}
+
 	inFrustum( frustum, transform ) {
 
-		const positions = this.getExtentPoints( transform );
+		const sphere = this.getBoundingSphere( transform );
 
-		// If any of these positions lies in frustum, tile is in view
-		for ( const v of positions ) {
-
-			if ( frustum.containsPoint( v ) ) {
-
-				return true;
-
-			}
-
-		}
-
-		return false;
+		return frustum.intersectsSphere( sphere );
 
 	}
 
