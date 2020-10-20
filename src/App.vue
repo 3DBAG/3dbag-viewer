@@ -1,52 +1,9 @@
 <template>
   <div id="app">
-    <section id="search">
-      <div class="field has-addons">
-        <div class="control">
-          <b-button @click="showSidebar=true"
-                    icon-right="menu" />
-        </div>
-        <b-autocomplete
-          id="search-input"
-          class="control"
-          field="weergavenaam"
-          :data="geocodeResult"
-          :loading="isGeocoding"
-          placeholder="Search"
-          icon-right="magnify"
-          @typing="doGeocode"
-          @select="(res) => {
-            if(res){
-              $router.push( {
-                path:'/', 
-                query: {rdx:res.rd_x, rdy:res.rd_y, ox: camOffset.x, oy: camOffset.y, oz: camOffset.z}
-              })
-            }
-          }"
-          >
-          <template slot="empty">No results found</template>
-          <template slot-scope="props">
-              <div class="media">
-                  <div class="media-left">
-                    <b-icon
-                        icon="map-marker"
-                        size="is-small">
-                    </b-icon>
-                  </div>
-                  <div class="media-content">
-                    <p class="has-text-left">
-                      {{ props.option.weergavenaam }}
-                      <br>
-                      <small>
-                          {{ props.option.type }} ({{ props.option.bron }})
-                      </small>
-                    </p>
-                  </div>
-              </div>
-          </template>
-        </b-autocomplete>
-      </div>
-    </section>
+    <search-bar
+      @menu-clicked="showSidebar = true;"
+      @select-place="moveToPlace">
+    </search-bar>
     <section id="map-options" class="field has-addons">
       <div class="control">
         <b-dropdown position="is-top-right" v-model="basemapPreset" aria-role="list">
@@ -193,7 +150,7 @@
 
 <script>
 import ThreeViewer from './components/ThreeViewer.vue';
-import debounce from 'debounce';
+import SearchBar from './components/SearchBar.vue';
 
 export default {
 
@@ -201,7 +158,8 @@ export default {
 
   components: {
 
-    ThreeViewer
+    ThreeViewer,
+    SearchBar
 
   },
 
@@ -227,9 +185,6 @@ export default {
 
       },
 
-      geocodeResult: [],
-      isGeocoding: false,
-
       showSidebar: false,
       showBuildingInfo: false,
 
@@ -245,6 +200,25 @@ export default {
 
     },
 
+    moveToPlace: function ( res ) {
+
+			if ( res ) {
+
+			  this.$router.push( {
+          path:'/', 
+          query: {
+            rdx:res.rd_x,
+            rdy:res.rd_y,
+            ox: this.camOffset.x,
+            oy: this.camOffset.y,
+            oz: this.camOffset.z
+          }
+        } );
+        
+      }
+
+		},
+
     objectPicked: function( event ) {
 
       if ( event ) {
@@ -258,46 +232,7 @@ export default {
 
       }
 
-    },
-
-    doGeocode: debounce(function ( name ) {
-
-      if (!name.length) {
-        this.geocodeResult = []
-        return
-      }
-
-      this.isGeocoding = true;
-      fetch( 'https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=' + name + '&fl=weergavenaam,bron,type,bron,id,centroide_rd&rows=10' )
-      .then( res => {
-        const contentType = res.headers.get("content-type");
-        if ( res.ok && contentType && contentType.indexOf("application/json") !== -1) {
-
-          return res.json();
-
-        }
-
-      })
-      .catch((error) => {
-        this.geocodeResult = [];
-        throw error;
-      })
-      .then( json => {
-        var re = /\d+\.?\d*/g;
-        this.geocodeResult = json.response.docs.map( a => { 
-          let m = a.centroide_rd.match(re);
-          a.rd_x = parseFloat(m[0]);
-          a.rd_y = parseFloat(m[1]);
-          return a; 
-        } );
-
-      })
-      .finally( () => {
-        this.isGeocoding = false;
-      });
-
-
-    })
+    }
 
   },
 
