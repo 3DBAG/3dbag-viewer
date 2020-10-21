@@ -150,7 +150,6 @@ export default {
 		this.box = null;
 
 		this.tiles = null;
-		this.cameraTileFocus = null;
 
 		this.needsRerender = 0;
 
@@ -467,7 +466,6 @@ export default {
 
 			this.camera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.farPlane );
 			this.camera.position.set( 400, 400, 400 );
-			this.cameraTileFocus = JSON.parse( JSON.stringify( this.camera.position ) );
 
 			this.dummyCamera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.dummyFarPlane );
 
@@ -654,8 +652,6 @@ export default {
 				this.dummyCamera.scale.copy( this.camera.scale );
 				this.dummyCamera.far = this.dummyFarPlane;
 				this.dummyCamera.updateMatrixWorld();
-
-				this.cameraTileFocus = JSON.parse( JSON.stringify( this.camera.position ) );
 
 				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
 				this.tiles.update();
