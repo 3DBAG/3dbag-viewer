@@ -5,11 +5,14 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "docs": "npx vuedoc.md src/components/*.vue --output docs/"
   },
   "dependencies": {
     "3d-tiles-renderer": "^0.1.4",
     "@mdi/font": "^5.7.55",
+    "@vuedoc/md": "^3.0.0",
+    "@vuedoc/parser": "^3.0.0",
     "buefy": "^0.9.3",
     "core-js": "^3.6.5",
     "dat.gui": "^0.7.7",
@@ -20,6 +23,7 @@
     "tweakpane": "^1.5.5",
     "vue": "^2.6.11",
     "vue-router": "^3.4.5",
+    "vuese": "^1.4.7",
     "x2js": "^3.4.0"
   },
   "devDependencies": {
@@ -36,7 +40,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "jest": "^26.4.2",
     "jest-cli": "^25.4.0",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.12"
   },
   "eslintConfig": {
     "root": true,

@@ -95,7 +95,7 @@ export default {
 		},
 		basemapOptions: {
 			type: Object,
-			default: function () {
+			default: () => {
 
 				return {
 					type: "wmts",
