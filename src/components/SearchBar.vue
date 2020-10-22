@@ -32,7 +32,6 @@
             <div class="media-content">
               <p class="has-text-left">
                 {{ props.option.weergavenaam }}
-                <br>
                 <small>
                   {{ props.option.type }} ({{ props.option.bron }})
                 </small>
@@ -48,23 +47,48 @@
 <script>
 import debounce from 'debounce';
 
+/**
+ * A search bar that conduct geocoding to PDOK service.
+ *
+ * @author 3D geoinformation group
+ */
 export default {
 	name: 'SearchBar',
 	data: function () {
 
 		return {
+			/**
+			* The result of the geocoding request
+			*/
 			geocodeResult: [],
-	  		isGeocoding: false
-	  	};
+			// Flag to indicate that geocoding is underway
+	  	isGeocoding: false
+	  };
 
 	},
 	methods: {
+		/**
+		 * Select the specified location.
+		 *
+		 * @argument {object} res - An object containing the location information.
+		 */
 		selectPlace: function ( res ) {
 
-			console.log( res );
+			/**
+       * Emitted when a location is selected.
+			 *
+			 * @argument {object} res - An object containing the location information.
+       */
+
 			this.$emit( 'select-place', res );
 
 		},
+		/**
+		 * Make the geocoding request to the server.
+		 *
+		 * @argument {string} name - The search term to look for.
+		 * @returns {void}
+		 */
 		doGeocode: debounce( function ( name ) {
 
 			if ( ! name.length ) {
