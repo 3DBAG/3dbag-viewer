@@ -433,7 +433,7 @@ export default {
 
 			} else {
 
-				this.terrainTiles = new WMTSTilesRenderer( this.basemapOptions.options );
+				this.terrainTiles = new WMTSTilesRenderer( this.basemapOptions.options, () => this.needsRerender = 1 );
 
 			}
 
