@@ -25,11 +25,19 @@
             </template>
             <template v-else-if="basemapPreset=='brtachtergrondkaart'">
               <b-icon icon="map" />
-              <span>BRT Achergrond Kaart</span>
+              <span>BRT Achtergrondkaart</span>
+            </template>
+            <template v-else-if="basemapPreset=='brtachtergrondkaartgrijs'">
+              <b-icon icon="map" />
+              <span>BRT Achtergrondkaart grijs</span>
+            </template>
+            <template v-else-if="basemapPreset=='luchtfoto2018wmts'">
+              <b-icon icon="map" />
+              <span>Orthophotos (WMTS)</span>
             </template>
             <template v-else>
               <b-icon icon="map" />
-              <span>Orthophotos</span>
+              <span>Orthophotos (WMS)</span>
             </template>
             <b-icon icon="menu-up" />
           </button>
@@ -44,7 +52,22 @@
                 icon="map"
               />
               <div class="media-content">
-                <p>BRT Achergrond Kaart</p>
+                <p>BRT Achtergrondkaart</p>
+              </div>
+            </div>
+          </b-dropdown-item>
+
+            <b-dropdown-item
+            :value="'brtachtergrondkaartgrijs'"
+            aria-role="listitem"
+          >
+            <div class="media">
+              <b-icon
+                class="media-left"
+                icon="map"
+              />
+              <div class="media-content">
+                <p>BRT Achtergrondkaart grijs</p>
               </div>
             </div>
           </b-dropdown-item>
@@ -65,7 +88,7 @@
           </b-dropdown-item>
 
           <b-dropdown-item
-            :value="'luchfoto2018'"
+            :value="'luchtfoto2018wmts'"
             aria-role="listitem"
           >
             <div class="media">
@@ -74,7 +97,22 @@
                 icon="map"
               />
               <div class="media-content">
-                <p>Orthophotos</p>
+                <p>Orthophotos (WMTS)</p>
+              </div>
+            </div>
+          </b-dropdown-item>
+
+          <b-dropdown-item
+            :value="'luchtfoto2018'"
+            aria-role="listitem"
+          >
+            <div class="media">
+              <b-icon
+                class="media-left"
+                icon="map"
+              />
+              <div class="media-content">
+                <p>Orthophotos (WMS)</p>
               </div>
             </div>
           </b-dropdown-item>
@@ -189,7 +227,7 @@
           <b-menu-item
             label="Orthophoto"
             icon="camera"
-            @click="wmsPreset='luchfoto2018'"
+            @click="wmsPreset='luchtfoto2018'"
           />
         </b-menu-list>
       </b-menu>
@@ -340,7 +378,7 @@ export default {
 
 				},
 
-				luchfoto2018: {
+				luchtfoto2018: {
 					type: "wms",
 					options: {
 						url: 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts?',
@@ -366,7 +404,7 @@ export default {
 
 				brtachtergrondkaartgrijs: {
 					type: "wmts",
-					option: {
+					options: {
 						url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
 						layer: 'brtachtergrondkaartgrijs',
 						style: 'default',
@@ -376,7 +414,23 @@ export default {
 						version: "1.0.0",
 						format: "image/png"
 					}
-				}
+				},
+
+        	luchtfoto2018wmts: {
+					type: "wmts",
+					options: {
+						url: 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts?',
+						layer: '2018_ortho25',
+						style: 'default',
+						tileMatrixSet: "EPSG:28992",
+						service: "WMTS",
+						request: "GetTile",
+						version: "1.0.0",
+						format: "image/png"
+					}
+				},
+
+
 
 			};
 
