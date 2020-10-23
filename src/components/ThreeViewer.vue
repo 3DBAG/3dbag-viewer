@@ -7,7 +7,6 @@ import {
 	Scene,
 	Color,
 	FogExp2,
-	MeshLambertMaterial,
 	WebGLRenderer,
 	sRGBEncoding,
 	PerspectiveCamera,
@@ -16,14 +15,16 @@ import {
 	DirectionalLight,
 	PointLight,
 	AmbientLight,
-	HemisphereLight,
 	Vector2,
 	Vector3,
 	Raycaster,
 	MOUSE,
 	ShaderMaterial,
 	ShaderLib,
-	UniformsUtils
+	UniformsUtils,
+	TextureLoader,
+	Sprite,
+	SpriteMaterial
 } from 'three';
 import {
 	TilesRenderer
@@ -37,6 +38,8 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 import debounce from 'debounce';
 import throttle from 'lodash/throttle';
+// Image from https://uxwing.com/maps-pin-black-icon/
+import markerSprite from '@/assets/locationmarker.png';
 
 const Tweakpane = require( 'tweakpane' );
 
@@ -186,6 +189,8 @@ export default {
 		this.enableWMS = true;
 		this.pane = new Tweakpane( { title: 'debug', expanded: false } );
 
+		this.markerName = "locationMarker";
+
 		this.selectedObject = null;
 
 	},
@@ -322,6 +327,12 @@ export default {
 
 			this.controls.update();
 
+			if ( q.placeMarker == "true" ) {
+
+				this.placeMarkerOnPoint( new Vector3( local_x, local_y, local_z ) );
+
+			}
+
 		},
 		setRouteFromCameraPos() {
 
@@ -348,6 +359,33 @@ export default {
 			).catch( err => {} );
 
 			// console.log( {rdx: RdX, rdy: RdY, cam_offset: cam_offset} );
+
+		},
+		placeMarkerOnPoint( position ) {
+
+			var marker = this.scene.getObjectByName( this.markerName );
+
+			if ( marker != "undefined" ) {
+
+				this.scene.remove( marker );
+
+			}
+
+			var textureLoader = new TextureLoader();
+			var map = textureLoader.load( markerSprite );
+			var material = new SpriteMaterial( { map: map } );
+			var sprite = new Sprite( material );
+
+			// Render sprite on top of other objects & fixed size regardless of zoom
+			material.depthWrite = false;
+			material.depthTest = false;
+			material.sizeAttenuation = false;
+
+			sprite.position.set( position.x, position.y, position.z );
+			sprite.scale.set( 0.04, 0.10, 1 );
+			sprite.name = this.markerName;
+
+			this.scene.add( sprite );
 
 		},
 		reinitTiles() {
@@ -498,6 +536,7 @@ export default {
 			this.renderer.domElement.addEventListener( 'pointermove', this.onPointerMove, false );
 			this.renderer.domElement.addEventListener( 'pointerdown', this.onPointerDown, false );
 			this.renderer.domElement.addEventListener( 'dblclick', this.onDblClick, false );
+			this.renderer.domElement.addEventListener( 'click', this.onClick, false );
 			this.renderer.domElement.addEventListener( 'pointerleave', this.onPointerLeave, false );
 
 			this.composer = new EffectComposer( this.renderer );
@@ -555,6 +594,11 @@ export default {
 		},
 		onPointerDown() {
 		},
+		onClick() {
+
+			this.castRay( true );
+
+		},
 		onDblClick() {
 
 			this.castRay();
@@ -563,7 +607,7 @@ export default {
 		onPointerLeave() {
 
 		},
-		castRay() {
+		castRay( singleClick ) {
 
 			const rect = this.renderer.domElement.getBoundingClientRect();
 			this.mouse.x = ( ( event.clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
@@ -571,48 +615,68 @@ export default {
 
 			this.raycaster.setFromCamera( this.mouse, this.camera );
 
-			const results = this.raycaster.intersectObject( this.tiles.group, true );
+			if ( singleClick ) {
 
-			// Set up the highlighted batchid to the material of new object
-			if ( this.selectedObject ) {
+				var marker = this.scene.getObjectByName( this.markerName );
 
-				this.selectedObject.material = this.material;
-				this.selectedObject = undefined;
+				if ( marker != undefined ) {
 
-			}
+					const results = this.raycaster.intersectObject( marker, true );
 
-			if ( results.length ) {
+					if ( results.length && results[ 0 ].uv.y >= 0.5 ) {
 
-				const { face, object } = results[ 0 ];
+						this.scene.remove( marker );
 
-				// Get info from batchTable
-				const batch_id_table = object.geometry.getAttribute( '_batchid' );
-				const batch_id = batch_id_table.getX( face.a );
-
-				const batchTable = object.parent.batchTable;
-				const keys = batchTable.getKeys();
-
-				if ( keys.includes( "identificatie" ) ) {
-
-					const identificatie = batchTable.getData( "identificatie" )[ batch_id ];
-					this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie, "rmse": "-" } );
-
-				} else if ( keys.includes( "attrs" ) ) {
-
-					const attrs = JSON.parse( batchTable.getData( "attrs" )[ batch_id ] );
-					// eslint-disable-next-line no-console
-					console.log( attrs );
-					this.$emit( 'object-picked', { "batchID": batch_id, "attributes": attrs } );
+					}
 
 				}
 
-				object.material = this.highlightMaterial;
-				this.highlightMaterial.uniforms.highlightedBatchId.value = batch_id;
-				this.selectedObject = object;
-
 			} else {
 
-				this.$emit( 'object-picked', undefined );
+				const results = this.raycaster.intersectObject( this.tiles.group, true );
+
+				// Set up the highlighted batchid to the material of new object
+				if ( this.selectedObject ) {
+
+					this.selectedObject.material = this.material;
+					this.selectedObject = undefined;
+
+				}
+
+				if ( results.length ) {
+
+					const { face, object } = results[ 0 ];
+
+					// Get info from batchTable
+					const batch_id_table = object.geometry.getAttribute( '_batchid' );
+					const batch_id = batch_id_table.getX( face.a );
+
+					const batchTable = object.parent.batchTable;
+					const keys = batchTable.getKeys();
+
+					if ( keys.includes( "identificatie" ) ) {
+
+						const identificatie = batchTable.getData( "identificatie" )[ batch_id ];
+						this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie, "rmse": "-" } );
+
+					} else if ( keys.includes( "attrs" ) ) {
+
+						const attrs = JSON.parse( batchTable.getData( "attrs" )[ batch_id ] );
+						// eslint-disable-next-line no-console
+						console.log( attrs );
+						this.$emit( 'object-picked', { "batchID": batch_id, "attributes": attrs } );
+
+					}
+
+					object.material = this.highlightMaterial;
+					this.highlightMaterial.uniforms.highlightedBatchId.value = batch_id;
+					this.selectedObject = object;
+
+				} else {
+
+					this.$emit( 'object-picked', undefined );
+
+				}
 
 			}
 
