@@ -9,7 +9,7 @@ import {
 
 export class WMTSTilesRenderer extends TilesRenderer {
 
-	constructor( wmtsOptions ) {
+	constructor( wmtsOptions, onLoadTileScheme = null ) {
 
 		super();
 
@@ -21,7 +21,7 @@ export class WMTSTilesRenderer extends TilesRenderer {
 
 		this.wmtsOptions = wmtsOptions;
 
-		this.tileScheme = new WMTSTileScheme( this.url, this.tileMatrixSet );
+		this.tileScheme = new WMTSTileScheme( this.url, this.tileMatrixSet, onLoadTileScheme );
 
 	}
 

@@ -170,7 +170,7 @@ export default {
 		this.dirZ = 0;
 
 		this.meshShading = "normal";
-		this.meshColor = "#697275";
+		this.meshColor = "#b8b8b8";
 
 		this.nearPlane = 1;
 		this.farPlane = 10000;
@@ -471,7 +471,7 @@ export default {
 
 			} else {
 
-				this.terrainTiles = new WMTSTilesRenderer( this.basemapOptions.options );
+				this.terrainTiles = new WMTSTilesRenderer( this.basemapOptions.options, () => this.needsRerender = 1 );
 
 			}
 

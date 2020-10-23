@@ -7,7 +7,7 @@ import * as X2JS from 'x2js';
 
 export class WMTSTileScheme extends BaseTileScheme {
 
-	constructor( url, tileMatrixSetId ) {
+	constructor( url, tileMatrixSetId, onLoadTileScheme = null ) {
 
 		super();
 
@@ -20,6 +20,7 @@ export class WMTSTileScheme extends BaseTileScheme {
 
 			this.capabilities = capabilities;
 			this.getTileMatrixSet();
+			onLoadTileScheme();
 
 		} );
 

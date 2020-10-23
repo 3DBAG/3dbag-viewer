@@ -510,7 +510,7 @@ export default {
 
 #picking-msg {
   position: absolute;
-  bottom: 20px;
+  bottom: 80px;
   left: 20px;
 }
 
