@@ -57,7 +57,7 @@
             </div>
           </b-dropdown-item>
 
-            <b-dropdown-item
+          <b-dropdown-item
             :value="'brtachtergrondkaartgrijs'"
             aria-role="listitem"
           >
@@ -459,7 +459,8 @@ export default {
 						rdy: res.rd_y,
 						ox: this.camOffset.x,
 						oy: this.camOffset.y,
-						oz: this.camOffset.z
+						oz: this.camOffset.z,
+						placeMarker: true
 					}
 				} );
 
