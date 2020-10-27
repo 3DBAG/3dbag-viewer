@@ -26,6 +26,8 @@ import {
 	Sprite,
 	SpriteMaterial
 } from 'three';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {
 	TilesRenderer
 } from '../../3DTilesRendererJS/src/index.js';
@@ -397,6 +399,26 @@ export default {
 			}
 
 			this.tiles = new TilesRenderer( this.tilesUrl );
+
+			const manager = this.tiles.manager;
+
+			this.tiles.manager.addHandler( /\.gltf$/, {
+
+				parse( ...args ) {
+
+					// Note the DRACO compression files need to be supplied via an explicit source.
+					// We use unpkg here but in practice should be provided by the application.
+					const dracoLoader = new DRACOLoader();
+					dracoLoader.setDecoderPath( 'https://unpkg.com/three@0.121.1/examples/js/libs/draco/gltf/' );
+
+					const loader = new GLTFLoader( manager );
+					loader.setDRACOLoader( dracoLoader );
+					return loader.parse( ...args );
+
+				}
+
+			} );
+
 			this.tiles.lruCache.minSize = this.lruCacheMinSize;
 			this.tiles.lruCache.maxSize = this.lruCacheMaxSize;
 
