@@ -1,34 +1,41 @@
 <template>
-  <b-message
-    id="picking-msg"
-    v-model="show"
-    type="is-warning"
-    size="is-small"
-    title="Building information"
-    aria-close-label="Close message"
+  <article
+    v-show="show"
+    id="building-info"
+    class="message is-warning is-small"
   >
-    <table class="table has-text-left">
-      <thead>
-        <tr>
-          <th>Attribute</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Batch ID</td>
-          <td>{{ building.batchID }}</td>
-        </tr>
-        <tr
-          v-for="[name, val] in Object.entries(building.attributes)"
-          :key="name"
-        >
-          <td>{{ name }}</td>
-          <td>{{ val }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </b-message>
+    <div class="message-header">
+      <p>Building Information</p>
+      <button
+        class="delete"
+        aria-label="Close info"
+        @click="$emit('close-info')"
+      />
+    </div>
+    <div class="message-body">
+      <table class="table has-text-left">
+        <thead>
+          <tr>
+            <th>Attribute</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Batch ID</td>
+            <td>{{ building.batchID }}</td>
+          </tr>
+          <tr
+            v-for="[name, val] in Object.entries(building.attributes)"
+            :key="name"
+          >
+            <td>{{ name }}</td>
+            <td>{{ val }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
 </template>
 
 <script>
@@ -54,5 +61,15 @@ export default {
 			}
 		}
 	},
+
+	methods: {
+
+		closeInfo() {
+
+			this.$emit( 'close-info' );
+
+		}
+
+	}
 };
 </script>

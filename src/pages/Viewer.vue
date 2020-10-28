@@ -175,6 +175,7 @@
     <BuildingInformation
       :building="pickedBuilding"
       :show="showBuildingInfo"
+      @close-info="showBuildingInfo = false"
     />
     <img
       id="logo"
@@ -401,7 +402,7 @@ export default {
   margin-left: 20px;
 }
 
-#picking-msg {
+#building-info {
   position: absolute;
   bottom: 80px;
   margin-left: 20px;

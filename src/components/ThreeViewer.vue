@@ -36,7 +36,6 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
-import debounce from 'debounce';
 import throttle from 'lodash/throttle';
 // Image from https://uxwing.com/maps-pin-black-icon/
 import markerSprite from '@/assets/locationmarker.png';
