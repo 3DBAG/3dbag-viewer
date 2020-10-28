@@ -8,169 +8,15 @@
       id="map-options"
       class="field has-addons"
     >
-      <div class="control">
-        <b-dropdown
-          v-model="basemapPreset"
-          position="is-top-right"
-          aria-role="list"
-        >
-          <button
-            slot="trigger"
-            class="button is-primary"
-            type="button"
-          >
-            <template v-if="basemapPreset=='top10nl'">
-              <b-icon icon="map" />
-              <span>TOP10NL</span>
-            </template>
-            <template v-else-if="basemapPreset=='brtachtergrondkaart'">
-              <b-icon icon="map" />
-              <span>BRT Achtergrondkaart</span>
-            </template>
-            <template v-else-if="basemapPreset=='brtachtergrondkaartgrijs'">
-              <b-icon icon="map" />
-              <span>BRT Achtergrondkaart grijs</span>
-            </template>
-            <template v-else-if="basemapPreset=='luchtfoto2018wmts'">
-              <b-icon icon="map" />
-              <span>Orthophotos (WMTS)</span>
-            </template>
-            <template v-else>
-              <b-icon icon="map" />
-              <span>Orthophotos (WMS)</span>
-            </template>
-            <b-icon icon="menu-up" />
-          </button>
-
-          <b-dropdown-item
-            :value="'brtachtergrondkaart'"
-            aria-role="listitem"
-          >
-            <div class="media">
-              <b-icon
-                class="media-left"
-                icon="map"
-              />
-              <div class="media-content">
-                <p>BRT Achtergrondkaart</p>
-              </div>
-            </div>
-          </b-dropdown-item>
-
-          <b-dropdown-item
-            :value="'brtachtergrondkaartgrijs'"
-            aria-role="listitem"
-          >
-            <div class="media">
-              <b-icon
-                class="media-left"
-                icon="map"
-              />
-              <div class="media-content">
-                <p>BRT Achtergrondkaart grijs</p>
-              </div>
-            </div>
-          </b-dropdown-item>
-
-          <b-dropdown-item
-            :value="'top10nl'"
-            aria-role="listitem"
-          >
-            <div class="media">
-              <b-icon
-                class="media-left"
-                icon="map"
-              />
-              <div class="media-content">
-                <p>TOP10NL</p>
-              </div>
-            </div>
-          </b-dropdown-item>
-
-          <b-dropdown-item
-            :value="'luchtfoto2018wmts'"
-            aria-role="listitem"
-          >
-            <div class="media">
-              <b-icon
-                class="media-left"
-                icon="map"
-              />
-              <div class="media-content">
-                <p>Orthophotos (WMTS)</p>
-              </div>
-            </div>
-          </b-dropdown-item>
-
-          <b-dropdown-item
-            :value="'luchtfoto2018'"
-            aria-role="listitem"
-          >
-            <div class="media">
-              <b-icon
-                class="media-left"
-                icon="map"
-              />
-              <div class="media-content">
-                <p>Orthophotos (WMS)</p>
-              </div>
-            </div>
-          </b-dropdown-item>
-        </b-dropdown>
-      </div>
-      <div class="control">
-        <b-dropdown
-          v-model="tileset"
-          position="is-top-right"
-          aria-role="list"
-        >
-          <button
-            slot="trigger"
-            class="button is-info"
-            type="button"
-          >
-            <template v-if="tileset=='nl_lod22_opt'">
-              <b-icon icon="home-floor-2" />
-              <span>LoD 2.2</span>
-            </template>
-            <template v-else>
-              <b-icon icon="home-floor-1" />
-              <span>LoD 1.3</span>
-            </template>
-            <b-icon icon="menu-up" />
-          </button>
-
-          <b-dropdown-item
-            :value="'nl_lod22_opt'"
-            aria-role="listitem"
-          >
-            <div class="media">
-              <b-icon
-                class="media-left"
-                icon="home-floor-2"
-              />
-              <div class="media-content">
-                <p>LoD 2.2</p>
-              </div>
-            </div>
-          </b-dropdown-item>
-
-          <b-dropdown-item
-            :value="'nl_lod13'"
-            aria-role="listitem"
-          >
-            <div class="media">
-              <b-icon
-                class="media-left"
-                icon="home-floor-1"
-              />
-              <div class="media-content">
-                <p>LoD1.3</p>
-              </div>
-            </div>
-          </b-dropdown-item>
-        </b-dropdown>
-      </div>
+      <DropDownSelector
+        v-model="basemapPreset"
+        :options="basemaps"
+      />
+      <DropDownSelector
+        v-model="tileset"
+        :options="lods"
+        color="is-info"
+      />
     </section>
     <BuildingInformation
       :building="pickedBuilding"
@@ -193,6 +39,7 @@
 
 <script>
 import BuildingInformation from '@/components/BuildingInformation.vue';
+import DropDownSelector from '@/components/DropDownSelector.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
 
@@ -202,6 +49,7 @@ export default {
 
 	components: {
 		BuildingInformation,
+		DropDownSelector,
 		SearchBar,
 		ThreeViewer
 	},
@@ -210,7 +58,6 @@ export default {
 
 		return {
 
-			tileset: 'nl_lod22_opt',
 			customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
 
 			camOffset: {
@@ -220,6 +67,32 @@ export default {
 			},
 
 			basemapPreset: 'brtachtergrondkaart',
+			basemaps: {
+				brtachtergrondkaart: {
+					name: "BRT Achtergrondkaart",
+					icon: "map"
+				},
+				brtachtergrondkaartgrijs: {
+					name: "BRT Achtergrondkaart (Grijs)",
+					icon: "map"
+				},
+				luchtfoto2018wmts: {
+					name: "Luchtfoto 2018",
+					icon: "map"
+				}
+			},
+
+			tileset: 'nl_lod22_opt',
+			lods: {
+				nl_lod22_opt: {
+					name: "LoD 2.2",
+					icon: "home-floor-2"
+				},
+				nl_lod13: {
+					name: "LoD 1.3",
+					icon: "home-floor-1"
+				}
+			},
 
 			pickedBuilding: {
 
