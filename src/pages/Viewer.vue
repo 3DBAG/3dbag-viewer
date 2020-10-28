@@ -172,36 +172,10 @@
         </b-dropdown>
       </div>
     </section>
-    <b-message
-      id="picking-msg"
-      v-model="showBuildingInfo"
-      type="is-warning"
-      size="is-small"
-      title="Building information"
-      aria-close-label="Close message"
-    >
-      <table class="table has-text-left">
-        <thead>
-          <tr>
-            <th>Attribute</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Batch ID</td>
-            <td>{{ pickedBuilding.batchID }}</td>
-          </tr>
-          <tr
-            v-for="[name, val] in Object.entries(pickedBuilding.attributes)"
-            :key="name"
-          >
-            <td>{{ name }}</td>
-            <td>{{ val }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </b-message>
+    <BuildingInformation
+      :building="pickedBuilding"
+      :show="showBuildingInfo"
+    />
     <img
       id="logo"
       alt="Vue logo"
@@ -217,6 +191,7 @@
 </template>
 
 <script>
+import BuildingInformation from '@/components/BuildingInformation.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
 
@@ -225,10 +200,9 @@ export default {
 	name: 'Viewer',
 
 	components: {
-
+		BuildingInformation,
 		SearchBar,
 		ThreeViewer
-
 	},
 
 	data() {
