@@ -312,6 +312,12 @@ export default {
 			let oy = parseFloat( q.oy );
 			let oz = parseFloat( q.oz );
 			// compute local tileset coordinates
+
+			if ( isNaN( rd_x ) ) {
+
+				return;
+
+			}
 			let tileset_offset_x = this.tiles.root.cached.transform.elements[ 12 ];
 			let tileset_offset_y = this.tiles.root.cached.transform.elements[ 13 ];
 			let local_x = rd_x - tileset_offset_x;
