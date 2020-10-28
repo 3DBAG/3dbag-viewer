@@ -42,6 +42,7 @@ import debounce from 'debounce';
 import throttle from 'lodash/throttle';
 // Image from https://uxwing.com/maps-pin-black-icon/
 import markerSprite from '@/assets/locationmarker.png';
+import { benchmarker } from '../benchmark/benchmark.js';
 
 const Tweakpane = require( 'tweakpane' );
 
@@ -302,6 +303,14 @@ export default {
 					this.tiles.lruCache.maxSize = val;
 
 				} );
+
+			const button = this.pane.addButton( this, { title: "Start benchmark" } );
+			button.on( 'click', () => {
+
+				var bench = new benchmarker();
+				bench.benchmark();
+
+			} );
 
 			this.pane.on( "change", ( val ) => this.needsRerender = 1 );
 
@@ -740,11 +749,11 @@ export default {
 				this.dummyCamera.updateMatrixWorld();
 
 				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
-				this.tiles.update();
+				// this.tiles.update();
 
 				if ( this.tiles.root ) {
 
-					this.updateTerrain();
+					// this.updateTerrain();
 
 				}
 
