@@ -13,6 +13,10 @@ export default new Router( {
 			component: ThreeViewer
 		},
 		{
+			path: '/',
+			redirect: '/viewer'
+		},
+		{
 			path: '/faq',
 			name: 'FAQ',
 			component: FAQ

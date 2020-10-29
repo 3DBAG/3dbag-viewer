@@ -7,7 +7,7 @@
     >
       <div class="navbar-brand navbar-start">
         <router-link
-          to="/"
+          to="/viewer"
           class="navbar-item"
         >
           <img
