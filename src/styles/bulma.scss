@@ -33,17 +33,13 @@ $colors: (
     "danger": ($danger, $danger-invert)
 );
 
-// $radius-small: 0;
-// $radius: 0;
-// $radius-large: 0;
-
 // Links
 $link: #4f7de6;
 $link-invert: $primary-invert;
 $link-focus-border: $primary;
 
-// Prevent hamburger menu on narrow screens (since we do not have a lot of menu items)
-$navbar-breakpoint: 0;
+// Control at which screen width the navbar changes on mobile devices
+$navbar-breakpoint: $tablet;
 
 // Import Bulma and Buefy styles
 @import "~bulma";

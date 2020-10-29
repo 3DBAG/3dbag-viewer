@@ -1,11 +1,11 @@
 <template>
   <div id="app">
     <nav
-      class="navbar is-fixed-top is-white"
+      class="navbar is-fixed-top is-white has-shadow"
       role="navigation"
       aria-label="dropdown navigation"
     >
-      <div class="navbar-brand navbar-start">
+      <div class="navbar-brand">
         <router-link
           to="/viewer"
           class="navbar-item"
@@ -17,26 +17,46 @@
           >
           <span class="logo-text">3D BAG </span>
         </router-link>
-        <div class="navbar-item tags has-addons">
-          <span class="tag">v20.10.0</span>
-          <span class="tag is-danger">beta</span>
-        </div>
+        <a
+          role="button"
+          class="navbar-burger"
+          :class="{ 'is-active': showBurgerMenu }"
+          aria-label="menu"
+          aria-expanded="false"
+          data-target="navMenu"
+          @click="showBurgerMenu=!showBurgerMenu"
+        >
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+        </a>
       </div>
-      <div class="navbar-end">
-        <router-link
-          to="/viewer"
-          active-class="is-active"
-          class="navbar-item is-tab"
-        >
-          Map
-        </router-link>
-        <router-link
-          to="/faq"
-          active-class="is-active"
-          class="navbar-item is-tab"
-        >
-          Docs
-        </router-link>
+      <div
+        class="navbar-menu"
+        :class="{ 'is-active': showBurgerMenu }"
+      >
+        <div class="navbar-start">
+          <div class="navbar-item tags has-addons">
+            <span class="tag">v20.10.0</span>
+            <span class="tag is-danger">beta</span>
+          </div>
+        </div>
+        <div class="navbar-end">
+          <router-link
+            to="/viewer"
+            active-class="is-active"
+            class="navbar-item is-tab"
+          >
+            Map
+          </router-link>
+          <router-link
+            to="/faq"
+            active-class="is-active"
+            class="navbar-item is-tab"
+          >
+            Docs
+          </router-link>
+        </div>
       </div>
     </nav>
     <router-view />
@@ -53,7 +73,7 @@ export default {
 
 		return {
 
-			showSidebar: true,
+			showBurgerMenu: false,
 
 		};
 
