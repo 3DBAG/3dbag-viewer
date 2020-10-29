@@ -17,7 +17,10 @@
           >
           <span class="logo-text">3D BAG </span>
         </router-link>
-        <span class="navbar-item has-text-grey-light">v20.10.0 beta</span>
+        <div class="navbar-item tags has-addons">
+          <span class="tag">v20.10.0</span>
+          <span class="tag is-danger">beta</span>
+        </div>
       </div>
       <div class="navbar-end">
         <router-link
