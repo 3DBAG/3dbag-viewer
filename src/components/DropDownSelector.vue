@@ -1,9 +1,9 @@
 <template>
   <div class="control">
     <b-dropdown
-      position="is-top-right"
       aria-role="list"
       :value="value"
+      :title="title"
       @input="$emit('input', $event)"
     >
       <button
@@ -13,8 +13,8 @@
         type="button"
       >
         <b-icon :icon="options[value].icon" />
-        <span>{{ options[value].name }}</span>
-        <b-icon icon="menu-up" />
+        <span class="is-hidden-mobile">{{ title }}</span>
+        <b-icon icon="menu-down" />
       </button>
 
       <b-dropdown-item
@@ -43,6 +43,10 @@ export default {
 	name: 'DropDownSelector',
 
 	props: {
+		title: {
+			type: String,
+			default: "Title"
+		},
 		color: {
 			type: String,
 			default: "is-primary"

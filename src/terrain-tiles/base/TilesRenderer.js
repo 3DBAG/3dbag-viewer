@@ -17,7 +17,7 @@ export class TilesRenderer {
 
 		this.tileLevel = 0;
 
-		this.resFactor = 25;
+		this.resFactor = 8;
 
 		this.tileMatrixLevels = null;
 		this.activeTiles = [];

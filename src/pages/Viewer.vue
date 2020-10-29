@@ -1,21 +1,22 @@
 <template>
   <div id="viewer">
-    <search-bar
-      @menu-clicked="$emit('hamburger-clicked')"
-      @select-place="moveToPlace"
-    />
     <section
       id="map-options"
       class="field has-addons"
     >
       <DropDownSelector
         v-model="basemapPreset"
+        title="Base Layer"
         :options="basemaps"
       />
       <DropDownSelector
         v-model="tileset"
+        title="LoD"
         :options="lods"
-        color="is-info"
+      />
+      <search-bar
+        @menu-clicked="$emit('hamburger-clicked')"
+        @select-place="moveToPlace"
       />
     </section>
     <BuildingInformation
@@ -23,17 +24,18 @@
       :show="showBuildingInfo"
       @close-info="showBuildingInfo = false"
     />
-    <img
-      id="logo"
-      alt="Vue logo"
-      src="http://3dbag.bk.tudelft.nl/static/img/logo-tud-3d-black.png"
-    >
     <ThreeViewer
       :tiles-url="tilesUrl"
       :basemap-options="basemapOptions"
       @object-picked="objectPicked"
       @cam-offset="onCamOffset"
     />
+    <div
+      id="attribution"
+      class="has-background-white has-text-grey"
+    >
+      <p>by 3D geoinformation group @ TUDelft</p>
+    </div>
   </div>
 </template>
 
@@ -86,11 +88,11 @@ export default {
 			lods: {
 				nl_lod22_opt: {
 					name: "LoD 2.2",
-					icon: "home-floor-2"
+					icon: "home"
 				},
 				nl_lod13: {
 					name: "LoD 1.3",
-					icon: "home-floor-1"
+					icon: "home"
 				}
 			},
 
@@ -269,26 +271,17 @@ export default {
 </script>
 
 <style>
-#search {
-  position: absolute;
-  margin-top: 20px;
-  margin-left: 20px;
-}
-
 #building-info {
   position: absolute;
-  bottom: 80px;
-  margin-left: 20px;
+  bottom: 0.5rem;
+  margin: 0 0.5rem;
 }
 
 #map-options {
   position: absolute;
-  bottom: 20px;
-  margin-left: 20px;
-}
-
-#search-input {
-  width: 500px;
+	margin: 0px;
+  top: 3.75rem;
+  margin: 0 0.5rem;
 }
 
 #viewer {
@@ -298,12 +291,11 @@ export default {
 
 }
 
-#logo {
-
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  width: 10%;
-
+#attribution {
+	position: absolute;
+	padding: 0.2rem;
+	right: 0;
+	bottom: 0;
+	opacity: 0.8;
 }
 </style>

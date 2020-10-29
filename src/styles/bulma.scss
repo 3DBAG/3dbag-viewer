@@ -1,0 +1,48 @@
+// Import Bulma's core
+@import "~bulma/sass/utilities/_all";
+
+// Set your colors
+$primary: #2c3e50;
+$primary-invert: findColorInvert($primary);
+$twitter: #4099FF;
+$twitter-invert: findColorInvert($twitter);
+
+$blue-light: #b4dde6;
+$blue-light-invert: findColorInvert($blue-light);
+$blue-mid: #24a1c8;
+$blue-mid-invert: findColorInvert($blue-mid);
+$blue-dark: #2d5fc1;
+$blue-dark-invert: findColorInvert($blue-dark);
+
+// Setup $colors to use as bulma classes (e.g. 'is-twitter')
+$colors: (
+    "blue-light": ($blue-light, $blue-light-invert),
+    "blue-mid": ($blue-mid, $blue-mid-invert),
+    "blue-dark": ($blue-dark, $blue-dark-invert),
+    "blue": ($blue-dark, $blue-dark-invert),
+    "cyan": ($blue-mid, $blue-mid-invert),
+    "white": ($white, $black),
+    "black": ($black, $white),
+    "light": ($light, $light-invert),
+    "dark": ($dark, $dark-invert),
+    "primary": ($primary, $primary-invert),
+    "success": ($success, $success-invert),
+    "warning": ($warning, $warning-invert),
+    "danger": ($danger, $danger-invert)
+);
+
+// $radius-small: 0;
+// $radius: 0;
+// $radius-large: 0;
+
+// Links
+$link: #4f7de6;
+$link-invert: $primary-invert;
+$link-focus-border: $primary;
+
+// Prevent hamburger menu on narrow screens (since we do not have a lot of menu items)
+$navbar-breakpoint: 0;
+
+// Import Bulma and Buefy styles
+@import "~bulma";
+@import "~buefy/src/scss/buefy";
