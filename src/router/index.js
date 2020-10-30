@@ -21,5 +21,18 @@ export default new Router( {
 			name: 'Docs',
 			component: Documentation
 		}
-	]
+	],
+	scrollBehavior: function ( to ) {
+
+		if ( to.hash ) {
+
+			return {
+
+				selector: to.hash
+
+			};
+
+		}
+
+	},
 } );

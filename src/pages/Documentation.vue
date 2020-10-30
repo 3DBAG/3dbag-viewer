@@ -12,7 +12,7 @@
     </p>
 
     <h1
-      id="bag_schema"
+      id="schema"
       class="title is-2"
     >
       3D BAG schema
@@ -65,10 +65,10 @@
       </figcaption>
     </figure>
     <h2
-      id="table-descriptions"
+      id="attributes"
       class="subtitle is-3"
     >
-      Table descriptions
+      Attributes
     </h2>
 
     <h3

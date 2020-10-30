@@ -45,17 +45,41 @@
           <router-link
             to="/viewer"
             active-class="is-active"
-            class="navbar-item is-tab"
+            class="navbar-item"
           >
             Map
           </router-link>
-          <router-link
-            to="/docs"
-            active-class="is-active"
-            class="navbar-item is-tab"
+          <div
+            class="navbar-item has-dropdown is-hoverable"
           >
-            Docs
-          </router-link>
+            <router-link
+              to="/docs"
+              active-class="is-active"
+              class="navbar-link"
+            >
+              Docs
+            </router-link>
+            <div class="navbar-dropdown">
+              <router-link
+                to="/docs#schema"
+                class="navbar-item"
+              >
+                Schema
+              </router-link>
+              <router-link
+                to="/docs#attributes"
+                class="navbar-item"
+              >
+                Attributes
+              </router-link>
+              <router-link
+                to="/docs#faq"
+                class="navbar-item"
+              >
+                FAQ
+              </router-link>
+            </div>
+          </div>
         </div>
       </div>
     </nav>
