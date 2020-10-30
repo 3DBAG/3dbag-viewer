@@ -126,7 +126,7 @@ html, body {
 
 }
 
-.logo {
+.logo-text {
   font-family: 'Barlow', sans-serif;
   font-weight: bold;
 }
