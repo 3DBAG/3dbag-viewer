@@ -50,7 +50,7 @@
             Map
           </router-link>
           <router-link
-            to="/faq"
+            to="/docs"
             active-class="is-active"
             class="navbar-item is-tab"
           >
@@ -89,7 +89,6 @@ html, body {
   height: 100%;
   width: 100%;
   margin: 0px;
-  overflow: hidden;
 }
 
 #app {

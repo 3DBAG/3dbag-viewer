@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import ThreeViewer from '@/pages/Viewer';
-import FAQ from '@/pages/FAQ';
+import Documentation from '@/pages/Documentation';
 
 Vue.use( Router );
 
@@ -17,9 +17,9 @@ export default new Router( {
 			redirect: '/viewer'
 		},
 		{
-			path: '/faq',
-			name: 'FAQ',
-			component: FAQ
+			path: '/docs',
+			name: 'Docs',
+			component: Documentation
 		}
 	]
 } );
