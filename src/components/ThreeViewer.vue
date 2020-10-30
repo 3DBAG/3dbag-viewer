@@ -19,6 +19,7 @@ import {
 	Vector3,
 	Raycaster,
 	MOUSE,
+	TOUCH,
 	ShaderMaterial,
 	ShaderLib,
 	UniformsUtils,
@@ -154,6 +155,11 @@ export default {
 		this.tiles = null;
 
 		this.needsRerender = 0;
+
+		this.pointerCaster = {
+			startClientX: 0,
+			startClientY: 0
+		};
 
 		// debug
 		this.lruCacheSize = 0;
@@ -535,13 +541,16 @@ export default {
 				MIDDLE: MOUSE.DOLLY,
 				RIGHT: MOUSE.ROTATE
 			};
+			this.controls.touches = {
+				ONE: TOUCH.ROTATE,
+				TWO: TOUCH.DOLLY_PAN
+			};
 			this.controls.addEventListener( "change", () => this.needsRerender = 1 );
 			this.controls.addEventListener( "end", this.setRouteFromCameraPos );
 
 			this.renderer.domElement.addEventListener( 'pointermove', this.onPointerMove, false );
 			this.renderer.domElement.addEventListener( 'pointerdown', this.onPointerDown, false );
-			this.renderer.domElement.addEventListener( 'dblclick', this.onDblClick, false );
-			this.renderer.domElement.addEventListener( 'click', this.onClick, false );
+			this.renderer.domElement.addEventListener( 'pointerup', this.onPointerUp, false );
 			this.renderer.domElement.addEventListener( 'pointerleave', this.onPointerLeave, false );
 
 			this.composer = new EffectComposer( this.renderer );
@@ -588,100 +597,101 @@ export default {
 			this.needsRerender = 1;
 
 		},
-		onPointerMove( e ) {
+		onPointerMove( evt ) {
 
 			if ( this.castOnHover ) {
 
-				this.castRay();
+				this.castRay( evt.clientX, evt.clientY );
 
 			}
 
 		},
-		onPointerDown() {
-		},
-		onClick() {
+		onPointerDown( evt ) {
 
-			this.castRay( true );
-
-		},
-		onDblClick() {
-
-			this.castRay();
+			this.pointerCaster.startClientX = evt.clientX;
+			this.pointerCaster.startClientY = evt.clientY;
 
 		},
-		onPointerLeave() {
+		onPointerUp( evt ) {
+
+			if (
+				this.pointerCaster.startClientX == evt.clientX &&
+				this.pointerCaster.startClientY == evt.clientY
+			) {
+
+				this.castRay( evt.clientX, evt.clientY );
+
+			}
 
 		},
-		castRay( singleClick ) {
+		castRay( clientX, clientY ) {
 
 			const rect = this.renderer.domElement.getBoundingClientRect();
-			this.mouse.x = ( ( event.clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
-			this.mouse.y = - ( ( event.clientY - rect.top ) / this.renderer.domElement.clientHeight ) * 2 + 1;
+			this.mouse.x = ( ( clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
+			this.mouse.y = - ( ( clientY - rect.top ) / this.renderer.domElement.clientHeight ) * 2 + 1;
 
 			this.raycaster.setFromCamera( this.mouse, this.camera );
 
-			if ( singleClick ) {
+			// check if we are hitting the geocoding marker. Eearly return if that was the case.
+			var marker = this.scene.getObjectByName( this.markerName );
 
-				var marker = this.scene.getObjectByName( this.markerName );
+			if ( marker != undefined ) {
 
-				if ( marker != undefined ) {
+				const results = this.raycaster.intersectObject( marker, true );
 
-					const results = this.raycaster.intersectObject( marker, true );
+				if ( results.length && results[ 0 ].uv.y >= 0.5 ) {
 
-					if ( results.length && results[ 0 ].uv.y >= 0.5 ) {
-
-						this.scene.remove( marker );
-
-					}
+					this.scene.remove( marker );
+					this.needsRerender = 1;
+					return;
 
 				}
+
+			}
+
+			// check if we are hitting a building
+			const results = this.raycaster.intersectObject( this.tiles.group, true );
+
+			// Set up the highlighted batchid to the material of new object
+			if ( this.selectedObject ) {
+
+				this.selectedObject.material = this.material;
+				this.selectedObject = undefined;
+
+			}
+
+			if ( results.length ) {
+
+				const { face, object } = results[ 0 ];
+
+				// Get info from batchTable
+				const batch_id_table = object.geometry.getAttribute( '_batchid' );
+				const batch_id = batch_id_table.getX( face.a );
+
+				const batchTable = object.parent.batchTable;
+				const keys = batchTable.getKeys();
+
+				if ( keys.includes( "identificatie" ) ) {
+
+					const identificatie = batchTable.getData( "identificatie" )[ batch_id ];
+					this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie, "rmse": "-" } );
+
+				} else if ( keys.includes( "attrs" ) ) {
+
+					const attrs = JSON.parse( batchTable.getData( "attrs" )[ batch_id ] );
+					// eslint-disable-next-line no-console
+					console.log( attrs );
+					this.$emit( 'object-picked', { "batchID": batch_id, "attributes": attrs } );
+
+				}
+
+				object.material = this.highlightMaterial;
+				this.highlightMaterial.uniforms.highlightedBatchId.value = batch_id;
+				this.selectedObject = object;
 
 			} else {
 
-				const results = this.raycaster.intersectObject( this.tiles.group, true );
-
-				// Set up the highlighted batchid to the material of new object
-				if ( this.selectedObject ) {
-
-					this.selectedObject.material = this.material;
-					this.selectedObject = undefined;
-
-				}
-
-				if ( results.length ) {
-
-					const { face, object } = results[ 0 ];
-
-					// Get info from batchTable
-					const batch_id_table = object.geometry.getAttribute( '_batchid' );
-					const batch_id = batch_id_table.getX( face.a );
-
-					const batchTable = object.parent.batchTable;
-					const keys = batchTable.getKeys();
-
-					if ( keys.includes( "identificatie" ) ) {
-
-						const identificatie = batchTable.getData( "identificatie" )[ batch_id ];
-						this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie, "rmse": "-" } );
-
-					} else if ( keys.includes( "attrs" ) ) {
-
-						const attrs = JSON.parse( batchTable.getData( "attrs" )[ batch_id ] );
-						// eslint-disable-next-line no-console
-						console.log( attrs );
-						this.$emit( 'object-picked', { "batchID": batch_id, "attributes": attrs } );
-
-					}
-
-					object.material = this.highlightMaterial;
-					this.highlightMaterial.uniforms.highlightedBatchId.value = batch_id;
-					this.selectedObject = object;
-
-				} else {
-
-					this.$emit( 'object-picked', undefined );
-
-				}
+				this.$emit( 'object-picked', undefined );
 
 			}
 
