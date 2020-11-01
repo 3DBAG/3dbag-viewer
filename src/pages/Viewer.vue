@@ -84,14 +84,18 @@ export default {
 				}
 			},
 
-			tileset: 'nl_lod22_opt',
+			tileset: 'lod22',
 			lods: {
-				nl_lod22_opt: {
+				lod22: {
 					name: "LoD 2.2",
 					icon: "home"
 				},
-				nl_lod13: {
+				lod13: {
 					name: "LoD 1.3",
+					icon: "home"
+				},
+				lod12: {
+					name: "LoD 1.2",
 					icon: "home"
 				}
 			},
@@ -132,12 +136,9 @@ export default {
 			}
 
 			const sources = {
-				zh_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/tileset1.json',
-				zh_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json',
-				nl_lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
-				nl_lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/lod13_kadaster/tileset1.json',
-				nl_lod22_attr: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_allattrs/tileset1.json',
-				nl_lod22_opt: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_allattrs/tileset2.json'
+				lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/v20100_lod22/tileset_qt.json',
+				lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/v20100_lod13/tileset_qt.json',
+				lod12: 'https://godzilla.bk.tudelft.nl/3dtiles/v20100_lod12/tileset_qt.json',
 			};
 
 			return sources[ this.tileset ];
