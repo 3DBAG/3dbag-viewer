@@ -277,6 +277,14 @@ export default {
   bottom: 0.5rem;
   margin: 0 0.5rem;
 }
+.table-value {
+	max-width: 170px;
+	overflow-x: auto;
+}
+#building-info .message-body {
+	overflow: auto;
+	height: 500px;
+}
 
 #map-options {
   position: absolute;
