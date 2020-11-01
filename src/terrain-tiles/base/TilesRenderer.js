@@ -11,10 +11,6 @@ import {
 	ResourceTracker
 } from './ResourceTracker.js';
 
-import {
-	throttle
-} from 'lodash';
-
 export class TilesRenderer {
 
 	constructor() {

@@ -49,6 +49,12 @@
           >
             Map
           </router-link>
+          <a
+            class="navbar-item"
+            href="http://godzilla.bk.tudelft.nl/3dbag_lod2/"
+          >
+            Download
+          </a>
           <div
             class="navbar-item has-dropdown is-hoverable"
           >
