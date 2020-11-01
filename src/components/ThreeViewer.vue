@@ -37,8 +37,6 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
-import throttle from 'lodash/throttle';
-// Image from https://uxwing.com/maps-pin-black-icon/
 import markerSprite from '@/assets/locationmarker.png';
 
 const Tweakpane = require( 'tweakpane' );
@@ -534,7 +532,7 @@ export default {
 			this.controls.enableDamping = true;
 			this.controls.dampingFactor = 0.15;
 			this.controls.minDistance = 20;
-			this.controls.maxDistance = 3000;
+			this.controls.maxDistance = 2900;
 			this.controls.maxPolarAngle = 0.8;
 			this.controls.mouseButtons = {
 				LEFT: MOUSE.PAN,
@@ -698,14 +696,14 @@ export default {
 			this.needsRerender = 1;
 
 		},
-		updateTerrain: throttle( function () {
+		updateTerrain: function () {
 
 			const transform = this.tiles.root.cached.transform;
 			const sceneTransform = new Vector2( transform.elements[ 12 ], transform.elements[ 13 ] );
 
 			this.terrainTiles.update( sceneTransform, this.camera );
 
-		}, 200 ),
+		},
 		renderScene() {
 
 			requestAnimationFrame( this.renderScene );
