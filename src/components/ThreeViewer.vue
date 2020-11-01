@@ -190,7 +190,7 @@ export default {
 		this.castOnHover = false;
 
 		this.enableWMS = true;
-		this.pane = new Tweakpane( { title: 'debug', expanded: false } );
+		this.pane = null;
 
 		this.markerName = "locationMarker";
 
@@ -205,6 +205,13 @@ export default {
 	},
 	methods: {
 		initTweakPane() {
+
+			var el = document.createElement( "div" );
+			el.setAttribute( "id", "debug-panel" );
+			el.setAttribute( "style", "position: absolute; top: 3.75rem;right: 0.5rem;" );
+			el.setAttribute( "class", "is-hidden-mobile" );
+			document.getElementById( "app" ).appendChild( el );
+			this.pane = new Tweakpane( { title: 'debug', expanded: false, container: el } );
 
 			// Camera
 			const f3 = this.pane.addFolder( {
