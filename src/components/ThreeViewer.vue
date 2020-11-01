@@ -669,17 +669,12 @@ export default {
 				const batchTable = object.parent.batchTable;
 				const keys = batchTable.getKeys();
 
-				if ( keys.includes( "identificatie" ) ) {
+				if ( keys.includes( "attributes" ) ) {
 
-					const identificatie = batchTable.getData( "identificatie" )[ batch_id ];
-					this.$emit( 'object-picked', { "batchID": batch_id, "identificatie": identificatie, "rmse": "-" } );
-
-				} else if ( keys.includes( "attrs" ) ) {
-
-					const attrs = JSON.parse( batchTable.getData( "attrs" )[ batch_id ] );
+					const attributes = JSON.parse( batchTable.getData( "attributes" )[ batch_id ] );
 					// eslint-disable-next-line no-console
-					console.log( attrs );
-					this.$emit( 'object-picked', { "batchID": batch_id, "attributes": attrs } );
+					// console.log( attributes );
+					this.$emit( 'object-picked', { "batchID": batch_id, "attributes": attributes } );
 
 				}
 
