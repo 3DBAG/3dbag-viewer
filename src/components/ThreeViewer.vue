@@ -542,7 +542,7 @@ export default {
 			this.controls.enableDamping = true;
 			this.controls.dampingFactor = 0.15;
 			this.controls.minDistance = 20;
-			this.controls.maxDistance = 3000;
+			this.controls.maxDistance = 2500;
 			this.controls.maxPolarAngle = 0.8;
 			this.controls.mouseButtons = {
 				LEFT: MOUSE.PAN,
