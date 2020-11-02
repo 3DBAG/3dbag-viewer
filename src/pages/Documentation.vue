@@ -2,7 +2,7 @@
   <section class="section">
     <h1
       id="introduction"
-      class="title is-2"
+      class="title is-3"
     >
       Introduction
     </h1>
@@ -13,7 +13,7 @@
 
     <h1
       id="schema"
-      class="title is-2"
+      class="title is-3"
     >
       3D BAG schema
     </h1>
@@ -1440,15 +1440,36 @@
 
     <h1
       id="faq"
-      class="title is-2"
+      class="title is-3"
     >
       Frequently Asked Questions
     </h1>
 
-    <h3>This the place for some question</h3>
+    <h3 class="subtitle is-5">Are there any known issues with the 3D BAG viewer?</h3>
 
     <p class="content">
-      And this is the place for explaining it.
+      Yes!
+      <ol type="1">
+        <li> Building picking does not work for multipart buildings. </li>
+        <li> Memory usage can become high in some cases. On mobile devices this may cause a forced page reload. </li>
+      </ol>
+    </p>
+
+    <h3 class="subtitle is-5">Are there any known issues with the 3D BAG data?</h3>
+
+    <p class="content">
+      Yes!
+      <ol type="1">
+        <li> Wrong face orientation (inverted normals) on LoD1.2 buildings. To verify the LoD of a building check the <code>lod</code> attribute (also the non-LoD1.2 layers have some LoD1.2 buildings). </li>
+        <li> Some buildings have spikes (due to lack of data or problem in triangulation). </li>
+        <li> Not all buildings are geometrically valid (missing faces). Note that this should be evident from the <code>val3dity_codes</code> attribute. </li>
+        <li> Some building tiles may be missing. </li>
+      </ol>
+    </p>
+
+    <h3 class="subtitle is-5">Some buildings are missing or outdated!</h3>
+    <p>
+      Due to the AHN3 source point cloud that was used to generate the 3D BAG, in some places the elevation information may be up to 6 years old (2014). Buildings that were constructed more recently will not be visible in the 3D BAG.
     </p>
   </section>
 </template>
