@@ -452,7 +452,7 @@ export default {
 						if ( c.geometry ) {
 
 							c.geometry.computeBoundingBox();
-							c.position.y = - c.geometry.boundingBox.min.y;
+							// c.position.y = - c.geometry.boundingBox.min.y;
 
 						}
 

@@ -1,6 +1,6 @@
 import {
-	CanvasTexture,
-	LinearFilter,
+	Texture,
+	NearestFilter,
 	PlaneBufferGeometry,
 	MeshBasicMaterial,
 	Mesh,
@@ -142,10 +142,12 @@ export class TilesRenderer {
 
 		} ).then( function ( imageBitmap ) {
 
-			const tex = new CanvasTexture( imageBitmap );
-
-			tex.minFilter = LinearFilter;
+			const tex = new Texture( imageBitmap );
+			tex.magFilter = NearestFilter;
+			tex.minFilter = NearestFilter;
 			tex.generateMipmaps = false;
+			tex.needsUpdate = tsrue;
+
 			var material = new MeshBasicMaterial( { map: scope.track( tex ) } );
 			mesh.material = material;
 			scope.onLoadTile();
