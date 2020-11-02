@@ -37,6 +37,7 @@
     >
       <p class="is-size-7">
         <a
+					class="tag"
           href="https://docs.google.com/forms/d/e/1FAIpQLSe2XLCYNmoFVHrgt_uRXeLLwfzDK7gS2kE7mGH8rnk6ltE0LQ/viewform?"
           target="_blank"
           rel="noopener noreferrer"
@@ -44,6 +45,7 @@
           Give feedback
         </a> |
         <a
+					class="tag is-danger"
           :href="reportDataIssueUrl"
           target="_blank"
           rel="noopener noreferrer"
