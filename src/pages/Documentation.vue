@@ -1,5 +1,5 @@
 <template>
-  <section class="section">
+  <section class="section content">
     <h1
       id="introduction"
       class="title is-3"
@@ -7,11 +7,11 @@
       Introduction
     </h1>
 
-    <p class="content">
+    <p>
       This the best 3D BAG we ever made. Really.
     </p>
 
-    <p class="content">
+    <p>
       The Basisregistraties Adressen en Gebouwen (BAG) is the most detailed, openly
       available data set on buildings and addresses in the Netherlands. It contains
       information about each address in a building, such as its current use,
@@ -20,7 +20,7 @@
       set is regularly updated as new buildings are registered, built or demolished.
     </p>
 
-    <p class="content">
+    <p>
       The Actueel Hoogtebestand Nederland (AHN) is the openly available elevation
       model of the Netherlands obtained by aerial laser scanning. The current is the
       third version which has been acquired through 2014-2019. Although the point cloud
@@ -28,7 +28,7 @@
       height data is still actual for over 96% of the buildings in the Netherlands.
     </p>
 
-    <p class="content">
+    <p>
       The 3D BAG combines the BAG and the AHN and models the buildings of the
       Netherlands in multiple dimensions.
     </p>
@@ -434,7 +434,7 @@
       Are there any known issues with the 3D BAG viewer?
     </h3>
 
-    <p class="content">
+    <p>
       Yes!
       <ol type="1">
         <li> Building picking does not work for multipart buildings. </li>
@@ -446,7 +446,7 @@
       Are there any known issues with the 3D BAG data?
     </h3>
 
-    <p class="content">
+    <p>
       Yes!
       <ol type="1">
         <li> Wrong face orientation (inverted normals) on LoD1.2 buildings. To verify the LoD of a building check the <code>lod</code> attribute (also the non-LoD1.2 layers have some LoD1.2 buildings). </li>
@@ -459,7 +459,7 @@
     <h3 class="title is-5">
       Some buildings are missing or outdated!
     </h3>
-    <p class="content">
+    <p>
       Due to the AHN3 source point cloud that was used to generate the 3D BAG, in some places the elevation information may be up to 6 years old (2014). Buildings that were constructed more recently will not be visible in the 3D BAG.
     </p>
 
