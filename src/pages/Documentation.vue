@@ -423,6 +423,68 @@
     </table>
 
 
+    <h4 class="subtitle is-4">
+      Possible values for <code>dak_type</code>
+    </h4>
+
+    <table>
+      <thead>
+        <tr class="odd">
+          <th><code>dak_type</code> value</th>
+          <th>Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="odd">
+          <td><code>2</code></td>
+          <td>roof with at least one slanted surface</td>
+        </tr>
+        <tr class="odd">
+          <td><code>1</code></td>
+          <td>roof with multiple, only horizontal surfaces</td>
+        </tr>
+        <tr class="odd">
+          <td><code>0</code></td>
+          <td>roof with a single horizontal surface</td>
+        </tr>
+        <tr class="odd">
+          <td><code>-1</code></td>
+          <td>no point was found for the building</td>
+        </tr>
+        <tr class="odd">
+          <td><code>-2</code></td>
+          <td>could not detect a roof surface, even though points were found</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4 class="subtitle is-4">
+      Possible values for <code>ondergronds_type</code>
+    </h4>
+    <table>
+      <thead>
+        <tr class="odd">
+          <th><code>ondergronds_type</code> value</th>
+          <th>Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="odd">
+          <td><code>1</code></td>
+          <td>Building or building part is above other buildings.</td>
+        </tr>
+        <tr class="odd">
+          <td><code>0</code></td>
+          <td>Building or building part is on the ground.</td>
+        </tr>
+        <tr class="odd">
+          <td><code>-1</code></td>
+          <td>Building or building part is under ground</td>
+        </tr>
+      </tbody>
+    </table>
+
+
     <h1
       id="faq"
       class="title is-3"
