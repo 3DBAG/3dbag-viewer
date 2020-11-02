@@ -11,6 +11,9 @@ output = sys.argv[2]
 leaf_size = 1000
 max_error = 5000
 
+extent_min_z = 0;
+extent_max_z = 5;
+
 with open(filename, "r") as in_file:
     tileset = json.load(in_file)
 
@@ -39,6 +42,8 @@ for child in root["children"]:
     cy = child["boundingVolume"]["box"][1] - rootmin_y
     r = int(cx//leaf_size)
     c = int(cy//leaf_size)
+    child["boundingVolume"]["box"][2] = extent_min_z + (extent_max_z-extent_min_z)/2;
+    child["boundingVolume"]["box"][11] = (extent_max_z-extent_min_z)/2;
     tile_index[tid] = child
     grid_index[r,c] = tid
 
@@ -54,10 +59,10 @@ def init_node(range_x, range_y):
     return {
         "geometricError": (h/rootdim_x)*max_error, 
         "boundingVolume": {"box": [
-            xc,yc, 0.0,
+            xc,yc, extent_min_z + (extent_max_z-extent_min_z)/2,
             (xdim*leaf_size)/2, 0.0, 0.0,
             0.0, (xdim*leaf_size)/2, 0.0,
-            0.0, 0.0, rootsize_z/2
+            0.0, 0.0, (extent_max_z-extent_min_z)/2
         ]}
     }
 
@@ -77,7 +82,7 @@ def recursive_subdivide(range_x, range_y):
         # return leafs
         tid = grid_index[xmin,ymin]
         node = tile_index[tid]
-        node["geometricError"]=10
+        #node["geometricError"]=10
     else:
         # recurse further
         c1 = recursive_subdivide((xmin, xmin+h), (ymin, ymin+h))
