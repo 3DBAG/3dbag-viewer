@@ -45,6 +45,14 @@
     <h3>Data</h3>
     <ul>
       <li>
+        Three <a href="https://3d.bk.tudelft.nl/lod/">levels of detail</a>. We added LoD1.3 and LoD2.2 to the previously
+        available LoD1.2 models.
+      </li>
+      <li>
+        2D and 3D. Both 2D roofsurface polygons and full 3D models are available
+        in all levels of detail.
+      </li>
+      <li>
         Greenhouses and warehouses. These buildings are marked in the BAG and
         only reconstructed in LoD1.2.
       </li>
@@ -57,14 +65,6 @@
         parts that are above the ground, like a standing construction, and parts
         that are either underground or they are the ground itself. We only include
         the above ground parts for the LoD1.3 and LoD2.2 reconstruction.
-      </li>
-      <li>
-        Three <a href="https://3d.bk.tudelft.nl/lod/">levels of detail</a>. We added LoD1.3 and LoD2.2 to the previously
-        available LoD1.2 models.
-      </li>
-      <li>
-        2D and 3D. Both 2D roofsurface polygons and full 3D models are available
-        in all levels of detail.
       </li>
       <li>CityJSON format. The 3D models are available as CityJSON.</li>
       <li>Download the data per tiles, instead of the whole country at once.</li>
@@ -528,12 +528,33 @@
     <h3 class="title is-5">
       Who is in the 3D BAG development team?
     </h3>
+
+    <p>The 3D BAG is developed by the 3D geoinformation research group. More specifically:</p>
+
     <ul>
-      <li> Balazs Dukai (data management, documentation) </li>
-      <li> Ravi Peters (data generation, viewer) </li>
-      <li> Stelios Vitalis (viewer) </li>
-      <li> Jordi Liempt (viewer) </li>
+      <li> Balázs Dukai does product management, takes care of the data processing, scalability, quality control and writes documentation. </li>
+      <li> Ravi Peters </li>
+      <li> Stelios Vitalis </li>
+      <li> Jordi Liempt </li>
+      <li> Teng Wu worked on the identification of underground and floating buildings in the BAG. </li>
     </ul>
+
+    <h3 class="title is-5">
+      What is the relation to the 3D Basisvoorziening data of the Kadaster?
+    </h3>
+    <p>
+      todo
+    </p>
+
+    <h3 class="title is-5">
+      Who pays for this?
+    </h3>
+    <p>
+      This project has received funding from the European Research Council (ERC) under
+      the European Unions Horizon2020 Research & Innovation Programme
+      (grant agreement no. 677312 UMnD: Urban modelling in higher dimensions).
+    </p>
+
   </section>
 </template>
 
