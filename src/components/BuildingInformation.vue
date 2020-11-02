@@ -7,10 +7,10 @@
     <div class="message-header">
       <p>Building Information</p>
       <button
-        class="button is-danger is-small is-rounded"
+        class="mx-1 button is-danger is-small"
         @click="$emit('report-data')"
       >
-        Report
+        Report a problem
       </button>
       <button
         class="delete"
@@ -20,9 +20,9 @@
     </div>
     <div class="message-body">
       <p class="content">
-        See also the <router-link to="/docs#attributes">
+        See the <router-link to="/docs#attributes">
           documentation
-        </router-link> for more information.
+        </router-link> for the attribute descriptions.
       </p>
       <table class="table has-text-left">
         <thead>

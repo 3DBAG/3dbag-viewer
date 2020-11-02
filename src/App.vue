@@ -38,7 +38,10 @@
         <div class="navbar-start">
           <div class="navbar-item tags has-addons">
             <span class="tag">v20.10.0</span>
-            <span class="tag is-danger">beta</span>
+            <a
+              class="tag is-danger"
+              @click="showWelcome=true"
+            >beta</a>
           </div>
         </div>
         <div class="navbar-end">
@@ -47,14 +50,15 @@
             active-class="is-active"
             class="navbar-item"
           >
-            Map
+            3D Map
           </router-link>
-          <a
+          <router-link
+            to="/download"
+            active-class="is-active"
             class="navbar-item"
-            href="http://godzilla.bk.tudelft.nl/3dbag_lod2/"
           >
             Download
-          </a>
+          </router-link>
           <div
             class="navbar-item has-dropdown is-hoverable"
           >
@@ -97,7 +101,7 @@
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">
-            Welcome to 3D BAG v2 beta
+            Welcome to the new 3D BAG beta
           </p>
           <button
             class="delete"
@@ -107,7 +111,7 @@
         </header>
         <section class="modal-card-body">
           <div class="content">
-            <p>This is the first beta release of the completely renewed 3DBAG service.</p>
+            <p>This is the first beta release of our completely renewed 3D BAG service.</p>
             <ul>
               <li>Everything is still under development. Expect broken things.</li>
               <li>We'll release an improved version of 3DBAG at least once every month.</li>
@@ -116,8 +120,8 @@
                   FAQ
                 </router-link> for a list of known issues.
               </li>
-              <li>If you find another issue you can use the feedback button to report it.</li>
-              <li>See the attributes of a building by clicking on it.</li>
+              <li>If you find another issue you can use one of the red feedback buttons to report it.</li>
+              <li>You can see the attributes of a building by clicking on it.</li>
             </ul>
 
             <h2 class="title is-5">
@@ -129,14 +133,6 @@
             </ul>
           </div>
         </section>
-        <footer class="modal-card-foot">
-          <button
-            class="button is-primary"
-            @click="showWelcome = false"
-          >
-            Okay
-          </button>
-        </footer>
       </div>
     </div>
     <router-view />

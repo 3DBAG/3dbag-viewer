@@ -208,11 +208,9 @@ export default {
 	methods: {
 		initTweakPane() {
 
-			var el = document.createElement( "div" );
-			el.setAttribute( "id", "debug-panel" );
+			var el = document.getElementById( "debug-panel" );
 			el.setAttribute( "style", "position: absolute; top: 3.75rem;right: 0.5rem;" );
 			el.setAttribute( "class", "is-hidden-mobile" );
-			document.getElementById( "app" ).appendChild( el );
 			this.pane = new Tweakpane( { title: 'debug', expanded: false, container: el } );
 
 			// Camera
