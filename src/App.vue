@@ -38,7 +38,7 @@
         <div class="navbar-start">
           <div class="navbar-item tags has-addons">
             <span class="tag">v20.10.0</span>
-            <span class="tag is-danger">beta</span>
+            <a class="tag is-danger" @click="showWelcome=true">beta</a>
           </div>
         </div>
         <div class="navbar-end">
@@ -98,7 +98,7 @@
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">
-            Welcome to 3D BAG v2 beta
+            Welcome to the new 3D BAG beta
           </p>
           <button
             class="delete"

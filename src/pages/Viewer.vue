@@ -67,6 +67,7 @@
         3DBAG by the <a href="https://3d.bk.tudelft.nl/">3D geoinformation group</a>
       </p>
     </div>
+    <div id="debug-panel" />
   </div>
 </template>
 
