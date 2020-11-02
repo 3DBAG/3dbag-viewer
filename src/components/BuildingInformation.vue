@@ -30,7 +30,9 @@
             :key="name"
           >
             <td>{{ name }}</td>
-            <td class="table-value">{{ val }}</td>
+            <td class="table-value">
+              {{ val }}
+            </td>
           </tr>
         </tbody>
       </table>

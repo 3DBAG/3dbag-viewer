@@ -442,6 +442,7 @@ export default {
 			};
 			this.tiles.onLoadModel = ( s ) => {
 
+				const offset_z = this.tiles.root.cached.transform.elements[ 14 ];
 				s.traverse( c => {
 
 					if ( c.material ) {
@@ -452,7 +453,7 @@ export default {
 						if ( c.geometry ) {
 
 							c.geometry.computeBoundingBox();
-							// c.position.y = - c.geometry.boundingBox.min.y;
+							c.position.y = offset_z;
 
 						}
 
