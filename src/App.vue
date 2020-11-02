@@ -107,15 +107,19 @@
           <div class="content">
             <h2>How to use</h2>
             <ul>
-              <li>See the attributes of a building by double clicking on it!</li>
+              <li>See the attributes of a building by clicking on it.</li>
               <li>This is a Beta version and we are improving on it every month. Come back often to see the updates! The version number is in the top left corner, besides the logo.</li>
             </ul>
 
             <h2>Terms of use</h2>
             <ul>
-              <li>The first rule about 3D BAG, is that you do not talk about 3D BAG.</li>
-              <li>The second rule about 3D BAG, is that you do not talk about 3D BAG.</li>
-              <li>The third rule about 3D BAG, is that you do not talk about 3D BAG.</li>
+              <p>The first rule about 3D BAG, is that you do not talk about 3D BAG. </p>
+              <p>
+                But jokes aside, what you currently see on this website and the data that you can download is meant
+                for internal use within the 3D geoinformation group only. Please look around,
+                check the data but don't share it just yet. Neither the files nor the link to the
+                website. We still need some time to iron things out and we would like it to be a surprise when it goes public.
+              </p>
             </ul>
           </div>
         </section>
