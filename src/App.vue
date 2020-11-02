@@ -47,14 +47,15 @@
             active-class="is-active"
             class="navbar-item"
           >
-            Map
+            3D Map
           </router-link>
-          <a
+          <router-link
+            to="/download"
+            active-class="is-active"
             class="navbar-item"
-            href="http://godzilla.bk.tudelft.nl/3dbag_lod2/"
           >
             Download
-          </a>
+          </router-link>
           <div
             class="navbar-item has-dropdown is-hoverable"
           >

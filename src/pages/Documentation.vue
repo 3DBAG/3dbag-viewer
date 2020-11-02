@@ -459,7 +459,7 @@
     <h3 class="title is-5">
       Some buildings are missing or outdated!
     </h3>
-    <p>
+    <p class="content">
       Due to the AHN3 source point cloud that was used to generate the 3D BAG, in some places the elevation information may be up to 6 years old (2014). Buildings that were constructed more recently will not be visible in the 3D BAG.
     </p>
 
