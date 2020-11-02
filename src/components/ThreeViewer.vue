@@ -357,6 +357,8 @@ export default {
 			// compute current camera position relative to target
 			let local_x = this.controls.target.x;
 			let local_z = this.controls.target.z;
+			console.log( this.camera.position.x );
+			console.log( this.camera.position.z );
 			let tileset_offset_x = this.tiles.root.cached.transform.elements[ 12 ];
 			let tileset_offset_y = this.tiles.root.cached.transform.elements[ 13 ];
 
@@ -436,6 +438,17 @@ export default {
 				if ( "rdx" in q && "rdy" in q && "ox" in q && "oy" in q && "oz" in q ) {
 
 					this.setCameraPosFromRoute( q );
+
+				} else {
+
+					// default viewport
+					this.setCameraPosFromRoute( {
+						rdx: "85181.55571255696",
+						rdy: "446859.38171179296",
+						ox: "-223.36609616703936",
+						oy: "281.19798302772574",
+						oz: "-184.218705413541"
+					} );
 
 				}
 
