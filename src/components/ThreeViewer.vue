@@ -175,7 +175,7 @@ export default {
 		this.dirZ = 0;
 
 		this.meshShading = "normal";
-		this.meshColor = "#b8b8b8";
+		this.meshColor = "#7b8f9f";
 
 		this.nearPlane = 1;
 		this.farPlane = 10000;
