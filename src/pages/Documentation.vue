@@ -1445,7 +1445,7 @@
       Frequently Asked Questions
     </h1>
 
-    <h3 class="subtitle is-5">Are there any known issues with the 3D BAG viewer?</h3>
+    <h3 class="title is-5">Are there any known issues with the 3D BAG viewer?</h3>
 
     <p class="content">
       Yes!
@@ -1455,7 +1455,7 @@
       </ol>
     </p>
 
-    <h3 class="subtitle is-5">Are there any known issues with the 3D BAG data?</h3>
+    <h3 class="title is-5">Are there any known issues with the 3D BAG data?</h3>
 
     <p class="content">
       Yes!
@@ -1467,10 +1467,18 @@
       </ol>
     </p>
 
-    <h3 class="subtitle is-5">Some buildings are missing or outdated!</h3>
-    <p>
+    <h3 class="title is-5">Some buildings are missing or outdated!</h3>
+    <p class="content">
       Due to the AHN3 source point cloud that was used to generate the 3D BAG, in some places the elevation information may be up to 6 years old (2014). Buildings that were constructed more recently will not be visible in the 3D BAG.
     </p>
+
+    <h3 class="title is-5">Who is in the 3D BAG development team?</h3>
+      <ul>
+        <li> Balazs Dukai (data management, documentation) </li>
+        <li> Ravi Peters (data generation, viewer) </li>
+        <li> Stelios Vitalis (viewer) </li>
+        <li> Jordi Liempt (viewer) </li>
+      </ul>
   </section>
 </template>
 
