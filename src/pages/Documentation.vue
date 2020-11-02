@@ -30,11 +30,11 @@
 
     <p>
       The 3D BAG combines the BAG and the AHN and models the buildings of the
-      Netherlands in multiple dimensions.
+      Netherlands 3D.
     </p>
 
     <h2
-      id="news"
+      id="features"
       class="subtitle is-3"
     >
       Main features
@@ -59,7 +59,7 @@
         the above ground parts for the LoD1.3 and LoD2.2 reconstruction.
       </li>
       <li>
-        Three levels of detail. We added LoD1.3 and LoD2.2 to the previously
+        Three <a href="https://3d.bk.tudelft.nl/lod/">levels of detail</a>. We added LoD1.3 and LoD2.2 to the previously
         available LoD1.2 models.
       </li>
       <li>
@@ -95,327 +95,327 @@
       Attributes
     </h1>
 
-    <table class="tg">
+    <table class="table is-striped">
       <thead>
-        <tr>
-          <th class="tg-0pky" />
-          <th class="tg-0pky">
+        <tr class="odd">
+          <th />
+          <th>
             Attribute name
           </th>
-          <th class="tg-0pky">
+          <th>
             Unit
           </th>
-          <th class="tg-0pky">
+          <th>
             Description
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             0
           </td>
-          <td class="tg-0pky">
+          <td>
             fid
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
+          <td>
             Feature ID
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             1
           </td>
-          <td class="tg-0pky">
+          <td>
             identificatie
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
+          <td>
             BAG: De unieke aanduiding van een pand.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             2
           </td>
-          <td class="tg-0pky">
+          <td>
             _rmse
           </td>
-          <td class="tg-0pky">
+          <td>
             meters
           </td>
-          <td class="tg-0pky">
+          <td>
             Root mean square error between the 3D model and input point cloud (only roof points).
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             3
           </td>
-          <td class="tg-0pky">
+          <td>
             _m2pc_error_max
           </td>
-          <td class="tg-0pky">
+          <td>
             meters
           </td>
-          <td class="tg-0pky">
+          <td>
             Maximum errors from any mesh vertex to point cloud.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             4
           </td>
-          <td class="tg-0pky">
+          <td>
             val3dity_codes
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
-            Val3dity error codes for the 3D model. `Null` means valid geometry.
+          <td>
+            Val3dity error codes for the 3D model. <code>Null</code> means valid geometry.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             5
           </td>
-          <td class="tg-0pky">
+          <td>
             _roof_pt_cnt
           </td>
-          <td class="tg-0pky">
+          <td>
             count
           </td>
-          <td class="tg-0pky">
+          <td>
             Total number of points in roof planes
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             6
           </td>
-          <td class="tg-0pky">
+          <td>
             _wall_pt_cnt
           </td>
-          <td class="tg-0pky">
+          <td>
             count
           </td>
-          <td class="tg-0pky">
+          <td>
             Total number of points in wall planes
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             7
           </td>
-          <td class="tg-0pky">
+          <td>
             _unsegmented_pt_cnt
           </td>
-          <td class="tg-0pky">
+          <td>
             count
           </td>
-          <td class="tg-0pky">
+          <td>
             Number of unsegmented points
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             8
           </td>
-          <td class="tg-0pky">
+          <td>
             lod
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
+          <td>
             Level of Detail.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             9
           </td>
-          <td class="tg-0pky">
+          <td>
             _t_run
           </td>
-          <td class="tg-0pky">
+          <td>
             milliseconds
           </td>
-          <td class="tg-0pky">
+          <td>
             Total reconstruction time in ms (for all LoDs).
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             10
           </td>
-          <td class="tg-0pky">
+          <td>
             _data_area
           </td>
-          <td class="tg-0pky">
+          <td>
             square meters
           </td>
-          <td class="tg-0pky">
-            Area in footprint that has a roofplane above it (`nodata area = total footprint area - data_area`). Unit: square meters.
+          <td>
+            Area in footprint that has a roofplane above it (<code>nodata area = total footprint area - data_area</code>). Unit: square meters.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             11
           </td>
-          <td class="tg-0pky">
+          <td>
             _lod13_22_missing
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
-            Indicates whether the LoD1.3/LoD2.2 reconstruction was skipped for this feature (and also LoD1.2 reconstruction if `lod12_replace==false`). This can happen when there were points found for instance.
+          <td>
+            Indicates whether the LoD1.3/LoD2.2 reconstruction was skipped for this feature (and also LoD1.2 reconstruction if <code>lod12_replace==false</code>). This can happen when there were points found for instance.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             12
           </td>
-          <td class="tg-0pky">
+          <td>
             h_maaiveld
           </td>
-          <td class="tg-0pky">
+          <td>
             meters
           </td>
-          <td class="tg-0pky">
+          <td>
             NAP elevation at groundlevel. Calculated as the 5th percentile of the ground points found within a 4 meter radius of the building. Unit: metre
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             13
           </td>
-          <td class="tg-0pky">
+          <td>
             pw_datum
           </td>
-          <td class="tg-0pky">
+          <td>
             YYYY-MM-DD
           </td>
-          <td class="tg-0pky">
+          <td>
             Acquisition date of the point cloud. In case of the AHN3, this is an assumed acquisition date, which is computed as 1st of December in the year *before* the officially reported acquisition year (inwijnjaar) of a particular AHN3 tile.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             14
           </td>
-          <td class="tg-0pky">
+          <td>
             pw_actueel
           </td>
-          <td class="tg-0pky">
+          <td>
             true/false
           </td>
-          <td class="tg-0pky">
+          <td>
             Does the date of the point cloud match the bouwjaar of the building?
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             15
           </td>
-          <td class="tg-0pky">
+          <td>
             pw_bron
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
+          <td>
             Source of the point cloud.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             16
           </td>
-          <td class="tg-0pky">
+          <td>
             reconstructie_methode
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
+          <td>
             Reconstruction method of the building model
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             17
           </td>
-          <td class="tg-0pky">
+          <td>
             versie_methode
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
+          <td>
             Version of the building reconstruction method.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             18
           </td>
-          <td class="tg-0pky">
+          <td>
             kas_warenhuis
           </td>
-          <td class="tg-0pky">
+          <td>
             true/false
           </td>
-          <td class="tg-0pky">
+          <td>
             The building is greenhouse or warehouse (according to Top10NL).
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             19
           </td>
-          <td class="tg-0pky">
+          <td>
             dak_type
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
+          <td>
             Roof type of the building.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             20
           </td>
-          <td class="tg-0pky">
+          <td>
             ondergronds_type
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
+          <td>
             Underground class of the building.
           </td>
         </tr>
-        <tr>
-          <td class="tg-0pky">
+        <tr class="odd">
+          <td>
             21
           </td>
-          <td class="tg-0pky">
+          <td>
             kwaliteits_klasse
           </td>
-          <td class="tg-0pky">
+          <td>
             –
           </td>
-          <td class="tg-0pky">
+          <td>
             Indication of the confidence that the reconstruction is realistic, compared to the real building.
           </td>
         </tr>
@@ -479,37 +479,4 @@
   figcaption {
     margin-bottom: 1.5rem;
   }
-
-  .tg {
-    border-collapse:collapse;border-spacing:0;
-  }
-
-  .tg td{
-    border-color: black;
-    border-style: solid;
-    border-width: 1px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    overflow: hidden;
-    padding: 10px 5px;
-    word-break: normal;
-  }
-
-  .tg th{
-		border-color: black;
-		border-style: solid;
-		border-width: 1px;
-		font-family: Arial, sans-serif;
-		font-size: 14px;
-    font-weight: normal;
-		overflow: hidden;
-		padding: 10px 5px;
-		word-break: normal;
-	}
-
-  .tg .tg-0pky{
-		border-color: inherit;
-		text-align: left;
-		vertical-align: top
-	}
 </style>
