@@ -1,6 +1,6 @@
 import {
-	Texture,
-	NearestFilter,
+	TextureLoader,
+	LinearFilter,
 	PlaneBufferGeometry,
 	MeshBasicMaterial,
 	Mesh,
@@ -20,10 +20,7 @@ export class TilesRenderer {
 		this.resFactor = 8;
 
 		this.tileMatrixLevels = null;
-		this.activeTiles = new Set();
-		this.downloadQueue = new Map();
-
-		this.tilesInView = null;
+		this.activeTiles = [];
 
 		this.group = new Group();
 		this.resourceTracker = new ResourceTracker();
@@ -38,49 +35,21 @@ export class TilesRenderer {
 	update( sceneCenter, camera ) {
 
 		// Get indices of all tiles that are in view
-		const tiles = this.tileScheme.getTilesInView( camera, this.resFactor, sceneCenter );
-		this.tilesInView = tiles;
+		var tiles = this.tileScheme.getTilesInView( camera, this.resFactor, sceneCenter );
 
-		// check if we just changed tileLevel
 		if ( tiles.length && tiles[ 0 ].tileMatrix.level != this.tileLevel ) {
 
 			this.cleanTiles();
 			this.tileLevel = tiles[ 0 ].tileMatrix.level;
-
-		} else {
-
-			// Cancel pending tile downloads that are not in view anymore
-			setTimeout( () => {
-
-				var tidsInView = new Set();
-				this.tilesInView.forEach( function ( ti ) {
-
-					tidsInView.add( ti.getId() );
-
-				} );
-
-				for ( let [ tid, abortCtrl ] of this.downloadQueue.entries() ) {
-
-					if ( ! tidsInView.has( tid ) ) {
-
-						abortCtrl.abort();
-
-					}
-
-				}
-
-			} );
 
 		}
 
 		// Create tiles that hadn't been created yet
 		tiles.forEach( function ( ti ) {
 
-			const tileId = ti.getId();
+			if ( ! this.activeTiles.includes( ti.getId() ) ) {
 
-			if ( ! this.activeTiles.has( tileId ) ) {
-
-				this.activeTiles.add( tileId );
+				this.activeTiles.push( ti.getId() );
 
 				this.createTile( ti, sceneCenter );
 
@@ -101,15 +70,7 @@ export class TilesRenderer {
 
 		this.resourceTracker.dispose();
 
-		this.activeTiles.clear();
-
-		for ( let abortCtrl of this.downloadQueue.values() ) {
-
-			abortCtrl.abort();
-
-		}
-
-		this.downloadQueue.clear();
+		this.activeTiles = [];
 
 	}
 
@@ -124,39 +85,17 @@ export class TilesRenderer {
 		var mesh = new Mesh( geometry, this.tempMaterial );
 		this.group.add( mesh );
 
+		var loader = new TextureLoader();
+
 		const requestURL = this.getRequestURL( tile );
 
-		const scope = this;
-		const tileId = tile.getId();
-		var controller = new AbortController();
-		var signal = controller.signal;
-		this.downloadQueue.set( tileId, controller );
-		fetch( requestURL, { signal } ).then( function ( res ) {
+		loader.load( requestURL, ( tex ) => {
 
-			scope.downloadQueue.delete( tileId );
-			return res.blob();
-
-		} ).then( function ( blob ) {
-
-			return createImageBitmap( blob, { premultiplyAlpha: 'none', imageOrientation: 'flipY' } );
-
-		} ).then( function ( imageBitmap ) {
-
-			const tex = new Texture( imageBitmap );
-			tex.magFilter = NearestFilter;
-			tex.minFilter = NearestFilter;
+			tex.minFilter = LinearFilter;
 			tex.generateMipmaps = false;
-			tex.needsUpdate = true;
-
-			var material = new MeshBasicMaterial( { map: scope.track( tex ) } );
+			var material = new MeshBasicMaterial( { map: this.track( tex ) } );
 			mesh.material = material;
-			scope.onLoadTile();
-
-		} ).catch( function ( e ) {
-
-			// we end up here if abort() is called on the Abortcontroller attached to this tile
-			scope.downloadQueue.delete( tileId );
-			scope.activeTiles.delete( tileId );
+			this.onLoadTile();
 
 		} );
 

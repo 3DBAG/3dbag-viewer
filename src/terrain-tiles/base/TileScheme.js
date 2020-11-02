@@ -196,7 +196,7 @@ class BaseTileScheme {
 
 	growRegion( centerTile, camera, transform ) {
 
-		let visited = new Set( centerTile.getId() );
+		let visited = [ centerTile.getId() ];
 		let queue = [ centerTile ];
 		let tilesInView = [ centerTile ];
 
@@ -215,13 +215,13 @@ class BaseTileScheme {
 			for ( const n of neighbours ) {
 
 				// Continue if tile already visited
-				if ( visited.has( n.getId() ) ) {
+				if ( visited.includes( n.getId() ) ) {
 
 					continue;
 
 				}
 
-				visited.add( n.getId() );
+				visited.push( n.getId() );
 
 				if ( n.inFrustum( frustum, transform ) ) {
 
