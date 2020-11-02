@@ -89,6 +89,46 @@
         </div>
       </div>
     </nav>
+    <div
+      class="modal"
+      :class="{ 'is-active' : showWelcome }"
+    >
+      <div class="modal-background" />
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Welcome to 3D BAG beta</p>
+          <button
+            class="delete"
+            aria-label="close"
+            @click="showWelcome"
+          />
+        </header>
+        <section class="modal-card-body">
+          <div class="content">
+            <h2>How to use</h2>
+            <ul>
+              <li>See the attributes of a building by double clicking on it!</li>
+              <li>This is a Beta version and we are improving on it every month. Come back often to see the updates! The version number is in the top left corner, besides the logo.</li>
+            </ul>
+
+            <h2>Terms of use</h2>
+            <ul>
+              <li>The first rule about 3D BAG, is that you do not talk about 3D BAG.</li>
+              <li>The second rule about 3D BAG, is that you do not talk about 3D BAG.</li>
+              <li>The third rule about 3D BAG, is that you do not talk about 3D BAG.</li>
+            </ul>
+          </div>
+        </section>
+        <footer class="modal-card-foot">
+          <button
+            class="button is-success"
+            @click="showWelcome = false"
+          >
+            Gotcha!
+          </button>
+        </footer>
+      </div>
+    </div>
     <router-view />
   </div>
 </template>
@@ -104,6 +144,7 @@ export default {
 		return {
 
 			showBurgerMenu: false,
+			showWelcome: true
 
 		};
 
