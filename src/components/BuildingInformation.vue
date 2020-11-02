@@ -13,6 +13,7 @@
       />
     </div>
     <div class="message-body">
+      <p class="content">See also the <router-link to="/docs#attributes">documentation</router-link> for more information.</p>
       <table class="table has-text-left">
         <thead>
           <tr>

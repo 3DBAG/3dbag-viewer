@@ -175,7 +175,7 @@ export default {
 		this.dirZ = 0;
 
 		this.meshShading = "normal";
-		this.meshColor = "#b8b8b8";
+		this.meshColor = "#7b8f9f";
 
 		this.nearPlane = 1;
 		this.farPlane = 10000;
@@ -537,7 +537,7 @@ export default {
 			this.camera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.farPlane );
 			this.camera.position.set( 400, 400, 400 );
 
-			this.dummyCamera = new PerspectiveCamera( 60, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.dummyFarPlane );
+			this.dummyCamera = new PerspectiveCamera( 30, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.dummyFarPlane );
 
 			this.offsetParent = new Group();
 			this.scene.add( this.offsetParent );

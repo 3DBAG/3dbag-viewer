@@ -96,39 +96,45 @@
       <div class="modal-background" />
       <div class="modal-card">
         <header class="modal-card-head">
-          <p class="modal-card-title">Welcome to 3D BAG beta</p>
+          <p class="modal-card-title">
+            Welcome to 3D BAG v2 beta
+          </p>
           <button
             class="delete"
             aria-label="close"
-            @click="showWelcome"
+            @click="showWelcome = false"
           />
         </header>
         <section class="modal-card-body">
           <div class="content">
-            <h2>How to use</h2>
+            <p>This is the first beta release of the 3DBAG v2.</p>
             <ul>
+              <li>Everything is still under development. Expect broken things.</li>
+              <li>We'll release an improved version of 3DBAG at least once every month.</li>
+              <li>
+                Check the <router-link to="/docs#faq">
+                  FAQ
+                </router-link> for a list of known issues.
+              </li>
+              <li>If you find another issue you can use the feedback button to report it.</li>
               <li>See the attributes of a building by clicking on it.</li>
-              <li>This is a Beta version and we are improving on it every month. Come back often to see the updates! The version number is in the top left corner, besides the logo.</li>
             </ul>
 
-            <h2>Terms of use</h2>
+            <h2 class="title is-5">
+              Terms of use
+            </h2>
             <ul>
-              <p>The first rule about 3D BAG, is that you do not talk about 3D BAG. </p>
-              <p>
-                But jokes aside, what you currently see on this website and the data that you can download is meant
-                for internal use within the 3D geoinformation group only. Please look around,
-                check the data but don't share it just yet. Neither the files nor the link to the
-                website. We still need some time to iron things out and we would like it to be a surprise when it goes public.
-              </p>
+              <li>Please do not publicly share or promote this website at this time.</li>
+              <li>Otherwise feel free to do with the data whatever you want.</li>
             </ul>
           </div>
         </section>
         <footer class="modal-card-foot">
           <button
-            class="button is-success"
+            class="button is-primary"
             @click="showWelcome = false"
           >
-            Gotcha!
+            Okay
           </button>
         </footer>
       </div>

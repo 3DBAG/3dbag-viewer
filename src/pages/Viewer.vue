@@ -6,7 +6,7 @@
     >
       <DropDownSelector
         v-model="basemapPreset"
-        title="Base Layer"
+        title="Baselayer"
         :options="basemaps"
       />
       <DropDownSelector
@@ -34,7 +34,10 @@
       id="attribution"
       class="has-background-white has-text-grey"
     >
-      <p>by 3D geoinformation group @ TUDelft</p>
+      <p class="is-size-7">
+        Baselayers from <a href="https://www.pdok.nl/">PDOK</a>.
+        3DBAG by the <a href="https://3d.bk.tudelft.nl/">3D geoinformation group</a>
+      </p>
     </div>
   </div>
 </template>
