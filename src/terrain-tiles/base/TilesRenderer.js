@@ -146,7 +146,7 @@ export class TilesRenderer {
 			tex.magFilter = NearestFilter;
 			tex.minFilter = NearestFilter;
 			tex.generateMipmaps = false;
-			tex.needsUpdate = tsrue;
+			tex.needsUpdate = true;
 
 			var material = new MeshBasicMaterial( { map: scope.track( tex ) } );
 			mesh.material = material;
