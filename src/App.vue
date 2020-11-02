@@ -67,10 +67,10 @@
             </router-link>
             <div class="navbar-dropdown">
               <router-link
-                to="/docs#schema"
+                to="/docs#features"
                 class="navbar-item"
               >
-                Schema
+                Features
               </router-link>
               <router-link
                 to="/docs#attributes"
@@ -107,7 +107,7 @@
         </header>
         <section class="modal-card-body">
           <div class="content">
-            <p>This is the first beta release of the 3DBAG v2.</p>
+            <p>This is the first beta release of the completely renewed 3DBAG service.</p>
             <ul>
               <li>Everything is still under development. Expect broken things.</li>
               <li>We'll release an improved version of 3DBAG at least once every month.</li>
