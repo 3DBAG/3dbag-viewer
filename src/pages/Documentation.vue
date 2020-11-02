@@ -533,7 +533,7 @@
 
     <ul>
       <li> Balázs Dukai does product management, takes care of the data processing, scalability, quality control and writes documentation. </li>
-      <li> Ravi Peters </li>
+      <li> Ravi Peters works on the building reconstruction algorithms and the 3D viewer.</li>
       <li> Stelios Vitalis </li>
       <li> Jordi Liempt </li>
       <li> Teng Wu worked on the identification of underground and floating buildings in the BAG. </li>
