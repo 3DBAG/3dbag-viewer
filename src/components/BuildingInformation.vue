@@ -20,9 +20,9 @@
     </div>
     <div class="message-body">
       <p class="content">
-        See also the <router-link to="/docs#attributes">
+        See the <router-link to="/docs#attributes">
           documentation
-        </router-link> for more information.
+        </router-link> for the attribute descriptions.
       </p>
       <table class="table has-text-left">
         <thead>
