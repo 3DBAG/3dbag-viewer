@@ -23,6 +23,7 @@
       :building="pickedBuilding"
       :show="showBuildingInfo"
       @close-info="showBuildingInfo = false"
+      @report-data="getReportDataIssuePathWithId( pickedBuilding.attributes.identificatie )"
     />
     <ThreeViewer
       :tiles-url="tilesUrl"
@@ -35,7 +36,32 @@
       class="has-background-white has-text-grey"
     >
       <p class="is-size-7">
-        Baselayers from <a href="https://www.pdok.nl/">PDOK</a>.
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLSe2XLCYNmoFVHrgt_uRXeLLwfzDK7gS2kE7mGH8rnk6ltE0LQ/viewform?"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Give feedback
+        </a> |
+        <a
+          :href="reportDataIssueUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Report data issue
+        </a> |
+        <span v-if="basemapOptions.attribution">
+          Baselayer from
+          <a
+            v-if="basemapOptions.attributionURL"
+            href="https://www.pdok.nl/"
+          >
+            {{ basemapOptions.attribution }}
+          </a>
+          <span v-else>
+            {{ basemapOptions.attribution }}
+          </span> |
+        </span>
         3DBAG by the <a href="https://3d.bk.tudelft.nl/">3D geoinformation group</a>
       </p>
     </div>
@@ -155,6 +181,8 @@ export default {
 				top10nl: {
 
 					type: "wms",
+					attribution: "PDOK",
+					attributionURL: "https://www.pdok.nl/",
 					options: {
 						url: 'https://geodata.nationaalgeoregister.nl/top10nlv2/ows?',
 						layer: 'top10nlv2',
@@ -166,6 +194,8 @@ export default {
 
 				luchtfoto2018: {
 					type: "wms",
+					attribution: "PDOK",
+					attributionURL: "https://www.pdok.nl/",
 					options: {
 						url: 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts?',
 						layer: '2018_ortho25',
@@ -176,6 +206,8 @@ export default {
 
 				brtachtergrondkaart: {
 					type: "wmts",
+					attribution: "PDOK",
+					attributionURL: "https://www.pdok.nl/",
 					options: {
 						url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
 						layer: 'brtachtergrondkaart',
@@ -190,6 +222,8 @@ export default {
 
 				brtachtergrondkaartgrijs: {
 					type: "wmts",
+					attribution: "PDOK",
+					attributionURL: "https://www.pdok.nl/",
 					options: {
 						url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
 						layer: 'brtachtergrondkaartgrijs',
@@ -204,6 +238,8 @@ export default {
 
         	luchtfoto2018wmts: {
 					type: "wmts",
+					attribution: "PDOK",
+					attributionURL: "https://www.pdok.nl/",
 					options: {
 						url: 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts?',
 						layer: '2018_ortho25',
@@ -221,6 +257,14 @@ export default {
 			};
 
 			return sources[ this.basemapPreset ];
+
+		},
+
+		reportDataIssueUrl: function () {
+
+			return `https://docs.google.com/forms/d/e/
+				1FAIpQLScIVBEWkpOraOIpOb1SOwRvpSnlQxLFDDYsqK4MrZgOqvNjWw/viewform?
+				entry.1880096492=${ escape( "https://tudelft3d.github.io/3dbag-viewer/#" + this.$route.fullPath ) }`;
 
 		}
 
@@ -266,6 +310,12 @@ export default {
 				this.showBuildingInfo = false;
 
 			}
+
+		},
+
+		getReportDataIssuePathWithId: function ( identificatie ) {
+
+			window.open( this.reportDataIssueUrl + `&entry.547110854=${ identificatie }`, '_blank' );
 
 		}
 

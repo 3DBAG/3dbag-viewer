@@ -357,8 +357,6 @@ export default {
 			// compute current camera position relative to target
 			let local_x = this.controls.target.x;
 			let local_z = this.controls.target.z;
-			console.log( this.camera.position.x );
-			console.log( this.camera.position.z );
 			let tileset_offset_x = this.tiles.root.cached.transform.elements[ 12 ];
 			let tileset_offset_y = this.tiles.root.cached.transform.elements[ 13 ];
 

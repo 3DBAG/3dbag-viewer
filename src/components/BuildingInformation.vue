@@ -7,6 +7,12 @@
     <div class="message-header">
       <p>Building Information</p>
       <button
+        class="button is-danger is-small is-rounded"
+        @click="$emit('report-data')"
+      >
+        Report
+      </button>
+      <button
         class="delete"
         aria-label="Close info"
         @click="$emit('close-info')"
