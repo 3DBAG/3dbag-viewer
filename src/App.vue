@@ -101,7 +101,7 @@
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">
-            Welcome to the new 3D BAG beta
+            Welcome to 3D BAG v2
           </p>
           <button
             class="delete"
@@ -111,7 +111,7 @@
         </header>
         <section class="modal-card-body">
           <div class="content">
-            <p>This is the first beta release of our completely renewed 3D BAG service.</p>
+            <p>This is the first beta release of the renewed version of the 3D BAG service.</p>
             <ul>
               <li>Everything is still under development. Expect broken things.</li>
               <li>We'll release an improved version of 3DBAG at least once every month.</li>
@@ -122,6 +122,11 @@
               </li>
               <li>If you find another issue you can use one of the red feedback buttons to report it.</li>
               <li>You can see the attributes of a building by clicking on it.</li>
+              <li>
+                You can download the data by clicking on a tile on the <router-link to="/download">
+                  download page
+                </router-link>.
+              </li>
             </ul>
 
             <h2 class="title is-5">

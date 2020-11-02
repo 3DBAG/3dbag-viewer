@@ -95,394 +95,400 @@
       Attributes
     </h1>
 
-    <table class="table is-striped">
-      <thead>
-        <tr class="odd">
-          <th />
-          <th>
-            Attribute name
-          </th>
-          <th>
-            Unit
-          </th>
-          <th>
-            Description
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="odd">
-          <td>
-            0
-          </td>
-          <td>
-            fid
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Feature ID.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            1
-          </td>
-          <td>
-            identificatie
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            BAG: De unieke aanduiding van een pand.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            2
-          </td>
-          <td>
-            _rmse
-          </td>
-          <td>
-            metre
-          </td>
-          <td>
-            Root mean square error between the 3D model and input point cloud (only roof points).
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            3
-          </td>
-          <td>
-            _m2pc_error_max
-          </td>
-          <td>
-            metre
-          </td>
-          <td>
-            Maximum errors from any mesh vertex to point cloud.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            4
-          </td>
-          <td>
-            val3dity_codes
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Val3dity error codes for the 3D model. <code>Null</code> means valid geometry.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            5
-          </td>
-          <td>
-            _roof_pt_cnt
-          </td>
-          <td>
-            count
-          </td>
-          <td>
-            Total number of points in roof planes.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            6
-          </td>
-          <td>
-            _wall_pt_cnt
-          </td>
-          <td>
-            count
-          </td>
-          <td>
-            Total number of points in wall planes.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            7
-          </td>
-          <td>
-            _unsegmented_pt_cnt
-          </td>
-          <td>
-            count
-          </td>
-          <td>
-            Number of unsegmented points.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            8
-          </td>
-          <td>
-            lod
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Level of Detail.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            9
-          </td>
-          <td>
-            _t_run
-          </td>
-          <td>
-            milliseconds
-          </td>
-          <td>
-            Total reconstruction time in ms (for all LoDs).
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            10
-          </td>
-          <td>
-            _data_area
-          </td>
-          <td>
-            square metre
-          </td>
-          <td>
-            Area in footprint that has a roofplane above it (<code>nodata area = total footprint area - data_area</code>).
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            11
-          </td>
-          <td>
-            _lod13_22_missing
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Indicates whether the LoD1.3/LoD2.2 reconstruction was skipped for this feature (and also LoD1.2 reconstruction if <code>lod12_replace==false</code>). This can happen when there were points found for instance.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            12
-          </td>
-          <td>
-            h_maaiveld
-          </td>
-          <td>
-            metre
-          </td>
-          <td>
-            NAP elevation at groundlevel. Calculated as the 5th percentile of the ground points found within a 4 meter radius of the building.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            13
-          </td>
-          <td>
-            pw_datum
-          </td>
-          <td>
-            YYYY-MM-DD
-          </td>
-          <td>
-            Acquisition date of the point cloud. In case of the AHN3, this is an assumed acquisition date, which is computed as 1st of December in the year *before* the officially reported acquisition year (inwijnjaar) of a particular AHN3 tile.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            14
-          </td>
-          <td>
-            pw_actueel
-          </td>
-          <td>
-            true/false
-          </td>
-          <td>
-            Does the date of the point cloud match the bouwjaar of the building?
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            15
-          </td>
-          <td>
-            pw_bron
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Source of the point cloud.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            16
-          </td>
-          <td>
-            reconstructie_methode
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Reconstruction method of the building model.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            17
-          </td>
-          <td>
-            versie_methode
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Version of the building reconstruction method.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            18
-          </td>
-          <td>
-            kas_warenhuis
-          </td>
-          <td>
-            true/false
-          </td>
-          <td>
-            The building is greenhouse or warehouse (according to Top10NL).
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            19
-          </td>
-          <td>
-            dak_type
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Roof type of the building.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            20
-          </td>
-          <td>
-            ondergronds_type
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Underground class of the building.
-          </td>
-        </tr>
-        <tr class="odd">
-          <td>
-            21
-          </td>
-          <td>
-            kwaliteits_klasse
-          </td>
-          <td>
-            –
-          </td>
-          <td>
-            Indication of the confidence that the reconstruction is realistic, compared to the real building.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table class="table is-striped is-full-width">
+        <thead>
+          <tr class="odd">
+            <th />
+            <th>
+              Attribute name
+            </th>
+            <th>
+              Unit
+            </th>
+            <th>
+              Description
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="odd">
+            <td>
+              0
+            </td>
+            <td>
+              fid
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Feature ID.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              1
+            </td>
+            <td>
+              identificatie
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              BAG: De unieke aanduiding van een pand.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              2
+            </td>
+            <td>
+              _rmse
+            </td>
+            <td>
+              metre
+            </td>
+            <td>
+              Root mean square error between the 3D model and input point cloud (only roof points).
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              3
+            </td>
+            <td>
+              _m2pc_error_max
+            </td>
+            <td>
+              metre
+            </td>
+            <td>
+              Maximum errors from any mesh vertex to point cloud.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              4
+            </td>
+            <td>
+              val3dity_codes
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Val3dity error codes for the 3D model. <code>Null</code> means valid geometry.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              5
+            </td>
+            <td>
+              _roof_pt_cnt
+            </td>
+            <td>
+              count
+            </td>
+            <td>
+              Total number of points in roof planes.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              6
+            </td>
+            <td>
+              _wall_pt_cnt
+            </td>
+            <td>
+              count
+            </td>
+            <td>
+              Total number of points in wall planes.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              7
+            </td>
+            <td>
+              _unsegmented_pt_cnt
+            </td>
+            <td>
+              count
+            </td>
+            <td>
+              Number of unsegmented points.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              8
+            </td>
+            <td>
+              lod
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Level of Detail.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              9
+            </td>
+            <td>
+              _t_run
+            </td>
+            <td>
+              milliseconds
+            </td>
+            <td>
+              Total reconstruction time in ms (for all LoDs).
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              10
+            </td>
+            <td>
+              _data_area
+            </td>
+            <td>
+              square metre
+            </td>
+            <td>
+              Area in footprint that has a roofplane above it (<code>nodata area = total footprint area - data_area</code>).
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              11
+            </td>
+            <td>
+              _lod13_22_missing
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Indicates whether the LoD1.3/LoD2.2 reconstruction was skipped for this feature (and also LoD1.2 reconstruction if <code>lod12_replace==false</code>). This can happen when there were points found for instance.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              12
+            </td>
+            <td>
+              h_maaiveld
+            </td>
+            <td>
+              metre
+            </td>
+            <td>
+              NAP elevation at groundlevel. Calculated as the 5th percentile of the ground points found within a 4 meter radius of the building.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              13
+            </td>
+            <td>
+              pw_datum
+            </td>
+            <td>
+              YYYY-MM-DD
+            </td>
+            <td>
+              Acquisition date of the point cloud. In case of the AHN3, this is an assumed acquisition date, which is computed as 1st of December in the year *before* the officially reported acquisition year (inwijnjaar) of a particular AHN3 tile.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              14
+            </td>
+            <td>
+              pw_actueel
+            </td>
+            <td>
+              true/false
+            </td>
+            <td>
+              Does the date of the point cloud match the bouwjaar of the building?
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              15
+            </td>
+            <td>
+              pw_bron
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Source of the point cloud.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              16
+            </td>
+            <td>
+              reconstructie_methode
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Reconstruction method of the building model.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              17
+            </td>
+            <td>
+              versie_methode
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Version of the building reconstruction method.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              18
+            </td>
+            <td>
+              kas_warenhuis
+            </td>
+            <td>
+              true/false
+            </td>
+            <td>
+              The building is greenhouse or warehouse (according to Top10NL).
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              19
+            </td>
+            <td>
+              dak_type
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Roof type of the building.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              20
+            </td>
+            <td>
+              ondergronds_type
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Underground class of the building.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              21
+            </td>
+            <td>
+              kwaliteits_klasse
+            </td>
+            <td>
+              –
+            </td>
+            <td>
+              Indication of the confidence that the reconstruction is realistic, compared to the real building.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
 
     <h4 class="subtitle is-4">
       Possible values for <code>dak_type</code>
     </h4>
 
-    <table>
-      <thead>
-        <tr class="odd">
-          <th><code>dak_type</code> value</th>
-          <th>Meaning</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="odd">
-          <td><code>2</code></td>
-          <td>roof with at least one slanted surface</td>
-        </tr>
-        <tr class="odd">
-          <td><code>1</code></td>
-          <td>roof with multiple, only horizontal surfaces</td>
-        </tr>
-        <tr class="odd">
-          <td><code>0</code></td>
-          <td>roof with a single horizontal surface</td>
-        </tr>
-        <tr class="odd">
-          <td><code>-1</code></td>
-          <td>no point was found for the building</td>
-        </tr>
-        <tr class="odd">
-          <td><code>-2</code></td>
-          <td>could not detect a roof surface, even though points were found</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr class="odd">
+            <th><code>dak_type</code> value</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="odd">
+            <td><code>2</code></td>
+            <td>roof with at least one slanted surface</td>
+          </tr>
+          <tr class="odd">
+            <td><code>1</code></td>
+            <td>roof with multiple, only horizontal surfaces</td>
+          </tr>
+          <tr class="odd">
+            <td><code>0</code></td>
+            <td>roof with a single horizontal surface</td>
+          </tr>
+          <tr class="odd">
+            <td><code>-1</code></td>
+            <td>no point was found for the building</td>
+          </tr>
+          <tr class="odd">
+            <td><code>-2</code></td>
+            <td>could not detect a roof surface, even though points were found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <h4 class="subtitle is-4">
       Possible values for <code>ondergronds_type</code>
     </h4>
-    <table>
-      <thead>
-        <tr class="odd">
-          <th><code>ondergronds_type</code> value</th>
-          <th>Meaning</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="odd">
-          <td><code>1</code></td>
-          <td>Building or building part is above other buildings.</td>
-        </tr>
-        <tr class="odd">
-          <td><code>0</code></td>
-          <td>Building or building part is on the ground.</td>
-        </tr>
-        <tr class="odd">
-          <td><code>-1</code></td>
-          <td>Building or building part is under ground</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr class="odd">
+            <th><code>ondergronds_type</code> value</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="odd">
+            <td><code>1</code></td>
+            <td>Building or building part is above other buildings.</td>
+          </tr>
+          <tr class="odd">
+            <td><code>0</code></td>
+            <td>Building or building part is on the ground.</td>
+          </tr>
+          <tr class="odd">
+            <td><code>-1</code></td>
+            <td>Building or building part is under ground</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
 
     <h1
@@ -554,11 +560,13 @@
       the European Unions Horizon2020 Research & Innovation Programme
       (grant agreement no. 677312 UMnD: Urban modelling in higher dimensions).
     </p>
-
   </section>
 </template>
 
 <style>
+  .table-wrapper {
+    overflow-x: auto;
+  }
   figcaption {
     margin-bottom: 1.5rem;
   }
