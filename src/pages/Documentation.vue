@@ -122,7 +122,7 @@
             –
           </td>
           <td>
-            Feature ID
+            Feature ID.
           </td>
         </tr>
         <tr class="odd">
@@ -147,7 +147,7 @@
             _rmse
           </td>
           <td>
-            meters
+            metre
           </td>
           <td>
             Root mean square error between the 3D model and input point cloud (only roof points).
@@ -161,7 +161,7 @@
             _m2pc_error_max
           </td>
           <td>
-            meters
+            metre
           </td>
           <td>
             Maximum errors from any mesh vertex to point cloud.
@@ -192,7 +192,7 @@
             count
           </td>
           <td>
-            Total number of points in roof planes
+            Total number of points in roof planes.
           </td>
         </tr>
         <tr class="odd">
@@ -206,7 +206,7 @@
             count
           </td>
           <td>
-            Total number of points in wall planes
+            Total number of points in wall planes.
           </td>
         </tr>
         <tr class="odd">
@@ -220,7 +220,7 @@
             count
           </td>
           <td>
-            Number of unsegmented points
+            Number of unsegmented points.
           </td>
         </tr>
         <tr class="odd">
@@ -259,10 +259,10 @@
             _data_area
           </td>
           <td>
-            square meters
+            square metre
           </td>
           <td>
-            Area in footprint that has a roofplane above it (<code>nodata area = total footprint area - data_area</code>). Unit: square meters.
+            Area in footprint that has a roofplane above it (<code>nodata area = total footprint area - data_area</code>).
           </td>
         </tr>
         <tr class="odd">
@@ -287,10 +287,10 @@
             h_maaiveld
           </td>
           <td>
-            meters
+            metre
           </td>
           <td>
-            NAP elevation at groundlevel. Calculated as the 5th percentile of the ground points found within a 4 meter radius of the building. Unit: metre
+            NAP elevation at groundlevel. Calculated as the 5th percentile of the ground points found within a 4 meter radius of the building.
           </td>
         </tr>
         <tr class="odd">
@@ -346,7 +346,7 @@
             –
           </td>
           <td>
-            Reconstruction method of the building model
+            Reconstruction method of the building model.
           </td>
         </tr>
         <tr class="odd">
