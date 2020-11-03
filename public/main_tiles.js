@@ -54,12 +54,21 @@ fetch('https://geodata.nationaalgeoregister.nl/wmts?request=GetCapabilities').th
     // select interaction working on "singleclick"
     var select = new ol.interaction.Select({condition: ol.events.condition.click,});
 
+    var has_clicked = false;
     if (select !== null) {
-    map.addInteraction(select);
-    select.on('select', function (e) {
-        console.log('Selected: ' + e.selected[0].get('tile_id'));
-        var filename = e.selected[0].get('tile_id')+'.json';
-        window.location.href = 'https://3d.bk.tudelft.nl/3dbag/v20100/'+filename;
-    });
+        map.addInteraction(select);
+        select.on('select', function (e) {
+            const tile_id = e.selected[0].get('tile_id');
+            console.log('Selected: ' + tile_id);
+            var a = document.getElementById("download-link")
+            var filename = tile_id+'.json';
+            a.href = 'https://godzilla.bk.tudelft.nl/v20100/'+filename;
+            a.innerHTML = "Download tile " + filename;
+            if(!has_clicked) {
+                has_clicked=true;
+                a.classList.remove("hide");
+                document.getElementById("download-placeholder").classList.add("hide");
+            }
+        });
     }
 });

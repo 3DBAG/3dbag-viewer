@@ -9,6 +9,22 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.5.0/proj4.js"></script>
     <style>
+      body {
+        font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+      }
+      #download-container {
+        position: absolute;
+        bottom:0.25rem;
+        left:0.25rem;
+        padding:1em;
+        background-color:rgba(255, 255, 255, 0.8);
+      }
+      .hide {
+        display: none;
+      }
+      p {
+        margin: 0;
+      }
       .map {
         width: 99%;
         height:99%;
@@ -20,6 +36,10 @@
   </head>
   <body>
     <div id="map" class="map"></div>
+    <div id="download-container">
+      <p id="download-placeholder">Click on a tile to download</p>
+      <a id="download-link" class="hide" target="_blank"></a>
+    </div>
     <script src="main_tiles.js"></script>
   </body>
 </html>
