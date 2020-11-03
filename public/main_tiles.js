@@ -58,8 +58,8 @@ fetch('https://geodata.nationaalgeoregister.nl/wmts?request=GetCapabilities').th
     map.addInteraction(select);
     select.on('select', function (e) {
         console.log('Selected: ' + e.selected[0].get('tile_id'));
-        var filename = e.selected[0].get('tile_id')+'.json.gz';
-        window.location.href = 'http://godzilla.bk.tudelft.nl/v20100/'+filename;
+        var filename = e.selected[0].get('tile_id')+'.json';
+        window.location.href = 'https://3d.bk.tudelft.nl/3dbag/v20100/'+filename;
     });
     }
 });
