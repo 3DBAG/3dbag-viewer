@@ -526,10 +526,10 @@
     </p>
 
     <h3 class="title is-5">
-      Why are these buildings are missing or outdated?
+      Why is my house missing or outdated?
     </h3>
     <p class="content">
-      Due to the AHN3 source point cloud that was used to generate the 3D BAG, in some places the elevation information may be up to 6 years old (2014). Buildings that were constructed more recently will not be visible in the 3D BAG.
+      Due to the AHN3 source point cloud that was used to generate the 3D BAG, in some places the elevation information may be up to 6 years old (2014). Buildings that were constructed more recently will not be visible in the 3D BAG. See also the <a href="https://www.ahn.nl/kwaliteitsbeschrijving">AHN website</a> (figure 1c).
     </p>
 
     <h3 class="title is-5">
@@ -591,14 +591,15 @@
 
     <ul>
       <li> Amsterdam Institute for Advanced Metropolitan Solutions (AMS) </li>
-      <li> European Research Council (ERC) under
-      the European Unions Horizon2020 Research & Innovation Programme
-      (grant agreement no. 677312 UMnD: Urban modelling in higher dimensions).</li>
+      <li>
+        European Research Council (ERC) under
+        the European Unions Horizon2020 Research & Innovation Programme
+        (grant agreement no. 677312 UMnD: Urban modelling in higher dimensions).
+      </li>
       <li> Kadaster </li>
       <li> Rijksinstituut voor Volksgezondheid en Milieu </li>
       <li> Rijkswaterstaat </li>
     </ul>
-
   </section>
 </template>
 
