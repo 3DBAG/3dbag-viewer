@@ -550,7 +550,7 @@
       What software was used to generate and publish the 3D BAG?
     </h3>
 
-    <p>Data reconstruction is done entirely by us. This website was developed by ourselves, using the following libraries:</p>
+    <p>We use our own <a href="https://github.com/geoflow3d">software</a> for building reconstruction. On the server side the dataset is stored in a PostgreSQL/PostGIS database. For the development of this <a href="https://github.com/tudelft3d/3dbag-viewer/">website</a> which include a 3D viewer we made use of the following open source software projects.</p>
 
     <ul>
       <li> <a href="https://github.com/NASA-AMMOS/3DTilesRendererJS">3DTilesRendererJS</a> by NASA AMMOS is used for displaying the buildings.</li>
