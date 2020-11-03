@@ -521,6 +521,7 @@
         <li> Some buildings have spikes; big peaks in the building geometry or a triangle that has one erroneous coordinate. </li>
         <li> Not all buildings are geometrically valid (eg. missing faces). Note that this should be evident from the <code>val3dity_codes</code> attribute. </li>
         <li> Some building tiles may be missing. </li>
+        <li> Some buildings may be duplicated. </li>
       </ol>
     </p>
 
@@ -546,10 +547,28 @@
     </ul>
 
     <h3 class="title is-5">
-      What is the relation to the 3D Basisvoorziening data of the Kadaster?
+      What is the relation to the 3D Basisvoorziening data of the Kadaster? Why is this
+      3D BAG not on PDOK?
     </h3>
     <p>
-      todo
+      In some sense this data is on PDOK too, because we develop the tools and
+      algorithms that the Kadaster uses for reconstructing the 3D models in the
+      3D Basisvoorziening, and the same algorithms are used for creating this
+      3D BAG too.
+    </p>
+
+    <p>
+      However, we continuously improve and experiment with our methods and maintaining
+      our own data and service allows us to integrate changes immediately and retain
+      full control over the process. These experiments take some time until they are
+      ironed out and find their way into the 3D Basisvoorziening, if at all.
+    </p>
+
+    <p>
+      Additionally, for the 3D Basisvoorziening the Kadaster uses their own point
+      cloud that is generated with dense image matching on the aerial images that they
+      collect each year. However, this is not open data. Therefore we use the AHN for
+      this 3D BAG.
     </p>
 
     <h3 class="title is-5">
