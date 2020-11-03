@@ -583,13 +583,22 @@
     </p>
 
     <h3 class="title is-5">
-      Who pays for this?
+      Who paid for this?
     </h3>
     <p>
-      This project has received funding from the European Research Council (ERC) under
-      the European Unions Horizon2020 Research & Innovation Programme
-      (grant agreement no. 677312 UMnD: Urban modelling in higher dimensions).
+      This project has received funding from the following organisations (in alphabetic order):
     </p>
+
+    <ul>
+      <li> Amsterdam Institute for Advanced Metropolitan Solutions (AMS) </li>
+      <li> European Research Council (ERC) under
+      the European Unions Horizon2020 Research & Innovation Programme
+      (grant agreement no. 677312 UMnD: Urban modelling in higher dimensions).</li>
+      <li> Kadaster </li>
+      <li> Rijksinstituut voor Volksgezondheid en Milieu </li>
+      <li> Rijkswaterstaat </li>
+    </ul>
+
   </section>
 </template>
 
