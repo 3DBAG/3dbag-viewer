@@ -547,6 +547,17 @@
     </ul>
 
     <h3 class="title is-5">
+      What software was used to generate and publish the 3D BAG?
+    </h3>
+
+    <p>Data reconstruction is done entirely by us. This website was developed by ourselves, using the following libraries:</p>
+
+    <ul>
+      <li> <a href="https://github.com/NASA-AMMOS/3DTilesRendererJS">3DTilesRendererJS</a> by NASA AMMOS is used for displaying the buildings.</li>
+      <li> <a href="https://github.com/Geodan/pg2b3dm/">pg2b3dm</a> by Geodan is used to export our data to 3D tiles.</li>
+    </ul>
+
+    <h3 class="title is-5">
       What is the relation to the 3D Basisvoorziening data of the Kadaster? Why is this
       3D BAG not on PDOK?
     </h3>
