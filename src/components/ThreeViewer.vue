@@ -87,36 +87,35 @@ function batchIdHighlightShaderMixin( shader ) {
 		`
 			attribute float _batchid;
       attribute float attrValue;
-			varying float batchid;
-			varying float attrValue_;
+			uniform float valMin;
+			uniform float valMax;
+			uniform float opacity;
+			uniform float highlightedBatchId;
+			uniform vec3 highlightColor;
+      uniform sampler2D colormap;
+			varying vec4 diffuseColor_;
 		` +
 		newShader.vertexShader.replace(
 			/#include <uv_vertex>/,
 			`
 			#include <uv_vertex>
-			batchid = _batchid;
-			attrValue_ = attrValue;
+			float texCoord = (attrValue - valMin)/(valMax-valMin);
+      vec3 diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
+			diffuseColor_ =
+				_batchid == highlightedBatchId ?
+				vec4( highlightColor, opacity ) :
+				vec4( diffuse_, opacity );
 			`
 		);
 	newShader.fragmentShader =
 		`
-			varying float batchid;
-			varying float attrValue_;
-			uniform float valMin;
-			uniform float valMax;
-			uniform float highlightedBatchId;
-			uniform vec3 highlightColor;
-      uniform sampler2D colormap;
+			varying vec4 diffuseColor_;
+      
 		` +
 		newShader.fragmentShader.replace(
 			/vec4 diffuseColor = vec4\( diffuse, opacity \);/,
 			`
-      float texCoord = (attrValue_ - valMin)/(valMax-valMin);
-      vec3 diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
-			vec4 diffuseColor =
-				abs( batchid - highlightedBatchId ) < 0.5 ?
-				vec4( highlightColor, opacity ) :
-				vec4( diffuse_, opacity );
+			vec4 diffuseColor = diffuseColor_;
 			`
 		);
 
@@ -333,11 +332,13 @@ export default {
 			fac.addInput( this, "colorAttrMinVal" ).on( 'change', ( val ) => {
 
 				this.material.uniforms.valMin.value = parseFloat( val );
+				this.highlightMaterial.uniforms.valMin.value = parseFloat( val );
 
 			} );
 			fac.addInput( this, "colorAttrMaxVal" ).on( 'change', ( val ) => {
 
 				this.material.uniforms.valMax.value = parseFloat( val );
+				this.highlightMaterial.uniforms.valMax.value = parseFloat( val );
 
 			} );
 			fac.addInput( this, "colorAttrName", { options: { rmse: "_rmse", m2pc_error_max: "_m2pc_error_max", t_run: "_t_run" } } );
