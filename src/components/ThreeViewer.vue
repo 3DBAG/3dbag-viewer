@@ -157,7 +157,7 @@ export default {
 		this.markerName = "locationMarker";
 		this.selectedObject = null;
 
-		this.enableAttributeColoring = false;
+		this.enableAttributeColoring = true;
 		this.colorAttrMinVal = 0.0;
 		this.colorAttrMaxVal = 1.0;
 		this.colorAttrName = "_rmse";
