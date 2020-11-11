@@ -49,80 +49,6 @@ import markerSprite from '@/assets/locationmarker.png';
 
 const Tweakpane = require( 'tweakpane' );
 
-// Adjusts the three.js standard shader to include batchid highlight
-function batchIdHighlightShaderMixin( shader ) {
-
-	const newShader = { ...shader };
-	const cmlut = new Lut( 'rainbow', 512 );
-	const cm_data = new Uint8Array( 3 * 512 );
-	cmlut.lut.forEach( ( col, i ) => {
-
-		var r = Math.floor( col.r * 255 );
-		var g = Math.floor( col.g * 255 );
-		var b = Math.floor( col.b * 255 );
-
-		var stride = i * 3;
-
-		cm_data[ stride ] = r;
-		cm_data[ stride + 1 ] = g;
-		cm_data[ stride + 2 ] = b;
-
-	} );
-	const cm = new DataTexture( cm_data, 512, 1, RGBFormat );
-
-	newShader.uniforms = {
-		valMin: { value: 0.0 },
-		valMax: { value: 0.5 },
-		colormap: { type: "t", value: cm },
-		highlightedBatchId: { value: - 1 },
-		highlightColor: { value: new Color( 0xFFC107 ).convertSRGBToLinear() },
-		...UniformsUtils.clone( shader.uniforms ),
-	};
-	newShader.extensions = {
-		derivatives: true,
-	};
-	newShader.lights = true;
-	newShader.fog = true;
-	newShader.vertexShader =
-		`
-			attribute float _batchid;
-      attribute float attrValue;
-			uniform float valMin;
-			uniform float valMax;
-			uniform float opacity;
-			uniform float highlightedBatchId;
-			uniform vec3 highlightColor;
-      uniform sampler2D colormap;
-			varying vec4 diffuseColor_;
-		` +
-		newShader.vertexShader.replace(
-			/#include <uv_vertex>/,
-			`
-			#include <uv_vertex>
-			float texCoord = (attrValue - valMin)/(valMax-valMin);
-      vec3 diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
-			diffuseColor_ =
-				_batchid == highlightedBatchId ?
-				vec4( highlightColor, opacity ) :
-				vec4( diffuse_, opacity );
-			`
-		);
-	newShader.fragmentShader =
-		`
-			varying vec4 diffuseColor_;
-      
-		` +
-		newShader.fragmentShader.replace(
-			/vec4 diffuseColor = vec4\( diffuse, opacity \);/,
-			`
-			vec4 diffuseColor = diffuseColor_;
-			`
-		);
-
-	return newShader;
-
-}
-
 export default {
 	name: 'ThreeViewer',
 	props: {
@@ -244,6 +170,87 @@ export default {
 
 	},
 	methods: {
+		// Adjusts the three.js standard shader to include batchid highlight
+		batchIdHighlightShaderMixin( shader ) {
+
+			const newShader = { ...shader };
+			const cmlut = new Lut( 'cooltowarm', 512 );
+			const cm_data = new Uint8Array( 3 * 512 );
+			cmlut.lut.forEach( ( col, i ) => {
+
+				var r = Math.floor( col.r * 255 );
+				var g = Math.floor( col.g * 255 );
+				var b = Math.floor( col.b * 255 );
+
+				var stride = i * 3;
+
+				cm_data[ stride ] = r;
+				cm_data[ stride + 1 ] = g;
+				cm_data[ stride + 2 ] = b;
+
+			} );
+			const cm = new DataTexture( cm_data, 512, 1, RGBFormat );
+
+			newShader.uniforms = {
+				valMin: { value: this.colorAttrMinVal },
+				valMax: { value: this.colorAttrMaxVal },
+				enableAttributeColoring: { value: this.enableAttributeColoring },
+				colormap: { type: "t", value: cm },
+				highlightedBatchId: { value: - 1 },
+				highlightColor: { value: new Color( 0xFFC107 ).convertSRGBToLinear() },
+				...UniformsUtils.clone( shader.uniforms ),
+			};
+			newShader.extensions = {
+				derivatives: true,
+			};
+			newShader.lights = true;
+			newShader.fog = true;
+			newShader.vertexShader =
+				`
+					attribute float _batchid;
+					attribute float attrValue;
+					uniform float valMin;
+					uniform float valMax;
+					uniform float opacity;
+					uniform vec3 diffuse;
+					uniform int enableAttributeColoring;
+					uniform float highlightedBatchId;
+					uniform vec3 highlightColor;
+					uniform sampler2D colormap;
+					varying vec4 diffuseColor_;
+				` +
+				newShader.vertexShader.replace(
+					/#include <uv_vertex>/,
+					`
+					#include <uv_vertex>
+					vec3 diffuse_;
+					if ( enableAttributeColoring != 0 ) {
+						float texCoord = (attrValue - valMin)/(valMax-valMin);
+						diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
+					} else {
+						diffuse_ = diffuse;
+					}
+					diffuseColor_ =
+						_batchid == highlightedBatchId ?
+						vec4( highlightColor, opacity ) :
+						vec4( diffuse_, opacity );
+					`
+				);
+			newShader.fragmentShader =
+				`
+					varying vec4 diffuseColor_;
+					
+				` +
+				newShader.fragmentShader.replace(
+					/vec4 diffuseColor = vec4\( diffuse, opacity \);/,
+					`
+					vec4 diffuseColor = diffuseColor_;
+					`
+				);
+
+			return newShader;
+
+		},
 		initTweakPane() {
 
 			var el = document.getElementById( "debug-panel" );
@@ -328,7 +335,18 @@ export default {
 				expanded: false,
 				title: 'AttributeColoring',
 			} );
-			fac.addInput( this, "enableAttributeColoring" );
+			fac.addInput( this, "enableAttributeColoring" ).on( 'change', ( val ) => {
+
+				this.material.uniforms.enableAttributeColoring.value = val;
+				this.highlightMaterial.uniforms.enableAttributeColoring.value = val;
+
+				if ( val ) {
+
+					this.reinitTiles();
+
+				}
+
+			} );
 			fac.addInput( this, "colorAttrMinVal" ).on( 'change', ( val ) => {
 
 				this.material.uniforms.valMin.value = parseFloat( val );
@@ -341,8 +359,11 @@ export default {
 				this.highlightMaterial.uniforms.valMax.value = parseFloat( val );
 
 			} );
-			fac.addInput( this, "colorAttrName", { options: { rmse: "_rmse", m2pc_error_max: "_m2pc_error_max", t_run: "_t_run" } } );
+			fac.addInput( this, "colorAttrName", { options: { rmse: "_rmse", m2pc_error_max: "_m2pc_error_max", t_run: "_t_run" } } ).on( 'change', ( val ) => {
 
+				this.reinitTiles();
+
+			} );
 			// stats
 			const f7 = this.pane.addFolder( {
 				expanded: false,
@@ -540,7 +561,11 @@ export default {
 
 						}
 
-						this.setTileAttributes( s, c );
+						if ( this.enableAttributeColoring ) {
+
+							this.setTileAttributes( s, c );
+
+						}
 
 					}
 
@@ -588,10 +613,10 @@ export default {
 			this.scene.background = new Color( this.fogColor );
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
 
-			this.material = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
+			this.material = new ShaderMaterial( this.batchIdHighlightShaderMixin( ShaderLib.lambert ) );
 			this.material.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
 
-			this.highlightMaterial = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
+			this.highlightMaterial = new ShaderMaterial( this.batchIdHighlightShaderMixin( ShaderLib.lambert ) );
 			this.highlightMaterial.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
 
 			let canvas = document.getElementById( "canvas" );
