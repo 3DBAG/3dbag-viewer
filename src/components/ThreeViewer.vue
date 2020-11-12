@@ -174,7 +174,7 @@ export default {
 		batchIdHighlightShaderMixin( shader ) {
 
 			const newShader = { ...shader };
-			const cmlut = new Lut( 'cooltowarm', 512 );
+			const cmlut = new Lut( 'grayscale', 512 );
 			const cm_data = new Uint8Array( 3 * 512 );
 			cmlut.lut.forEach( ( col, i ) => {
 
@@ -225,7 +225,8 @@ export default {
 					#include <uv_vertex>
 					vec3 diffuse_;
 					if ( enableAttributeColoring != 0 ) {
-						float texCoord = (attrValue - valMin)/(valMax-valMin);
+						float texCoord = (attrValue - valMin)/(valMax - valMin);
+						texCoord = clamp(texCoord, 0.0, 1.0);
 						diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
 					} else {
 						diffuse_ = diffuse;
