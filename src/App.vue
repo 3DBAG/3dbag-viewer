@@ -82,13 +82,10 @@
               >
                 Attributes
               </router-link>
-              <router-link
-                to="/docs#faq"
-                class="navbar-item"
-              >
-                FAQ
-              </router-link>
             </div>
+            <ul class="navbar-nav ml-auto">
+              <LocaleSwitcher />
+            </ul>
           </div>
         </div>
       </div>
@@ -146,20 +143,33 @@
 
 <script>
 
+import LocaleSwitcher from './components/LocaleSwitcher';
+
 export default {
 
 	name: 'App',
+  	components: {
+		LocaleSwitcher,
+	},
 
 	data() {
 
 		return {
 
 			showBurgerMenu: false,
-			showWelcome: true
+			showWelcome: true,
 
 		};
 
-	}
+	},
+
+	computed: {
+		currentLocale() {
+
+			return this.$route.params.locale;
+
+		},
+	},
 
 };
 </script>
