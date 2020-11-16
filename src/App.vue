@@ -83,10 +83,8 @@
                 Attributes
               </router-link>
             </div>
-            <ul class="navbar-nav ml-auto">
-              <LocaleSwitcher />
-            </ul>
           </div>
+          <LocaleSwitcher />
         </div>
       </div>
     </nav>
