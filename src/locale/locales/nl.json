@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "3dmap": "3D kaart",
+    "download": "Download",
+	"docs": "Docs",
+	"features": "Features",
+	"attributes": "Attributen"
+  },
+  "viewer": {
+	"feedback": "Geef feedback",
+	"issue": "Rapporteer dataprobleem",
+	"baselayer1": "Basislaag van",
+	"3dgeoinfo1": "3DBAG door de",
+	"3dgeoinfo2": "3D geoinformation groep",
+	"baselayer2": "Basislaag"
+  },
+    "SearchBar": {
+	"search": "Zoeken",
+	"empty": "Geen resultaten gevonden"
+	}
+}

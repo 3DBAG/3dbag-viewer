@@ -50,14 +50,14 @@
             active-class="is-active"
             class="navbar-item"
           >
-            3D Map
+            {{ $t("nav.3dmap") }}
           </router-link>
           <router-link
             to="/download"
             active-class="is-active"
             class="navbar-item"
           >
-            Download
+            {{ $t("nav.download") }}
           </router-link>
           <div
             class="navbar-item has-dropdown is-hoverable"
@@ -67,20 +67,20 @@
               active-class="is-active"
               class="navbar-link"
             >
-              Docs
+              {{ $t("nav.docs") }}
             </router-link>
             <div class="navbar-dropdown">
               <router-link
                 to="/docs#features"
                 class="navbar-item"
               >
-                Features
+                {{ $t("nav.features") }}
               </router-link>
               <router-link
                 to="/docs#attributes"
                 class="navbar-item"
               >
-                Attributes
+                {{ $t("nav.attributes") }}
               </router-link>
             </div>
           </div>

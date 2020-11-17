@@ -6,8 +6,8 @@
     >
       <DropDownSelector
         v-model="basemapPreset"
-        title="Baselayer"
         :options="basemaps"
+        :title="$t('viewer.baselayer2')"
       />
       <DropDownSelector
         v-model="tileset"
@@ -42,7 +42,7 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          Give feedback
+          {{ $t("viewer.feedback") }}
         </a> |
         <a
           class="tag is-danger"
@@ -50,10 +50,10 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          Report data issue
+          {{ $t("viewer.issue") }}
         </a> |
         <span v-if="basemapOptions.attribution">
-          Baselayer from
+          {{ $t("viewer.baselayer1") }}
           <a
             v-if="basemapOptions.attributionURL"
             href="https://www.pdok.nl/"
@@ -64,7 +64,7 @@
             {{ basemapOptions.attribution }}
           </span> |
         </span>
-        3DBAG by the <a href="https://3d.bk.tudelft.nl/">3D geoinformation group</a>
+        {{ $t("viewer.3dgeoinfo1") }} <a href="https://3d.bk.tudelft.nl/">{{ $t("viewer.3dgeoinfo2") }}</a>
       </p>
     </div>
     <div id="debug-panel" />

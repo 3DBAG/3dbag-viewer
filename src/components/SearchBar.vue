@@ -5,13 +5,13 @@
     field="weergavenaam"
     :data="geocodeResult"
     :loading="isGeocoding"
-    placeholder="Search"
+    :placeholder="$t('SearchBar.search')"
     icon-right="magnify"
     @typing="doGeocode"
     @select="selectPlace"
   >
     <template slot="empty">
-      No results found
+      {{ $t("SearchBar.empty") }}
     </template>
     <template slot-scope="props">
       <div class="media">
