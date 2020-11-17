@@ -86,13 +86,13 @@ router.beforeEach( ( to, from, next )=> {
 
 			i18n.locale = from.params.locale;
 
-			next( { name: routeNames[ routeIndex ], hash: to.hash, params: { locale: from.params.locale } } );
+			next( { name: routeNames[ routeIndex ], query: to.query, hash: to.hash, params: { locale: from.params.locale } } );
 
 		} else if ( routeIndex != - 1 ) {
 
 			i18n.locale = i18n.fallbackLocale;
 
-			next( { name: routeNames[ routeIndex ], hash: to.hash, params: { locale: i18n.fallbackLocale } } );
+			next( { name: routeNames[ routeIndex ], query: to.query, hash: to.hash, params: { locale: i18n.fallbackLocale } } );
 
 		} else next( "/" );
 
