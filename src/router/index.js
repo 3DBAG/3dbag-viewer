@@ -3,8 +3,7 @@ import Router from 'vue-router';
 import ThreeViewer from '@/pages/Viewer';
 import Documentation from '@/pages/Documentation';
 import DownloadView from '@/pages/DownloadView';
-import { defaultLocale } from '../locale/i18n';
-import { locales } from '../locale/i18n';
+import i18n from "@/locale/i18n";
 
 Vue.use( Router );
 
@@ -12,7 +11,7 @@ const router = new Router( {
 	routes: [
 		{
 			path: '/',
-			redirect: `/${defaultLocale}/viewer`,
+			redirect: `/${i18n.fallbackLocale}/viewer`,
 		},
 		{
 			path: '/:locale',
@@ -73,26 +72,19 @@ for ( var i = 0; i < routes.length; i ++ ) {
 
 router.beforeEach( ( to, from, next )=> {
 
-	const localeCodes = [];
-	for ( var i = 0; i < locales.length; i ++ ) {
-
-		localeCodes.push( locales[ i ].code );
-
-	}
-
 	// Check if locale is valid or otherwise if the route directs to an existing page
-	if ( ! localeCodes.includes( to.params.locale ) ) {
+	if ( ! i18n.availableLocales.includes( to.params.locale ) ) {
 
 		const routeNamesLower = routeNames.map( a => a.toLowerCase() );
 		const routeIndex = routeNamesLower.indexOf( to.params.locale.toLowerCase() );
 
-		if ( routeIndex != - 1 && localeCodes.includes( from.params.locale ) ) {
+		if ( routeIndex != - 1 && i18n.availableLocales.includes( from.params.locale ) ) {
 
 			next( { name: routeNames[ routeIndex ], hash: to.hash, params: { locale: from.params.locale } } );
 
 		} else if ( routeIndex != - 1 ) {
 
-			next( { name: routeNames[ routeIndex ], hash: to.hash, params: { locale: defaultLocale } } );
+			next( { name: routeNames[ routeIndex ], hash: to.hash, params: { locale: i18n.fallbackLocale } } );
 
 		} else next( "/" );
 
