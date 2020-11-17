@@ -7,12 +7,12 @@
     </a>
     <div class="navbar-dropdown">
       <router-link
-        v-for="locale in locales"
-        :key="locale.code"
-        :to="createRoute( locale.code )"
+        v-for="locale in $i18n.availableLocales"
+        :key="locale"
+        :to="createRoute( locale )"
         class="dropdown-item"
       >
-        <span class="locale-name">{{ locale.name }}</span>
+        <span class="locale-name">{{ locale }}</span>
       </router-link>
     </div>
   </div>

@@ -80,16 +80,26 @@ router.beforeEach( ( to, from, next )=> {
 
 		if ( routeIndex != - 1 && i18n.availableLocales.includes( from.params.locale ) ) {
 
+			i18n.locale = from.params.locale;
+
 			next( { name: routeNames[ routeIndex ], hash: to.hash, params: { locale: from.params.locale } } );
 
 		} else if ( routeIndex != - 1 ) {
+
+			i18n.locale = i18n.fallbackLocale;
 
 			next( { name: routeNames[ routeIndex ], hash: to.hash, params: { locale: i18n.fallbackLocale } } );
 
 		} else next( "/" );
 
 
-	} else next();
+	} else {
+
+		i18n.locale = to.params.locale;
+
+		next();
+
+	}
 
 } );
 
