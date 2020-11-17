@@ -1,26 +1,16 @@
 <template>
-  <div
-    class="navbar-item has-dropdown is-hoverable"
-  >
-    <a class="navbar-link">
-      Language
-    </a>
-    <div class="navbar-dropdown">
-      <router-link
-        v-for="locale in $i18n.availableLocales"
-        :key="locale"
-        :to="createRoute( locale )"
-        class="dropdown-item"
-      >
-        <span class="locale-name">{{ locale }}</span>
-      </router-link>
-    </div>
+  <div class="buttons">
+    <b-button
+      tag="router-link"
+      :to="createRoute( otherLocale )"
+      type="is-link"
+    >
+      <span>{{ localeName( otherLocale ) }}</span>
+    </b-button>
   </div>
 </template>
 
 <script>
-
-import { locales } from '../locale/i18n';
 
 export default {
 
@@ -29,15 +19,24 @@ export default {
 	data() {
 
 		return {
-			locales,
 		};
 
 	},
 
 	computed: {
-		currentLocale() {
+		otherLocale() {
 
-			return this.$route.params.locale;
+			for ( var i = 0; i < this.$i18n.availableLocales.length; i ++ ) {
+
+				if ( this.$i18n.availableLocales[ i ] != this.$i18n.locale ) {
+
+					return this.$i18n.availableLocales[ i ];
+
+				}
+
+			}
+
+			return this.$i18n.fallbackLocale;
 
 		},
 	},
@@ -52,15 +51,15 @@ export default {
 
 			return routeParams.join( "/" ) + hash;
 
-		}
+		},
+		localeName( locale ) {
+
+			const localeNames = { "en": "English", "nl": "Nederlands" };
+
+			return localeNames[ locale ];
+
+		},
 
 	}
 };
 </script>
-
-<style scoped>
-    .locale-name {
-        display: inline-block;
-        vertical-align: baseline;
-    }
-</style>
