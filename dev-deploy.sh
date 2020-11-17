@@ -13,6 +13,6 @@ git init
 git add -A
 git commit -m 'deploy'
 
-rsync -rzhP . godzilla:/var/www/3dbag-viewer
+rsync -rzhP --exclude=".*" . godzilla:/var/www/3dbag-viewer
 
 cd -
