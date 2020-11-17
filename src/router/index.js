@@ -54,6 +54,7 @@ const router = new Router( {
 	},
 } );
 
+var previousQuery;
 const routes = router.options.routes;
 var routeNames = [];
 for ( var i = 0; i < routes.length; i ++ ) {
@@ -71,6 +72,9 @@ for ( var i = 0; i < routes.length; i ++ ) {
 }
 
 router.beforeEach( ( to, from, next )=> {
+
+	if ( Object.keys( from.query ).length != 0 )
+		previousQuery = from.query;
 
 	// Check if locale is valid or otherwise if the route directs to an existing page
 	if ( ! i18n.availableLocales.includes( to.params.locale ) ) {
@@ -93,7 +97,14 @@ router.beforeEach( ( to, from, next )=> {
 		} else next( "/" );
 
 
-	} else {
+	} else if ( from.name != "Viewer" && to.name == "Viewer" && previousQuery != undefined ) {
+
+		var queryCopy = JSON.parse( JSON.stringify( previousQuery ) );
+		previousQuery = undefined;
+
+		next( { name: "Viewer", query: queryCopy, params: { locale: i18n.locale } } );
+
+	}	else {
 
 		i18n.locale = to.params.locale;
 
