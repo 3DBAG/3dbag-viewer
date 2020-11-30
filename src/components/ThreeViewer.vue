@@ -37,8 +37,6 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
-import throttle from 'lodash/throttle';
-// Image from https://uxwing.com/maps-pin-black-icon/
 import markerSprite from '@/assets/locationmarker.png';
 
 const Tweakpane = require( 'tweakpane' );
@@ -710,14 +708,14 @@ export default {
 			this.needsRerender = 1;
 
 		},
-		updateTerrain: throttle( function () {
+		updateTerrain: function () {
 
 			const transform = this.tiles.root.cached.transform;
 			const sceneTransform = new Vector2( transform.elements[ 12 ], transform.elements[ 13 ] );
 
 			this.terrainTiles.update( sceneTransform, this.camera );
 
-		}, 200 ),
+		},
 		renderScene() {
 
 			requestAnimationFrame( this.renderScene );
