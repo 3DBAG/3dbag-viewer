@@ -27,9 +27,39 @@ export class benchmarker {
 
 	}
 
+	filterOutliers( someArray ) {
+
+		if ( someArray.length < 4 )
+		  return someArray;
+
+		let values, q1, q3, iqr, maxValue, minValue;
+
+		values = someArray.slice().sort( ( a, b ) => a - b );//copy array fast and sort
+
+		if ( ( values.length / 4 ) % 1 === 0 ) { //find quartiles
+
+		  q1 = 1 / 2 * ( values[ ( values.length / 4 ) ] + values[ ( values.length / 4 ) + 1 ] );
+		  q3 = 1 / 2 * ( values[ ( values.length * ( 3 / 4 ) ) ] + values[ ( values.length * ( 3 / 4 ) ) + 1 ] );
+
+		} else {
+
+		  q1 = values[ Math.floor( values.length / 4 + 1 ) ];
+		  q3 = values[ Math.ceil( values.length * ( 3 / 4 ) + 1 ) ];
+
+		}
+
+		iqr = q3 - q1;
+		maxValue = q3 + iqr * 1.5;
+		minValue = q1 - iqr * 1.5;
+
+		return values.filter( ( x ) => ( x >= minValue ) && ( x <= maxValue ) );
+
+	}
+
+
 	async benchmark() {
 
-		const compressionTypes = [ "original", "draco", "gzip", "gzip-pre" ];
+		const compressionTypes = [ "original", "draco", "gzip", "gzip-pre", "draco-gzip" ];
 		const tileIDs = [ '39862', '26118', '54290', '47253', '26474', '59880', '55103', '35044', '26441', '48910', '45791', '56056',
 			'40916', '31132', '25220', '76721', '44837', '27019', '22172', '21253', '23708', '21237', '31930', '19102', '66653',
 			'28580', '50812', '39952', '43555', '24914', '55797', '33197', '28907', '36303', '31731', '43306', '66527', '37743',
@@ -97,7 +127,7 @@ export class benchmarker {
 				}
 
 				var mb = buf.byteLength / 1000000;
-				var avg = average( times.original ) / 1000;
+				var avg = average( this.filterOutliers( times.original ) ) / 1000;
 
 				results[ compressionType ].id.push( tileID );
 				results[ compressionType ].mean.push( avg );
