@@ -621,7 +621,13 @@ export default {
 				this.highlightMaterial.uniforms.valMax.value = parseFloat( val );
 
 			} );
-			fac.addInput( this, "colorAttrName", { options: { rmse: "_rmse", m2pc_error_max: "_m2pc_error_max", t_run: "_t_run" } } ).on( 'change', ( val ) => {
+			fac.addInput( this, "colorAttrName", { options: {
+				rmse: "_rmse",
+				m2pc_error_max: "_m2pc_error_max",
+				t_run: "_t_run",
+				data_coverage: "_data_coverage",
+				nodata_area: "_nodata_area"
+			} } ).on( 'change', ( val ) => {
 
 				this.reinitTiles();
 
