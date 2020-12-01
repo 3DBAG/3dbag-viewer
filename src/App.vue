@@ -106,7 +106,7 @@
         </header>
         <section class="modal-card-body">
           <div class="content">
-            <p>This is the first beta release of the renewed version of the 3D BAG service.</p>
+            <p>This is a beta release of the renewed version of the 3D BAG service.</p>
             <ul>
               <li>Everything is still under development. Expect broken things.</li>
               <li>We'll release an improved version of 3DBAG at least once every month.</li>
@@ -129,7 +129,6 @@
             </h2>
             <ul>
               <li>Please do not publicly share or promote this website at this time.</li>
-              <li>Otherwise feel free to do with the data whatever you want.</li>
             </ul>
           </div>
         </section>
