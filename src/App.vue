@@ -82,6 +82,12 @@
               >
                 {{ $t("nav.attributes") }}
               </router-link>
+              <router-link
+                to="/docs#changelog"
+                class="navbar-item"
+              >
+                {{ $t("nav.changelog") }}
+              </router-link>
             </div>
           </div>
           <LocaleSwitcher />
@@ -109,7 +115,12 @@
             <p>This is a beta release of the renewed version of the 3D BAG service.</p>
             <ul>
               <li>Everything is still under development. Expect broken things.</li>
-              <li>We'll release an improved version of 3DBAG at least once every month.</li>
+              <li>We'll release an improved version of 3DBAG once a month.</li>
+              <li>
+                Check the <router-link to="/docs#changelog">
+                  changelog
+                </router-link> for what is new.
+              </li>
               <li>
                 Check the <router-link to="/docs#faq">
                   FAQ
