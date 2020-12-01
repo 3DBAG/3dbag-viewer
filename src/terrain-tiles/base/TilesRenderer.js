@@ -1,15 +1,20 @@
 import {
-	TextureLoader,
-	LinearFilter,
+	Texture,
 	PlaneBufferGeometry,
 	MeshBasicMaterial,
 	Mesh,
-	Group
+	Group,
+	RGBFormat,
+	LinearFilter
 } from 'three';
 
 import {
 	ResourceTracker
 } from './ResourceTracker.js';
+
+import {
+	arrayBuffer2Base64
+} from './ArrayBuffer2Base64.js';
 
 export class TilesRenderer {
 
@@ -20,7 +25,10 @@ export class TilesRenderer {
 		this.resFactor = 8;
 
 		this.tileMatrixLevels = null;
-		this.activeTiles = [];
+		this.activeTiles = new Set();
+		this.downloadQueue = new Map();
+
+		this.tilesInView = null;
 
 		this.group = new Group();
 		this.resourceTracker = new ResourceTracker();
@@ -35,21 +43,49 @@ export class TilesRenderer {
 	update( sceneCenter, camera ) {
 
 		// Get indices of all tiles that are in view
-		var tiles = this.tileScheme.getTilesInView( camera, this.resFactor, sceneCenter );
+		const tiles = this.tileScheme.getTilesInView( camera, this.resFactor, sceneCenter );
+		this.tilesInView = tiles;
 
+		// check if we just changed tileLevel
 		if ( tiles.length && tiles[ 0 ].tileMatrix.level != this.tileLevel ) {
 
 			this.cleanTiles();
 			this.tileLevel = tiles[ 0 ].tileMatrix.level;
+
+		} else {
+
+			// Cancel pending tile downloads that are not in view anymore
+			setTimeout( () => {
+
+				var tidsInView = new Set();
+				this.tilesInView.forEach( function ( ti ) {
+
+					tidsInView.add( ti.getId() );
+
+				} );
+
+				for ( let [ tid, abortCtrl ] of this.downloadQueue.entries() ) {
+
+					if ( ! tidsInView.has( tid ) ) {
+
+						abortCtrl.abort();
+
+					}
+
+				}
+
+			} );
 
 		}
 
 		// Create tiles that hadn't been created yet
 		tiles.forEach( function ( ti ) {
 
-			if ( ! this.activeTiles.includes( ti.getId() ) ) {
+			const tileId = ti.getId();
 
-				this.activeTiles.push( ti.getId() );
+			if ( ! this.activeTiles.has( tileId ) ) {
+
+				this.activeTiles.add( tileId );
 
 				this.createTile( ti, sceneCenter );
 
@@ -70,7 +106,15 @@ export class TilesRenderer {
 
 		this.resourceTracker.dispose();
 
-		this.activeTiles = [];
+		this.activeTiles.clear();
+
+		for ( let abortCtrl of this.downloadQueue.values() ) {
+
+			abortCtrl.abort();
+
+		}
+
+		this.downloadQueue.clear();
 
 	}
 
@@ -85,17 +129,43 @@ export class TilesRenderer {
 		var mesh = new Mesh( geometry, this.tempMaterial );
 		this.group.add( mesh );
 
-		var loader = new TextureLoader();
-
 		const requestURL = this.getRequestURL( tile );
 
-		loader.load( requestURL, ( tex ) => {
+		const scope = this;
+		const tileId = tile.getId();
+		var controller = new AbortController();
+		var signal = controller.signal;
+		this.downloadQueue.set( tileId, controller );
+		fetch( requestURL, { signal } ).then( function ( res ) {
 
-			tex.minFilter = LinearFilter;
-			tex.generateMipmaps = false;
-			var material = new MeshBasicMaterial( { map: this.track( tex ) } );
-			mesh.material = material;
-			this.onLoadTile();
+			scope.downloadQueue.delete( tileId );
+			return res.arrayBuffer();
+
+		} ).then( function ( buffer ) {
+
+			const tex = new Texture();
+			var image = new Image();
+			image.src = 'data:image/png;base64,' + arrayBuffer2Base64( buffer );
+			image.onload = function () {
+
+				tex.image = image;
+				tex.magFilter = LinearFilter;
+				tex.minFilter = LinearFilter;
+				tex.generateMipmaps = false;
+				tex.needsUpdate = true;
+				tex.format = RGBFormat;
+				var material = new MeshBasicMaterial( { map: scope.track( tex ) } );
+				mesh.material = material;
+				scope.onLoadTile();
+
+			};
+
+		} ).catch( function ( e ) {
+
+			// we end up here if abort() is called on the Abortcontroller attached to this tile
+			scope.downloadQueue.delete( tileId );
+			scope.activeTiles.delete( tileId );
+			scope.resourceTracker.untrack( geometry );
 
 		} );
 

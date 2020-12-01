@@ -1,3 +1,5 @@
+
+
 <template>
   <section class="section content">
     <h1
@@ -263,7 +265,35 @@
               square metre
             </td>
             <td>
-              Area in footprint that has a roofplane above it (<code>nodata area = total footprint area - data_area</code>).
+              Area in footprint that has a roofplane above it.
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              10
+            </td>
+            <td>
+              _nodata_area
+            </td>
+            <td>
+              square metre
+            </td>
+            <td>
+              Area in footprint that has no roofplane above it (<code>nodata area = total footprint area - data_area</code>).
+            </td>
+          </tr>
+          <tr class="odd">
+            <td>
+              10
+            </td>
+            <td>
+              _data_coverage
+            </td>
+            <td>
+              percentage
+            </td>
+            <td>
+              Percentage of footprint area that has a roofplane above it.
             </td>
           </tr>
           <tr class="odd">
@@ -490,7 +520,6 @@
       </table>
     </div>
 
-
     <h1
       id="faq"
       class="title is-3"
@@ -517,7 +546,6 @@
     <p>
       Yes!
       <ol type="1">
-        <li> Wrong face orientation (inverted normals) on LoD1.2 buildings. To verify the LoD of a building check the <code>lod</code> attribute (also the non-LoD1.2 layers have some LoD1.2 buildings). </li>
         <li> Some buildings have spikes; big peaks in the building geometry or a triangle that has one erroneous coordinate. </li>
         <li> Not all buildings are geometrically valid (eg. missing faces). Note that this should be evident from the <code>val3dity_codes</code> attribute. </li>
         <li> Some building tiles may be missing. </li>
@@ -600,6 +628,34 @@
       <li> Rijksinstituut voor Volksgezondheid en Milieu </li>
       <li> Rijkswaterstaat </li>
     </ul>
+
+    <h1
+      id="changelog"
+      class="title is-3"
+    >
+      Changelog
+    </h1>
+    <h3
+      id="v20110"
+      class="title is-5"
+    >
+      v20.11.0
+    </h3>
+    <p>
+      New features:
+      <ol type="1">
+        <li> New attributes relative data_area (<code>_data_coverage</code>) and absolute no-data area (<code>_nodata_area</code>) </li>
+        <li> Improved loading of WMTS tiles in 3D viewer (<a href="https://github.com/tudelft3d/3dbag-viewer/issues/20">#20</a>) </li>
+        <li> Internationalisation support for website (<a href="https://github.com/tudelft3d/3dbag-viewer/issues/36">#36</a>) </li>
+        <li> Preserve location in 3D map when switching between website pages (<a href="https://github.com/tudelft3d/3dbag-viewer/issues/27">#27</a>) </li>
+        <li> B3dm tiles are now pre-compressed (gzip) on the server side (<a href="https://github.com/tudelft3d/3dbag-viewer/issues/35">#35</a>) </li>
+        <li> Report active tileset to data issue form </li>
+      </ol>
+      Fixed the following issues:
+      <ol type="1">
+        <li> Wrong face orientation (inverted normals) on LoD1.2 buildings. </li>
+      </ol>
+    </p>
   </section>
 </template>
 
