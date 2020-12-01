@@ -169,7 +169,7 @@ export default {
 
 			const sources = {
 				lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/v20110_lod22/tileset_qt.json',
-				lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/v20100_lod13/tileset_qt.json',
+				lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/v20110_lod13/tileset_qt.json',
 				lod12: 'https://godzilla.bk.tudelft.nl/3dtiles/v20100_lod12/tileset_qt.json',
 			};
 
