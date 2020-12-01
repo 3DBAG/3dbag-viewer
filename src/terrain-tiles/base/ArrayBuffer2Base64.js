@@ -1,3 +1,4 @@
+// from https://gist.github.com/jonleighton/958841
 export function arrayBuffer2Base64( arrayBuffer ) {
 
 	let base64 = '';
