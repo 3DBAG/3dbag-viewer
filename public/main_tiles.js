@@ -62,7 +62,7 @@ fetch('https://geodata.nationaalgeoregister.nl/wmts?request=GetCapabilities').th
             console.log('Selected: ' + tile_id);
             var a = document.getElementById("download-link")
             var filename = tile_id+'.json';
-            a.href = 'https://godzilla.bk.tudelft.nl/v20100/'+filename;
+            a.href = 'https://godzilla.bk.tudelft.nl/v20110/'+filename;
             a.innerHTML = "Download tile " + filename;
             if(!has_clicked) {
                 has_clicked=true;
