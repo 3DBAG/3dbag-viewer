@@ -165,6 +165,7 @@ export class TilesRenderer {
 			// we end up here if abort() is called on the Abortcontroller attached to this tile
 			scope.downloadQueue.delete( tileId );
 			scope.activeTiles.delete( tileId );
+			scope.resourceTracker.untrack( geometry );
 
 		} );
 
