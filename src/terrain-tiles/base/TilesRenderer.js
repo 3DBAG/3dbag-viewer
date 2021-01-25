@@ -33,10 +33,12 @@ export class TilesRenderer {
 		this.group = new Group();
 		this.resourceTracker = new ResourceTracker();
 		this.track = this.resourceTracker.track.bind( this.resourceTracker );
+		this.needsTileLevelClean = false;
 
 		this.onLoadTile = null;
 
 		this.tempMaterial = new MeshBasicMaterial( { color: 0xFFFFFF } );
+		this.tempMaterial.depthWrite = false;
 
 	}
 
@@ -49,7 +51,9 @@ export class TilesRenderer {
 		// check if we just changed tileLevel
 		if ( tiles.length && tiles[ 0 ].tileMatrix.level != this.tileLevel ) {
 
-			this.cleanTiles();
+			this.abortDownloads();
+			this.changeRenderOrder();
+			this.needsTileLevelClean = true;
 			this.tileLevel = tiles[ 0 ].tileMatrix.level;
 
 		} else {
@@ -93,20 +97,30 @@ export class TilesRenderer {
 
 		}, this );
 
+		if ( this.needsTileLevelClean && this.downloadQueue.size == 0 ) {
 
-	}
-
-	cleanTiles() {
-
-		while ( this.group.children.length ) {
-
-			this.group.remove( this.group.children[ 0 ] );
+			this.cleanTileLevels();
 
 		}
 
-		this.resourceTracker.dispose();
+	}
 
-		this.activeTiles.clear();
+	changeRenderOrder() {
+
+		for ( let i = this.group.children.length - 1; i > 0; i -- ) {
+
+			if ( this.group.children[ i ].name != this.tileLevel ) {
+
+				// Place tiles of old tileLevel above temporary (white) tiles, but underneath fully loaded tiles of new tileLevel
+				this.group.children[ i ].renderOrder = 1;
+
+			}
+
+		}
+
+	}
+
+	abortDownloads() {
 
 		for ( let abortCtrl of this.downloadQueue.values() ) {
 
@@ -115,6 +129,34 @@ export class TilesRenderer {
 		}
 
 		this.downloadQueue.clear();
+
+	}
+
+	cleanTileLevels() {
+
+		this.needsOldTileLevelClean = false;
+		const scope = this;
+
+		for ( let i = this.group.children.length - 1; i > 0; i -- ) {
+
+			if ( this.group.children[ i ].name != this.tileLevel ) {
+
+				this.group.remove( this.group.children[ i ] );
+				this.resourceTracker.untrack( this.group.children[ i ] );
+
+			}
+
+		}
+
+		this.activeTiles.forEach( function ( tile ) {
+
+			if ( tile.split( "-" )[ 0 ] != scope.tileLevel ) {
+
+				scope.activeTiles.delete( tile );
+
+			}
+
+		} );
 
 	}
 
@@ -127,6 +169,9 @@ export class TilesRenderer {
 		var geometry = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
 
 		var mesh = new Mesh( geometry, this.tempMaterial );
+		mesh.name = this.tileLevel;
+		// The temporary (white) tiles on the bottom
+		mesh.renderOrder = 0;
 		this.group.add( mesh );
 
 		const requestURL = this.getRequestURL( tile );
@@ -138,10 +183,14 @@ export class TilesRenderer {
 		this.downloadQueue.set( tileId, controller );
 		fetch( requestURL, { signal } ).then( function ( res ) {
 
-			scope.downloadQueue.delete( tileId );
 			return res.arrayBuffer();
 
 		} ).then( function ( buffer ) {
+
+			scope.downloadQueue.delete( tileId );
+
+			// Place tiles of new/current tile level with loaded texture completely on top
+			mesh.renderOrder = 2;
 
 			const tex = new Texture();
 			var image = new Image();
@@ -155,6 +204,7 @@ export class TilesRenderer {
 				tex.needsUpdate = true;
 				tex.format = RGBFormat;
 				var material = new MeshBasicMaterial( { map: scope.track( tex ) } );
+				material.depthWrite = false;
 				mesh.material = material;
 				scope.onLoadTile();
 
