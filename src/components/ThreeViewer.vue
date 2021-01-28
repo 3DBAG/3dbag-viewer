@@ -42,10 +42,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
+// import TWEEN from '@tweenjs/tween.js';
 import markerSprite from '@/assets/locationmarker.png';
 import northArrow from '@/assets/North_Pointer.svg';
 
 const Tweakpane = require( 'tweakpane' );
+const TWEEN = require( '@tweenjs/tween.js' );
 
 // Adjusts the three.js standard shader to include batchid highlight
 function batchIdHighlightShaderMixin( shader ) {
@@ -405,6 +407,8 @@ export default {
 
 			this.scene.add( sprite );
 
+			this.needsRerender = 1;
+
 		},
 		addNorthArrow() {
 
@@ -746,14 +750,39 @@ export default {
 				if ( results.length > 0 ) {
 
 					// Position camera to the south of the point it's focusing on
-					var centre = new Vector2( this.controls.target.x, this.controls.target.z );
-					var pos = new Vector2( this.camera.position.x, this.camera.position.z );
-					var radius = centre.distanceTo( pos );
-					var x = radius * Math.cos( Math.PI / 2 ) + centre.x;
-					var z = radius * Math.sin( Math.PI / 2 ) + centre.y;
+					const centre = new Vector2( this.controls.target.x, this.controls.target.z );
+					const pos = new Vector2( this.camera.position.x, this.camera.position.z );
+					const radius = centre.distanceTo( pos );
+					const x = radius * Math.cos( Math.PI / 2 ) + centre.x;
+					const z = radius * Math.sin( Math.PI / 2 ) + centre.y;
 
-					this.camera.position.x = x;
-					this.camera.position.z = z;
+					const oldPos = { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z };
+					const newPos = { x: x, y: this.camera.position.y, z: z };
+
+					function animate( time ) {
+
+						requestAnimationFrame( animate );
+						TWEEN.update( time );
+
+					}
+					requestAnimationFrame( animate );
+
+					new TWEEN.Tween( oldPos )
+						.to( newPos, 3000 )
+						.easing( TWEEN.Easing.Circular.Out )
+						.onUpdate( () => {
+
+							this.camera.position.x = oldPos.x;
+							this.camera.position.z = oldPos.z;
+							this.camera.lookAt( this.controls.target );
+
+							this.renderer.autoClear = true;
+							this.renderer.render( this.scene, this.camera );
+							this.renderer.autoClear = false;
+							this.renderer.render( this.sceneOrtho, this.cameraOrtho );
+
+						} )
+						.start();
 
 					this.needsRerender = 1;
 
@@ -766,7 +795,7 @@ export default {
 			this.raycaster.setFromCamera( this.mouse, this.camera );
 
 			// check if we are hitting the geocoding marker. Eearly return if that was the case.
-			var marker = this.scene.getObjectByName( this.markerName );
+			const marker = this.scene.getObjectByName( this.markerName );
 
 			if ( marker != undefined ) {
 
