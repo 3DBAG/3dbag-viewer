@@ -25,7 +25,11 @@ import {
 	UniformsUtils,
 	TextureLoader,
 	Sprite,
-	SpriteMaterial
+	SpriteMaterial,
+	Mesh,
+	MeshBasicMaterial,
+	ShapeBufferGeometry,
+	OrthographicCamera
 } from 'three';
 import {
 	TilesRenderer
@@ -37,7 +41,9 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 import markerSprite from '@/assets/locationmarker.png';
+import northArrow from '@/assets/North_Pointer.svg';
 
 const Tweakpane = require( 'tweakpane' );
 
@@ -191,8 +197,6 @@ export default {
 
 		this.enableWMS = true;
 		this.pane = null;
-
-		this.markerName = "locationMarker";
 
 		this.selectedObject = null;
 
@@ -402,6 +406,75 @@ export default {
 			this.scene.add( sprite );
 
 		},
+		addNorthArrow() {
+
+			const canvas = document.getElementById( "canvas" );
+			const scope = this;
+			const loader = new SVGLoader();
+
+			loader.load(
+				northArrow,
+				function ( data ) {
+
+					const paths = data.paths;
+					const group = new Group();
+
+					for ( let i = 0; i < paths.length; i ++ ) {
+
+						const path = paths[ i ];
+
+						const material = new MeshBasicMaterial( {
+							color: path.color,
+							depthWrite: false,
+							depthTest: false
+						} );
+
+						const shapes = path.toShapes( true );
+
+						for ( let j = 0; j < shapes.length; j ++ ) {
+
+							const shape = shapes[ j ];
+							const geometry = new ShapeBufferGeometry( shape );
+							const mesh = new Mesh( geometry, material );
+							const scale = canvas.clientWidth * 0.0001;
+							mesh.scale.set( scale, - scale, scale );
+
+							group.add( mesh );
+
+						}
+
+					}
+
+					group.bbox = new Box3().setFromObject( group );
+					const translate = group.bbox.getCenter().negate();
+
+					for ( let i = 0; i < group.children.length; i ++ ) {
+
+						group.children[ i ].translateX( translate.x );
+						group.children[ i ].translateY( translate.y );
+
+					}
+
+					scope.northArrow = group;
+					scope.positionNorthArrow();
+					scope.sceneOrtho.add( scope.northArrow );
+
+				}
+			);
+
+		},
+		positionNorthArrow() {
+
+			// Position just right from map options bar
+			const mo = document.getElementById( "map-options" );
+			const pos = ( mo.offsetWidth + mo.offsetLeft );
+			const x = this.cameraOrtho.left + pos;
+			const translate = this.northArrow.bbox.getCenter().negate();
+			const maxDim = Math.max( Math.abs( translate.x ), Math.abs( translate.y ) );
+			this.northArrow.position.set( x + maxDim + 5, this.cameraOrtho.top - maxDim - 10, 0 );
+
+
+		},
 		reinitTiles() {
 
 			if ( this.tiles ) {
@@ -588,9 +661,13 @@ export default {
 			//this.hemLight = new HemisphereLight( 0xffffbb, 0x080820, 1 );
 			//this.scene.add(this.hemLight);
 
-			this.offsetParent.rotation.x = - Math.PI / 2;
+			this.sceneOrtho = new Scene();
+			this.cameraOrtho = new OrthographicCamera( - canvas.clientWidth / 2, canvas.clientWidth / 2, canvas.clientHeight / 2, - canvas.clientHeight / 2, 0.1, 10000 );
+			this.cameraOrtho.position.z = 10;
 
-			// this.reinitWms();
+			this.addNorthArrow();
+
+			this.offsetParent.rotation.x = - Math.PI / 2;
 
 			this.reinitBasemap();
 
@@ -603,11 +680,27 @@ export default {
 		onWindowResize() {
 
 			let canvas = document.getElementById( "canvas" );
-			this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
-			this.renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+
+			const width = canvas.clientWidth;
+			const height = canvas.clientHeight;
+
+			this.camera.aspect = width / height;
+			this.renderer.setSize( width, height );
 
 			this.camera.updateProjectionMatrix();
 			this.renderer.setPixelRatio( window.devicePixelRatio );
+
+			this.cameraOrtho.left = - width / 2;
+			this.cameraOrtho.right = width / 2;
+			this.cameraOrtho.top = height / 2;
+			this.cameraOrtho.bottom = - height / 2;
+			this.cameraOrtho.updateProjectionMatrix();
+
+			if ( this.northArrow != undefined ) {
+
+				this.positionNorthArrow();
+
+			}
 
 			this.needsRerender = 1;
 
@@ -644,6 +737,31 @@ export default {
 			const rect = this.renderer.domElement.getBoundingClientRect();
 			this.mouse.x = ( ( clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
 			this.mouse.y = - ( ( clientY - rect.top ) / this.renderer.domElement.clientHeight ) * 2 + 1;
+
+			if ( this.northArrow != undefined ) {
+
+				this.raycaster.setFromCamera( this.mouse, this.cameraOrtho );
+				const results = this.raycaster.intersectObject( this.northArrow, true );
+
+				if ( results.length > 0 ) {
+
+					// Position camera to the south of the point it's focusing on
+					var centre = new Vector2( this.controls.target.x, this.controls.target.z );
+					var pos = new Vector2( this.camera.position.x, this.camera.position.z );
+					var radius = centre.distanceTo( pos );
+					var x = radius * Math.cos( Math.PI / 2 ) + centre.x;
+					var z = radius * Math.sin( Math.PI / 2 ) + centre.y;
+
+					this.camera.position.x = x;
+					this.camera.position.z = z;
+
+					this.needsRerender = 1;
+
+					return;
+
+				}
+
+			}
 
 			this.raycaster.setFromCamera( this.mouse, this.camera );
 
@@ -745,6 +863,12 @@ export default {
 				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
 				this.tiles.update();
 
+				if ( this.northArrow != undefined ) {
+
+					this.northArrow.rotation.z = this.camera.rotation.z;
+
+				}
+
 				if ( this.tiles.root ) {
 
 					this.updateTerrain();
@@ -753,7 +877,10 @@ export default {
 
 				if ( this.meshShading == "normal" ) {
 
+					this.renderer.autoClear = true;
 					this.renderer.render( this.scene, this.camera );
+					this.renderer.autoClear = false;
+					this.renderer.render( this.sceneOrtho, this.cameraOrtho );
 
 				} else if ( this.meshShading == "ssao" ) {
 
