@@ -477,6 +477,45 @@ export default {
 			const maxDim = Math.max( Math.abs( translate.x ), Math.abs( translate.y ) );
 			this.northArrow.position.set( x + maxDim + 5, this.cameraOrtho.top - maxDim - 10, 0 );
 
+		},
+		pointCameraToNorth() {
+
+			// Position camera to the south of the point it's focusing on
+			const centre = new Vector2( this.controls.target.x, this.controls.target.z );
+			const pos = new Vector2( this.camera.position.x, this.camera.position.z );
+			const radius = centre.distanceTo( pos );
+			const x = radius * Math.cos( Math.PI / 2 ) + centre.x;
+			const z = radius * Math.sin( Math.PI / 2 ) + centre.y;
+
+			const oldPos = { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z };
+			const newPos = { x: x, y: this.camera.position.y, z: z };
+
+			function animate( time ) {
+
+				requestAnimationFrame( animate );
+				TWEEN.update( time );
+
+			}
+			requestAnimationFrame( animate );
+
+			new TWEEN.Tween( oldPos )
+				.to( newPos, 1000 )
+				.easing( TWEEN.Easing.Quadratic.Out )
+				.onUpdate( () => {
+
+					this.camera.position.x = oldPos.x;
+					this.camera.position.z = oldPos.z;
+					this.camera.lookAt( this.controls.target );
+					this.northArrow.rotation.z = this.camera.rotation.z;
+
+					this.renderer.clear();
+					this.renderer.render( this.scene, this.camera );
+					this.renderer.render( this.sceneOrtho, this.cameraOrtho );
+
+				} )
+				.start();
+
+			this.needsRerender = 1;
 
 		},
 		reinitTiles() {
@@ -602,6 +641,7 @@ export default {
 			this.renderer.setSize( canvas.clientWidth, canvas.clientHeight );
 			this.renderer.setClearColor( 0xd9eefc );
 			this.renderer.outputEncoding = sRGBEncoding;
+			this.renderer.autoClear = false;
 
 			canvas.appendChild( this.renderer.domElement );
 
@@ -749,43 +789,7 @@ export default {
 
 				if ( results.length > 0 ) {
 
-					// Position camera to the south of the point it's focusing on
-					const centre = new Vector2( this.controls.target.x, this.controls.target.z );
-					const pos = new Vector2( this.camera.position.x, this.camera.position.z );
-					const radius = centre.distanceTo( pos );
-					const x = radius * Math.cos( Math.PI / 2 ) + centre.x;
-					const z = radius * Math.sin( Math.PI / 2 ) + centre.y;
-
-					const oldPos = { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z };
-					const newPos = { x: x, y: this.camera.position.y, z: z };
-
-					function animate( time ) {
-
-						requestAnimationFrame( animate );
-						TWEEN.update( time );
-
-					}
-					requestAnimationFrame( animate );
-
-					new TWEEN.Tween( oldPos )
-						.to( newPos, 3000 )
-						.easing( TWEEN.Easing.Circular.Out )
-						.onUpdate( () => {
-
-							this.camera.position.x = oldPos.x;
-							this.camera.position.z = oldPos.z;
-							this.camera.lookAt( this.controls.target );
-
-							this.renderer.autoClear = true;
-							this.renderer.render( this.scene, this.camera );
-							this.renderer.autoClear = false;
-							this.renderer.render( this.sceneOrtho, this.cameraOrtho );
-
-						} )
-						.start();
-
-					this.needsRerender = 1;
-
+					this.pointCameraToNorth();
 					return;
 
 				}
@@ -863,7 +867,7 @@ export default {
 			this.terrainTiles.update( sceneTransform, this.camera );
 
 		},
-		renderScene() {
+		renderScene( ) {
 
 			requestAnimationFrame( this.renderScene );
 
@@ -890,13 +894,8 @@ export default {
 				this.dummyCamera.updateMatrixWorld();
 
 				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
+
 				this.tiles.update();
-
-				if ( this.northArrow != undefined ) {
-
-					this.northArrow.rotation.z = this.camera.rotation.z;
-
-				}
 
 				if ( this.tiles.root ) {
 
@@ -904,11 +903,17 @@ export default {
 
 				}
 
+				if ( this.northArrow != undefined ) {
+
+					this.northArrow.rotation.z = this.camera.rotation.z;
+
+				}
+
 				if ( this.meshShading == "normal" ) {
 
-					this.renderer.autoClear = true;
+					// autoClear is false, so we need to clear manually. Don't want to clear when second scene is rendered
+					this.renderer.clear();
 					this.renderer.render( this.scene, this.camera );
-					this.renderer.autoClear = false;
 					this.renderer.render( this.sceneOrtho, this.cameraOrtho );
 
 				} else if ( this.meshShading == "ssao" ) {
