@@ -412,7 +412,6 @@ export default {
 		},
 		addNorthArrow() {
 
-			const canvas = document.getElementById( "canvas" );
 			const scope = this;
 			const loader = new SVGLoader();
 
@@ -440,7 +439,7 @@ export default {
 							const shape = shapes[ j ];
 							const geometry = new ShapeBufferGeometry( shape );
 							const mesh = new Mesh( geometry, material );
-							const scale = canvas.clientWidth * 0.0001;
+							const scale = 0.12;
 							mesh.scale.set( scale, - scale, scale );
 
 							group.add( mesh );
@@ -911,7 +910,7 @@ export default {
 
 				if ( this.meshShading == "normal" ) {
 
-					// autoClear is false, so we need to clear manually. Don't want to clear when second scene is rendered
+					// this.renderer.autoClear is set to false, so we need to clear manually. Because don't want to clear when second scene is rendered.
 					this.renderer.clear();
 					this.renderer.render( this.scene, this.camera );
 					this.renderer.render( this.sceneOrtho, this.cameraOrtho );
