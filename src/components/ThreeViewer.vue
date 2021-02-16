@@ -433,10 +433,10 @@ export default {
 					this.camera.position.z = oldPos.z;
 					this.camera.lookAt( this.controls.target );
 
+					this.needsRerender = 1;
+
 				} )
 				.start();
-
-			this.needsRerender = 2;
 
 		},
 		reinitTiles() {
