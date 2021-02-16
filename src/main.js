@@ -5,7 +5,9 @@ import i18n from "./locale/i18n";
 import '@mdi/font/css/materialdesignicons.css';
 import Buefy from 'buefy';
 import '@/styles/bulma.scss';
+import { InlineSvgPlugin } from 'vue-inline-svg';
 
+Vue.use( InlineSvgPlugin );
 Vue.use( Buefy );
 
 Vue.config.productionTip = false;

@@ -18,6 +18,11 @@
         @menu-clicked="$emit('hamburger-clicked')"
         @select-place="moveToPlace"
       />
+      <Compass
+        ref="compass"
+        :rotation="camRotationZ"
+        @orient-north="orientNorth"
+      />
     </section>
     <BuildingInformation
       :building="pickedBuilding"
@@ -26,10 +31,12 @@
       @report-data="getReportDataIssuePathWithId( pickedBuilding.attributes.identificatie )"
     />
     <ThreeViewer
+      ref="threeviewer"
       :tiles-url="tilesUrl"
       :basemap-options="basemapOptions"
       @object-picked="objectPicked"
       @cam-offset="onCamOffset"
+      @cam-rotation-z="onCamRotationZ"
     />
     <div
       id="attribution"
@@ -76,6 +83,7 @@ import BuildingInformation from '@/components/BuildingInformation.vue';
 import DropDownSelector from '@/components/DropDownSelector.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
+import Compass from '@/components/Compass.vue';
 
 export default {
 
@@ -85,7 +93,8 @@ export default {
 		BuildingInformation,
 		DropDownSelector,
 		SearchBar,
-		ThreeViewer
+		ThreeViewer,
+		Compass
 	},
 
 	data() {
@@ -99,6 +108,7 @@ export default {
 				y: 400,
 				z: 400
 			},
+			camRotationZ: 0,
 
 			basemapPreset: 'brtachtergrondkaart',
 			basemaps: {
@@ -239,7 +249,7 @@ export default {
 					}
 				},
 
-        	luchtfoto2018wmts: {
+				luchtfoto2018wmts: {
 					type: "wmts",
 					attribution: "PDOK",
 					attributionURL: "https://www.pdok.nl/",
@@ -282,11 +292,23 @@ export default {
 
 		},
 
+		onCamRotationZ: function ( value ) {
+
+			this.$refs.compass.setRotation( value );
+
+		},
+
+		orientNorth: function ( value ) {
+
+			this.$refs.threeviewer.pointCameraToNorth();
+
+		},
+
 		moveToPlace: function ( res ) {
 
 			if ( res ) {
 
-			  this.$router.push( {
+				this.$router.push( {
 					path: '/viewer',
 					query: {
 						rdx: res.rd_x,
@@ -330,9 +352,9 @@ export default {
 
 <style>
 #building-info {
-  position: absolute;
-  bottom: 0.5rem;
-  margin: 0 0.5rem;
+	position: absolute;
+	bottom: 0.5rem;
+	margin: 0 0.5rem;
 }
 .table-value {
 	max-width: 170px;
@@ -344,16 +366,16 @@ export default {
 }
 
 #map-options {
-  position: absolute;
+	position: absolute;
 	margin: 0px;
-  top: 3.75rem;
-  margin: 0 0.5rem;
+	top: 3.75rem;
+	margin: 0 0.5rem;
 }
 
 #viewer {
 
-  width: 100%;
-  height: 100%;
+	width: 100%;
+	height: 100%;
 
 }
 

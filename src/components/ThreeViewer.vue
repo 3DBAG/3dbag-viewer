@@ -25,11 +25,7 @@ import {
 	UniformsUtils,
 	TextureLoader,
 	Sprite,
-	SpriteMaterial,
-	Mesh,
-	MeshBasicMaterial,
-	ShapeBufferGeometry,
-	OrthographicCamera
+	SpriteMaterial
 } from 'three';
 import {
 	TilesRenderer
@@ -41,10 +37,8 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 // import TWEEN from '@tweenjs/tween.js';
 import markerSprite from '@/assets/locationmarker.png';
-import northArrow from '@/assets/North_Pointer.svg';
 
 const Tweakpane = require( 'tweakpane' );
 const TWEEN = require( '@tweenjs/tween.js' );
@@ -410,73 +404,6 @@ export default {
 			this.needsRerender = 1;
 
 		},
-		addNorthArrow() {
-
-			const scope = this;
-			const loader = new SVGLoader();
-
-			loader.load(
-				northArrow,
-				function ( data ) {
-
-					const paths = data.paths;
-					const group = new Group();
-
-					for ( let i = 0; i < paths.length; i ++ ) {
-
-						const path = paths[ i ];
-
-						const material = new MeshBasicMaterial( {
-							color: path.color,
-							depthWrite: false,
-							depthTest: false
-						} );
-
-						const shapes = path.toShapes( true );
-
-						for ( let j = 0; j < shapes.length; j ++ ) {
-
-							const shape = shapes[ j ];
-							const geometry = new ShapeBufferGeometry( shape );
-							const mesh = new Mesh( geometry, material );
-							const scale = 0.12;
-							mesh.scale.set( scale, - scale, scale );
-
-							group.add( mesh );
-
-						}
-
-					}
-
-					group.bbox = new Box3().setFromObject( group );
-					const translate = group.bbox.getCenter().negate();
-
-					for ( let i = 0; i < group.children.length; i ++ ) {
-
-						group.children[ i ].translateX( translate.x );
-						group.children[ i ].translateY( translate.y );
-
-					}
-
-					scope.northArrow = group;
-					scope.positionNorthArrow();
-					scope.sceneOrtho.add( scope.northArrow );
-
-				}
-			);
-
-		},
-		positionNorthArrow() {
-
-			// Position just right from map options bar
-			const mo = document.getElementById( "map-options" );
-			const pos = ( mo.offsetWidth + mo.offsetLeft );
-			const x = this.cameraOrtho.left + pos;
-			const translate = this.northArrow.bbox.getCenter().negate();
-			const maxDim = Math.max( Math.abs( translate.x ), Math.abs( translate.y ) );
-			this.northArrow.position.set( x + maxDim + 5, this.cameraOrtho.top - maxDim - 10, 0 );
-
-		},
 		pointCameraToNorth() {
 
 			// Position camera to the south of the point it's focusing on
@@ -505,11 +432,9 @@ export default {
 					this.camera.position.x = oldPos.x;
 					this.camera.position.z = oldPos.z;
 					this.camera.lookAt( this.controls.target );
-					this.northArrow.rotation.z = this.camera.rotation.z;
 
-					this.renderer.clear();
-					this.renderer.render( this.scene, this.camera );
-					this.renderer.render( this.sceneOrtho, this.cameraOrtho );
+					// this.renderer.clear();
+					// this.renderer.render( this.scene, this.camera );
 
 				} )
 				.start();
@@ -677,6 +602,7 @@ export default {
 				TWO: TOUCH.DOLLY_PAN
 			};
 			this.controls.addEventListener( "change", () => this.needsRerender = 1 );
+			this.controls.addEventListener( "change", () => this.$emit( 'cam-rotation-z', this.camera.rotation.z ) );
 			this.controls.addEventListener( "end", this.setRouteFromCameraPos );
 
 			this.renderer.domElement.addEventListener( 'pointermove', this.onPointerMove, false );
@@ -704,12 +630,6 @@ export default {
 			//this.hemLight = new HemisphereLight( 0xffffbb, 0x080820, 1 );
 			//this.scene.add(this.hemLight);
 
-			this.sceneOrtho = new Scene();
-			this.cameraOrtho = new OrthographicCamera( - canvas.clientWidth / 2, canvas.clientWidth / 2, canvas.clientHeight / 2, - canvas.clientHeight / 2, 0.1, 10000 );
-			this.cameraOrtho.position.z = 10;
-
-			this.addNorthArrow();
-
 			this.offsetParent.rotation.x = - Math.PI / 2;
 
 			this.reinitBasemap();
@@ -732,18 +652,6 @@ export default {
 
 			this.camera.updateProjectionMatrix();
 			this.renderer.setPixelRatio( window.devicePixelRatio );
-
-			this.cameraOrtho.left = - width / 2;
-			this.cameraOrtho.right = width / 2;
-			this.cameraOrtho.top = height / 2;
-			this.cameraOrtho.bottom = - height / 2;
-			this.cameraOrtho.updateProjectionMatrix();
-
-			if ( this.northArrow != undefined ) {
-
-				this.positionNorthArrow();
-
-			}
 
 			this.needsRerender = 1;
 
@@ -780,20 +688,6 @@ export default {
 			const rect = this.renderer.domElement.getBoundingClientRect();
 			this.mouse.x = ( ( clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
 			this.mouse.y = - ( ( clientY - rect.top ) / this.renderer.domElement.clientHeight ) * 2 + 1;
-
-			if ( this.northArrow != undefined ) {
-
-				this.raycaster.setFromCamera( this.mouse, this.cameraOrtho );
-				const results = this.raycaster.intersectObject( this.northArrow, true );
-
-				if ( results.length > 0 ) {
-
-					this.pointCameraToNorth();
-					return;
-
-				}
-
-			}
 
 			this.raycaster.setFromCamera( this.mouse, this.camera );
 
@@ -902,18 +796,11 @@ export default {
 
 				}
 
-				if ( this.northArrow != undefined ) {
-
-					this.northArrow.rotation.z = this.camera.rotation.z;
-
-				}
-
 				if ( this.meshShading == "normal" ) {
 
 					// this.renderer.autoClear is set to false, so we need to clear manually. Because don't want to clear when second scene is rendered.
 					this.renderer.clear();
 					this.renderer.render( this.scene, this.camera );
-					this.renderer.render( this.sceneOrtho, this.cameraOrtho );
 
 				} else if ( this.meshShading == "ssao" ) {
 
