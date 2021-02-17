@@ -28,7 +28,7 @@ export default {
 
 			if ( compasSVG ) {
 
-			  compasSVG.setAttribute( "transform", "rotate(" + value * ( 180 / 3.1415 ) + ")" );
+			  compasSVG.style.transform = "rotate(" + value + "rad)";
 
 			}
 

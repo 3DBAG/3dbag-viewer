@@ -425,7 +425,7 @@ export default {
 			requestAnimationFrame( animate );
 
 			new TWEEN.Tween( oldPos )
-				.to( newPos, 1000 )
+				.to( newPos, 500 )
 				.easing( TWEEN.Easing.Quadratic.Out )
 				.onUpdate( () => {
 
