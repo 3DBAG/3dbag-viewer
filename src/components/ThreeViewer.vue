@@ -177,8 +177,8 @@ export default {
 		this.meshShading = "normal";
 		this.meshColor = "#c4c8cf";
 
-		this.nearPlane = 1;
-		this.farPlane = 10000;
+		this.nearPlane = 2;
+		this.farPlane = 30000;
 		this.dummyFarPlane = 3500;
 
 		this.fog = null;
@@ -587,7 +587,7 @@ export default {
 			this.controls.enableDamping = true;
 			this.controls.dampingFactor = 0.15;
 			this.controls.minDistance = 20;
-			this.controls.maxDistance = 2500;
+			this.controls.maxDistance = 18000;
 			this.controls.maxPolarAngle = 0.8;
 			this.controls.mouseButtons = {
 				LEFT: MOUSE.PAN,
