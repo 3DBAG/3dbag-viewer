@@ -200,7 +200,11 @@ export default {
 	mounted() {
 
 		this.initScene();
-		this.initTweakPane();
+		if ( process.env.NODE_ENV === 'development' ) {
+
+			this.initTweakPane();
+
+		}
 
 	},
 	methods: {
