@@ -196,6 +196,8 @@ export default {
 
 		this.selectedObject = null;
 
+		this.sceneTransform = null;
+
 	},
 	mounted() {
 
@@ -443,7 +445,7 @@ export default {
 				.start();
 
 		},
-		reinitTiles() {
+		reinitTiles( init ) {
 
 			if ( this.tiles ) {
 
@@ -468,28 +470,36 @@ export default {
 
 			this.tiles.onLoadTileSet = () => {
 
-				// Ensure the tileset is loaded prior to setting the position form the url parameters (we need the tileset transform to do that)
-				let q = this.$router.currentRoute.query;
-				if ( "rdx" in q && "rdy" in q && "ox" in q && "oy" in q && "oz" in q ) {
+				if ( init ) {
 
-					this.setCameraPosFromRoute( q );
+					// Ensure the tileset is loaded prior to setting the position from the url parameters (we need the tileset transform to do that)
+					let q = this.$router.currentRoute.query;
+					if ( "rdx" in q && "rdy" in q && "ox" in q && "oy" in q && "oz" in q ) {
 
-				} else {
+						this.setCameraPosFromRoute( q );
 
-					// default viewport
-					this.setCameraPosFromRoute( {
-						rdx: "85181.55571255696",
-						rdy: "446859.38171179296",
-						ox: "-223.36609616703936",
-						oy: "281.19798302772574",
-						oz: "-184.218705413541"
-					} );
+					} else {
+
+						// default viewport
+						this.setCameraPosFromRoute( {
+							rdx: "85181.55571255696",
+							rdy: "446859.38171179296",
+							ox: "-223.36609616703936",
+							oy: "281.19798302772574",
+							oz: "-184.218705413541"
+						} );
+
+					}
 
 				}
+
+				const transform = this.tiles.root.cached.transform;
+				this.sceneTransform = new Vector2( transform.elements[ 12 ], transform.elements[ 13 ] );
 
 				this.needsRerender = 2;
 
 			};
+
 			this.tiles.onLoadModel = ( s ) => {
 
 				const offset_z = this.tiles.root.cached.transform.elements[ 14 ];
@@ -584,7 +594,7 @@ export default {
 
 			this.mouse = new Vector2();
 
-			this.reinitTiles();
+			this.reinitTiles( true );
 
 			this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 			this.controls.screenSpacePanning = false;
@@ -753,14 +763,6 @@ export default {
 			this.needsRerender = 1;
 
 		},
-		updateTerrain: function () {
-
-			const transform = this.tiles.root.cached.transform;
-			const sceneTransform = new Vector2( transform.elements[ 12 ], transform.elements[ 13 ] );
-
-			this.terrainTiles.update( sceneTransform, this.camera );
-
-		},
 		renderScene( ) {
 
 			requestAnimationFrame( this.renderScene );
@@ -791,9 +793,9 @@ export default {
 
 				this.tiles.update();
 
-				if ( this.tiles.root ) {
+				if ( this.sceneTransform ) {
 
-					this.updateTerrain();
+					this.terrainTiles.update( this.sceneTransform, this.camera );
 
 				}
 
