@@ -21,13 +21,13 @@
     "lodash": "^4.17.20",
     "sass": "^1.27.0",
     "sass-loader": "^10.0.4",
-    "three": ">=0.126.0",
+    "three": "^0.126.0",
     "tweakpane": "^1.5.5",
     "vue": "^2.6.11",
     "vue-i18n": "^8.22.2",
     "vue-inline-svg": "^2.0.0",
     "vue-router": "^3.4.5",
-    "vuese": "^1.4.7",
+    "vuese": "^1.1.1",
     "x2js": "^3.4.0"
   },
   "devDependencies": {
