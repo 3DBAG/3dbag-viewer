@@ -163,8 +163,8 @@ export default {
 
 		// debug
 		this.lruCacheSize = 0;
-		this.lruCacheMinSize = 175;
-		this.lruCacheMaxSize = 250;
+		this.lruCacheMinSize = 85;
+		this.lruCacheMaxSize = 115;
 
 		this.pointIntensity = 0.4;
 		this.directionalIntensity = 0.8;
