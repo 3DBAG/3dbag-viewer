@@ -178,9 +178,9 @@ export default {
 			}
 
 			const sources = {
-				lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/v20110_lod22/tileset_qt.json',
-				lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/v20110_lod13/tileset_qt.json',
-				lod12: 'https://godzilla.bk.tudelft.nl/3dtiles/v20110_lod12/tileset_qt.json',
+				lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/v21023_lod22/tileset.json',
+				lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/v21023_lod13/tileset.json',
+				lod12: 'https://godzilla.bk.tudelft.nl/3dtiles/v21023_lod12/tileset.json',
 			};
 
 			return sources[ this.tileset ];

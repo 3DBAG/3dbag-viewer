@@ -37,7 +37,7 @@
       >
         <div class="navbar-start">
           <div class="navbar-item tags has-addons">
-            <span class="tag">v20.11.0</span>
+            <span class="tag">v21.02.3</span>
             <a
               class="tag is-danger"
               @click="showWelcome=true"
