@@ -84,6 +84,7 @@ import DropDownSelector from '@/components/DropDownSelector.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
 import Compass from '@/components/Compass.vue';
+import BAG3D from '@/assets/3dbag_versions.json';
 
 export default {
 
@@ -102,6 +103,7 @@ export default {
 		return {
 
 			customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
+			BAG3DVersion: BAG3D[ 'versions' ][ BAG3D[ "latest" ] ],
 
 			camOffset: {
 				x: 400,
@@ -177,13 +179,7 @@ export default {
 
 			}
 
-			const sources = {
-				lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/v21023_lod22/tileset.json',
-				lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/v21023_lod13/tileset.json',
-				lod12: 'https://godzilla.bk.tudelft.nl/3dtiles/v21023_lod12/tileset.json',
-			};
-
-			return sources[ this.tileset ];
+			return this.BAG3DVersion[ '3DTilesets' ][ this.tileset ];
 
 		},
 

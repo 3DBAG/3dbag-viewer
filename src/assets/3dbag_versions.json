@@ -1,0 +1,13 @@
+{
+  "latest": "v21.02.3",
+  "versions": {
+    "v21.02.3" : {
+      "downloadBaseURL" : "http://3dbag.nl/download/v21023",
+      "3DTilesets" : {
+        "lod22": "https://godzilla.bk.tudelft.nl/3dtiles/v21023_lod22/tileset.json",
+				"lod13": "https://godzilla.bk.tudelft.nl/3dtiles/v21023_lod13/tileset.json",
+				"lod12": "https://godzilla.bk.tudelft.nl/3dtiles/v21023_lod12/tileset.json"
+      }
+    }
+  }
+}
