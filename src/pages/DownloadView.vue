@@ -72,27 +72,12 @@
 
     <div
       v-if="selectedTile"
-      class="tabs is-boxed is-medium"
-    >
-      <ul style="margin-left:0">
-        <li :class="{'is-active': activeTileFormat=='CityJSON'}">
-          <a @click="activeTileFormat='CityJSON'">CityJSON</a>
-        </li>
-        <li :class="{'is-active': activeTileFormat=='OBJ'}">
-          <a @click="activeTileFormat='OBJ'">OBJ</a>
-        </li>
-        <li :class="{'is-active': activeTileFormat=='GPKG'}">
-          <a @click="activeTileFormat='GPKG'">GPKG</a>
-        </li>
-      </ul>
-    </div>
-    <div
-      v-if="selectedTile"
       class="table-wrapper"
     >
       <table>
         <thead>
           <tr>
+            <th>Format</th>
             <th>File</th>
             <th>Size</th>
             <th>Version</th>
@@ -100,16 +85,20 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <tr
+            v-for="format in tileFormats"
+            :key="format"
+          >
+            <td>{{ format }}</td>
             <td>
               <a
-                :href="activeTileData[ activeTileFormat ]['fileURL']"
+                :href="activeTileData[format]['fileURL']"
                 download
-              > {{ activeTileData[ activeTileFormat ]["fileURL"].split('/').pop() }} </a>
+              > {{ activeTileData[format]["fileURL"].split('/').pop() }} </a>
             </td>
-            <td>{{ activeTileData[ activeTileFormat ]["fileSize"] }}</td>
-            <td>{{ activeTileData[ activeTileFormat ]["version"] }}</td>
-            <td>{{ activeTileData[ activeTileFormat ]["MD5hash"] }}</td>
+            <td>{{ activeTileData[format]["fileSize"] }}</td>
+            <td>{{ $root.$data[ "latest" ] }}</td>
+            <td>{{ activeTileData[format]["MD5hash"] }}</td>
           </tr>
         </tbody>
       </table>
@@ -140,9 +129,9 @@
               download
             > {{ PostgresFileURL.split('/').pop() }} </a>
           </td>
-          <td>{{ activeTileData[ activeTileFormat ]["fileSize"] }}</td>
-          <td>{{ activeTileData[ activeTileFormat ]["version"] }}</td>
-          <td>{{ activeTileData[ activeTileFormat ]["MD5hash"] }}</td>
+          <td>{{ }}</td>
+          <td>{{ $root.$data[ "latest" ] }}</td>
+          <td>{{ }}</td>
         </tr>
       </tbody>
     </table>
@@ -194,7 +183,7 @@ export default {
 			mapVisible: false,
 			map: null,
 			selectedTile: null,
-			activeTileFormat: "CityJSON",
+			tileFormats: [ "CityJSON", "OBJ", "GPKG" ],
 
 			PostgresFileURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "Postgres" ],
 			activeTileData: {
@@ -209,7 +198,7 @@ export default {
 	watch: {
 		selectedTile: function ( newTole, oldTile ) {
 
-			console.log( newTole );
+			// console.log( newTole );
 			this.activeTileData.CityJSON.fileURL = this.downloadURL( "CityJSON" );
 			this.activeTileData.OBJ.fileURL = this.downloadURL( "OBJ" );
 			this.activeTileData.GPKG.fileURL = this.downloadURL( "GPKG" );
@@ -229,12 +218,6 @@ export default {
 	},
 
 	methods: {
-
-		closeInfo() {
-
-			this.$emit( 'close-info' );
-
-		},
 
 		downloadURL( format ) {
 
