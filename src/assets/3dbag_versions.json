@@ -2,7 +2,14 @@
   "latest": "v21.03.1",
   "versions": {
     "v21.03.1" : {
-      "downloadBaseURL" : "http://3dbag.nl/download/v21023/",
+      "Postgres" : "https://godzilla.bk.tudelft.nl/download/postgres/3dbag_v21031_7425c21b.zip",
+
+      "OBJ" : "https://godzilla.bk.tudelft.nl/download/obj/v21031_7425c21b/3dbag_v21031_7425c21b_{TID}.zip",
+
+      "CityJSON" : "https://godzilla.bk.tudelft.nl/download/cityjson/v21031_7425c21b/3dbag_v21031_7425c21b_{TID}.json",
+      
+      "GPKG" : "https://godzilla.bk.tudelft.nl/download/gpkg/v21031_7425c21b/3dbag_v21031_7425c21b_{TID}.gpkg",
+
       "3DTilesets" : {
         "lod22": "https://godzilla.bk.tudelft.nl/download/3dtiles/v21031_7425c21b/lod22/tileset.json",
 				"lod13": "https://godzilla.bk.tudelft.nl/download/3dtiles/v21031_7425c21b/lod13/tileset.json",

@@ -84,9 +84,6 @@
         <li :class="{'is-active': activeTileFormat=='GPKG'}">
           <a @click="activeTileFormat='GPKG'">GPKG</a>
         </li>
-        <li :class="{'is-active': activeTileFormat=='CSV'}">
-          <a @click="activeTileFormat='CSV'">CSV</a>
-        </li>
       </ul>
     </div>
     <div
@@ -104,7 +101,12 @@
         </thead>
         <tbody>
           <tr>
-            <td>{{ activeTileData[ activeTileFormat ]["fileURL"] }}</td>
+            <td>
+              <a
+                :href="activeTileData[ activeTileFormat ]['fileURL']"
+                download
+              > {{ activeTileData[ activeTileFormat ]["fileURL"].split('/').pop() }} </a>
+            </td>
             <td>{{ activeTileData[ activeTileFormat ]["fileSize"] }}</td>
             <td>{{ activeTileData[ activeTileFormat ]["version"] }}</td>
             <td>{{ activeTileData[ activeTileFormat ]["MD5hash"] }}</td>
@@ -121,6 +123,29 @@
     </h1>
 
     The PostgreSQL backup files contain the data for the whole Netherlands, including geometry and attributes from both the BAG and the 3D BAG. Besides the data backup, the file bagactueel_schema.backup contains the custom data types used by the BAG. The backups can be restored as:
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Size</th>
+          <th>Version</th>
+          <th>MD5</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <a
+              :href="PostgresFileURL"
+              download
+            > {{ PostgresFileURL.split('/').pop() }} </a>
+          </td>
+          <td>{{ activeTileData[ activeTileFormat ]["fileSize"] }}</td>
+          <td>{{ activeTileData[ activeTileFormat ]["version"] }}</td>
+          <td>{{ activeTileData[ activeTileFormat ]["MD5hash"] }}</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 </template>
 
@@ -171,11 +196,11 @@ export default {
 			selectedTile: null,
 			activeTileFormat: "CityJSON",
 
+			PostgresFileURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "Postgres" ],
 			activeTileData: {
 				CityJSON: Object(),
 				OBJ: Object(),
 				GPKG: Object(),
-				CSV: Object(),
 			},
 		};
 
@@ -185,10 +210,10 @@ export default {
 		selectedTile: function ( newTole, oldTile ) {
 
 			console.log( newTole );
-			this.activeTileData.CityJSON.fileURL = this.downloadURL( "CityJSON", "json" );
-			this.activeTileData.OBJ.fileURL = this.downloadURL( "OBJ", "obj" );
-			this.activeTileData.GPKG.fileURL = this.downloadURL( "GPKG", "gpkg" );
-			this.activeTileData.CSV.fileURL = this.downloadURL( "CSV", "csv" );
+			this.activeTileData.CityJSON.fileURL = this.downloadURL( "CityJSON" );
+			this.activeTileData.OBJ.fileURL = this.downloadURL( "OBJ" );
+			this.activeTileData.GPKG.fileURL = this.downloadURL( "GPKG" );
+			this.activeTileData.CSV.fileURL = this.downloadURL( "CSV" );
 
 		}
 	},
@@ -211,10 +236,10 @@ export default {
 
 		},
 
-		downloadURL( format, extension ) {
+		downloadURL( format ) {
 
 			const latest = this.$root.$data[ "latest" ];
-			return this.$root.$data[ "versions" ][ latest ][ "downloadBaseURL" ] + format + "/bag3d_" + this.selectedTile + "." + extension;
+			return this.$root.$data[ "versions" ][ latest ][ format ].replace( "{TID}", this.selectedTile );
 
 		},
 
