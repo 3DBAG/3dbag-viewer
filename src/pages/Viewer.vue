@@ -273,7 +273,7 @@ export default {
 			return `https://docs.google.com/forms/d/e/
 				1FAIpQLScIVBEWkpOraOIpOb1SOwRvpSnlQxLFDDYsqK4MrZgOqvNjWw/viewform?
 				entry.401142300=${ this.tilesUrl }&
-				entry.1880096492=${ escape( "https://tudelft3d.github.io/3dbag-viewer/#" + this.$route.fullPath ) }`;
+				entry.1880096492=${ escape( "https://3dbag.nl/#" + this.$route.fullPath ) }`;
 
 		}
 

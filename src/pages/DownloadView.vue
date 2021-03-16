@@ -36,7 +36,7 @@
       id="downloads"
       class="title is-3"
     >
-      Static downloads {{ selectedTile ? 'for tile number ' + selectedTile : 'per tile'}}
+      Static downloads {{ selectedTile ? 'for tile number ' + selectedTile : 'per tile' }}
     </h1>
 
     <p>

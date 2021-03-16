@@ -1,5 +1,5 @@
 module.exports = {
-	publicPath: '/3dbag-viewer',
+	publicPath: '/',
 	configureWebpack: {
 		devtool: 'source-map'
 	  },
