@@ -37,7 +37,7 @@
       >
         <div class="navbar-start">
           <div class="navbar-item tags has-addons">
-            <span class="tag">v21.02.3</span>
+            <span class="tag">{{ $root.$data['latest'] }}</span>
             <a
               class="tag is-danger"
               @click="showWelcome=true"
@@ -165,7 +165,7 @@ export default {
 		return {
 
 			showBurgerMenu: false,
-			showWelcome: true,
+			showWelcome: false,
 
 		};
 
