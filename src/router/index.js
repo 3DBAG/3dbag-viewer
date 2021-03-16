@@ -8,6 +8,7 @@ import i18n from "@/locale/i18n";
 Vue.use( Router );
 
 const router = new Router( {
+	linkActiveClass: "is-active",
 	routes: [
 		{
 			path: '/',

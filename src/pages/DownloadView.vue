@@ -36,18 +36,12 @@
       id="downloads"
       class="title is-3"
     >
-      Static downloads per tile
+      Static downloads {{ selectedTile ? 'for tile number ' + selectedTile : 'per tile'}}
     </h1>
 
     <p>
       We offer the 3D BAG in various formats for download. Each format contains the data for the whole Netherlands and a new version is generated every month.
     </p>
-    <button
-      class="mx-1 button is-info"
-      @click="showMap()"
-    >
-      Pick a tile
-    </button>
 
     <div
       class="modal"
@@ -62,27 +56,45 @@
           id="map"
           class="map"
         />
-        <section
+        <div
           id="tilemap-overlay"
-          class="field has-addons"
+          class="message is-primary"
         >
-          
-        </section>
+          <div class="message-header">
+            Pick a tile
+            <button
+              class="delete"
+              aria-label="delete"
+              @click="hideMap()"
+            />
+          </div>
+          <div class="message-body">
+            <p v-if="selectedTile">
+              You have selected tile number <b>{{ selectedTile }}</b>. Pick another tile or confirm.
+            </p>
+            <p v-else>
+              Select a tile from the map.
+            </p>
+            <button
+              v-if="selectedTile"
+              class="button is-primary"
+              @click="hideMap()"
+            >
+              Confirm selection
+            </button>
+          </div>
+        </div>
       </div>
-      <button
-        class="modal-close is-large"
-        aria-label="close"
-        @click="hideMap()"
-      />
     </div>
 
     <div
       v-if="selectedTile"
-      class="table-wrapper"
+      class="table-wrapper box"
     >
       <table>
         <thead>
           <tr>
+            <th>Tile ID</th>
             <th>Format</th>
             <th>File</th>
             <th>Version</th>
@@ -93,6 +105,7 @@
             v-for="format in tileFormats"
             :key="format"
           >
+            <td>{{ selectedTile }}</td>
             <td>{{ format }}</td>
             <td>
               <a
@@ -106,6 +119,13 @@
       </table>
     </div>
 
+    <button
+      class="mx-1 button is-primary"
+      @click="showMap()"
+    >
+      Pick a{{ selectedTile ? 'nother' : '' }} tile
+    </button>
+
     <h1
       id="downloads-postgres"
       class="title is-3"
@@ -113,46 +133,47 @@
       PostgreSQL data dump
     </h1>
 
-    The PostgreSQL backup files contain the data for the whole Netherlands, including geometry and attributes from both the BAG and the 3D BAG. Besides the data backup, the file bagactueel_schema.backup contains the custom data types used by the BAG. The backups can be restored as:
-    <table>
-      <thead>
-        <tr>
-          <th>File</th>
-          <th>Size</th>
-          <th>Version</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>
-            <a
-              :href="PostgresFileURL"
-              download
-            > {{ PostgresFileURL.split('/').pop() }} </a>
-          </td>
-          <td>>20GB</td>
-          <td>{{ $root.$data[ "latest" ] }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <p>The PostgreSQL backup files contain the data for the whole Netherlands, including geometry and attributes from both the BAG and the 3D BAG. Besides the data backup, the file bagactueel_schema.backup contains the custom data types used by the BAG. The backups can be restored as:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Size</th>
+            <th>Version</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <a
+                :href="PostgresFileURL"
+                download
+              > {{ PostgresFileURL.split('/').pop() }} </a>
+            </td>
+            <td>>20GB</td>
+            <td>{{ $root.$data[ "latest" ] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 </template>
 
 <style>
-#embedded {
-  width: 100%;
-  height: 100%;
-}
 #map {
-  width: 100%;
-  height:100%;
-  margin: 0;
+  width: 98%;
+  height:98%;
+  margin: 1%;
   padding: 0;
   position: absolute;
 }
 #tilemap-overlay {
-  position: absolute;
-  top: 20px;
+  position: relative;
+  margin: auto;
+  top: 2em;
+  width: 80%;
+  box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%)
 }
 </style>
 
@@ -303,8 +324,8 @@ export default {
 					// center: [120953, 486328],
 					// 3Dgeoinfo office
 					center: [ 85177.9151549, 446749.16831151 ],
-					maxZoom: 28,
-					zoom: 12
+					maxZoom: 13,
+					zoom: 6
 				} );
 
 				that.map = new Map( {
@@ -328,7 +349,7 @@ export default {
 
 						// } );
 						that.selectedTile = e.selected[ 0 ].get( 'tile_id' );
-						setTimeout( that.hideMap, 100 );
+						// setTimeout( that.hideMap, 100 );
 
 					} );
 
