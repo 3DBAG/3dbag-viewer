@@ -99,8 +99,6 @@ export default {
 
 	data() {
 
-		console.log( this.$root );
-
 		return {
 
 			customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',

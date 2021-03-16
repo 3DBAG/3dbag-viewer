@@ -62,6 +62,12 @@
           id="map"
           class="map"
         />
+        <section
+          id="tilemap-overlay"
+          class="field has-addons"
+        >
+          
+        </section>
       </div>
       <button
         class="modal-close is-large"
@@ -79,9 +85,7 @@
           <tr>
             <th>Format</th>
             <th>File</th>
-            <th>Size</th>
             <th>Version</th>
-            <th>MD5</th>
           </tr>
         </thead>
         <tbody>
@@ -96,9 +100,7 @@
                 download
               > {{ activeTileData[format]["fileURL"].split('/').pop() }} </a>
             </td>
-            <td>{{ activeTileData[format]["fileSize"] }}</td>
             <td>{{ $root.$data[ "latest" ] }}</td>
-            <td>{{ activeTileData[format]["MD5hash"] }}</td>
           </tr>
         </tbody>
       </table>
@@ -118,7 +120,6 @@
           <th>File</th>
           <th>Size</th>
           <th>Version</th>
-          <th>MD5</th>
         </tr>
       </thead>
       <tbody>
@@ -129,9 +130,8 @@
               download
             > {{ PostgresFileURL.split('/').pop() }} </a>
           </td>
-          <td>{{ }}</td>
+          <td>>20GB</td>
           <td>{{ $root.$data[ "latest" ] }}</td>
-          <td>{{ }}</td>
         </tr>
       </tbody>
     </table>
@@ -149,6 +149,10 @@
   margin: 0;
   padding: 0;
   position: absolute;
+}
+#tilemap-overlay {
+  position: absolute;
+  top: 20px;
 }
 </style>
 
@@ -196,15 +200,17 @@ export default {
 	},
 
 	watch: {
-		selectedTile: function ( newTole, oldTile ) {
+		selectedTile: function ( newTile, oldTile ) {
 
-			// console.log( newTole );
-			this.activeTileData.CityJSON.fileURL = this.downloadURL( "CityJSON" );
-			this.activeTileData.OBJ.fileURL = this.downloadURL( "OBJ" );
-			this.activeTileData.GPKG.fileURL = this.downloadURL( "GPKG" );
-			this.activeTileData.CSV.fileURL = this.downloadURL( "CSV" );
+			this.setSelectedTile( newTile );
 
-		}
+		},
+
+		// $route( to, from ) {
+
+		// 	this.setSelectedTile( to.query.tid );
+
+		// },
 	},
 
 	updated() {
@@ -219,10 +225,36 @@ export default {
 
 	methods: {
 
-		downloadURL( format ) {
+		setSelectedTile( tid ) {
+
+			this.selectedTile = tid;
+
+			this.setFormatData( "CityJSON" );
+			this.setFormatData( "OBJ" );
+			this.setFormatData( "GPKG" );
+			this.setFormatData( "CSV" );
+
+		},
+
+		setFormatData( format ) {
 
 			const latest = this.$root.$data[ "latest" ];
-			return this.$root.$data[ "versions" ][ latest ][ format ].replace( "{TID}", this.selectedTile );
+			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "versions" ][ latest ][ format ].replace( "{TID}", this.selectedTile );
+
+			// we should be able to figure out md5 hasd and files size with a HEAD request
+			// also can check if the file exists to not put broken link
+			// fetch( this.activeTileData[ format ][ "fileURL" ], {
+			// 	method: 'HEAD'
+			// } )
+			// 	.then( response => {
+
+			// 		if ( ! response.ok ) {
+
+			// 			this.activeTileData[ format ][ "fileURL" ] = null;
+
+			// 		}
+
+			// 	} );
 
 		},
 
@@ -288,6 +320,13 @@ export default {
 					that.map.addInteraction( select );
 					select.on( 'select', function ( e ) {
 
+						// that.$router.push(
+						// 	{ url: '/', query: { tid: e.selected[ 0 ].get( 'tile_id' ) } }
+						// ).catch( err => {
+
+						// 	console.log( err );
+
+						// } );
 						that.selectedTile = e.selected[ 0 ].get( 'tile_id' );
 						setTimeout( that.hideMap, 100 );
 
