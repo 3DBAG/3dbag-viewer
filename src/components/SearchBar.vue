@@ -23,9 +23,9 @@
         </div>
         <div class="media-content">
           <p class="has-text-left">
-            {{ props.option.weergavenaam }}
+            {{ props.option.display_name }}
             <small>
-              {{ props.option.type }} ({{ props.option.bron }})
+              {{ props.option.type }} ({{ props.option.class }})
             </small>
           </p>
         </div>
@@ -36,6 +36,19 @@
 
 <script>
 import debounce from 'debounce';
+import Proj4 from 'proj4';
+
+
+Proj4.defs( [
+	[
+		"EPSG:28992",
+		"+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs"
+	],
+	[
+		'EPSG:4326',
+		'+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees'
+	]
+] );
 
 /**
  * A search bar that conduct geocoding to PDOK service.
@@ -89,7 +102,7 @@ export default {
 			}
 
 			this.isGeocoding = true;
-			fetch( 'https://geodata.nationaalgeoregister.nl/locatieserver/v3/free?q=' + name + '&fl=weergavenaam,bron,type,bron,id,centroide_rd&rows=10' )
+			fetch( 'https://nominatim.openstreetmap.org/search?q=' + name + '&format=json&countrycodes=nl&accept-language=nl' )
 				.then( res => {
 
 					const contentType = res.headers.get( "content-type" );
@@ -108,15 +121,20 @@ export default {
 				} )
 				.then( json => {
 
-					var re = /\d+\.?\d*/g;
-					this.geocodeResult = json.response.docs.map( a => {
+					this.geocodeResult = json.map( a => {
 
-						let m = a.centroide_rd.match( re );
-						a.rd_x = parseFloat( m[ 0 ] );
-						a.rd_y = parseFloat( m[ 1 ] );
+						let rd_coords = Proj4( "EPSG:4326", "EPSG:28992", [ parseFloat( a.lon ), parseFloat( a.lat ) ] );
+						a.rd_x = rd_coords[ 0 ];
+						a.rd_y = rd_coords[ 1 ];
 						return a;
 
 					} );
+
+				} )
+				.catch( ( error ) => {
+
+					this.geocodeResult = [];
+					throw error;
 
 				} )
 				.finally( () => {
@@ -126,7 +144,7 @@ export default {
 				} );
 
 
-		} )
+		}, 300 )
 	}
 };
 </script>
