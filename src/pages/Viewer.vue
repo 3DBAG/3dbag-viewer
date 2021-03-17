@@ -279,6 +279,43 @@ export default {
 
 	},
 
+	watch: {
+
+		$route( to, from ) {
+
+			if ( to.query.lod ) {
+
+				this.tileset = to.query.lod;
+
+			}
+
+		},
+
+		tileset( to, from ) {
+
+			if ( to != from ) {
+
+				let q = Object.assign( {}, this.$router.currentRoute.query );
+				q.lod = to;
+
+				this.$router.push(
+					{ url: '/', query: q }
+				).catch( err => {} );
+
+			}
+
+		}
+
+	},
+	mounted() {
+
+		if ( this.$router.currentRoute.query.lod ) {
+
+			this.tileset = this.$router.currentRoute.query.lod;
+
+		}
+
+	},
 	methods: {
 
 		onCamOffset: function ( event ) {
