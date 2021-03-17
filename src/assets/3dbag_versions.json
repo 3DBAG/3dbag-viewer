@@ -10,6 +10,10 @@
       
       "GPKG" : "https://data.3dbag.nl/gpkg/v21031_7425c21b/3dbag_v21031_7425c21b_{TID}.gpkg",
 
+      "WFS" : "https://data.3dbag.nl/api/wfs?request=getcapabilities",
+
+      "WMS" : "https://data.3dbag.nl/api/wms?request=getcapabilities",
+
       "3DTilesets" : {
         "lod22": "https://dev.3dbag.nl/download/3dtiles/v21031_7425c21b/lod22/tileset.json",
 				"lod13": "https://dev.3dbag.nl/download/3dtiles/v21031_7425c21b/lod13/tileset.json",

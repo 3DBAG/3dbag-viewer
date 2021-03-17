@@ -22,11 +22,11 @@
         <tbody>
           <tr>
             <td>WMS</td>
-            <td><a href="http://3dbag.bk.tudelft.nl/data/wms?request=getcapabilities">http://3dbag.bk.tudelft.nl/data/wms?request=getcapabilities</a></td>
+            <td><a :href="WMSURL">{{ WMSURL }}</a></td>
           </tr>
           <tr>
             <td>WFS</td>
-            <td><a href="http://3dbag.bk.tudelft.nl/data/wfs?request=getcapabilities">http://3dbag.bk.tudelft.nl/data/wfs?request=getcapabilities</a></td>
+            <td><a :href="WFSURL">{{ WFSURL }}</a></td>
           </tr>
         </tbody>
       </table>
@@ -211,6 +211,8 @@ export default {
 			tileFormats: [ "CityJSON", "OBJ", "GPKG" ],
 
 			PostgresFileURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "Postgres" ],
+			WFSURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "WFS" ],
+			WMSURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "WMS" ],
 			activeTileData: {
 				CityJSON: Object(),
 				OBJ: Object(),
