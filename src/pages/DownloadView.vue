@@ -8,7 +8,7 @@
     </h1>
 
     <p>
-      If you don't want to download the data for the whole country, you can use one of the web services.
+      These allow you to explore the entire dataset in another software (eg. QGIS) without having to download anything beforehand.
     </p>
 
     <div class="table-wrapper">
@@ -40,7 +40,7 @@
     </h1>
 
     <p>
-      We offer the 3D BAG in various formats for download. Each format contains the data for the whole Netherlands and a new version is generated every month.
+      To keep filesizes manageable the 3D BAG dataset is subdived in tiles. For each tile we offer the data in a number of different file formats. Use the button below to select the tile of interest to see the download options.
     </p>
 
     <div
@@ -70,10 +70,10 @@
           </div>
           <div class="message-body">
             <p v-if="selectedTile">
-              You have selected tile number <b>{{ selectedTile }}</b>. Pick another tile or confirm.
+              You have selected tile number <b>{{ selectedTile }}</b>
             </p>
             <p v-else>
-              Select a tile from the map.
+              Select a tile from the map
             </p>
             <button
               v-if="selectedTile"
@@ -133,7 +133,7 @@
       PostgreSQL data dump
     </h1>
 
-    <p>The PostgreSQL backup files contain the data for the whole Netherlands, including geometry and attributes from both the BAG and the 3D BAG. Besides the data backup, the file bagactueel_schema.backup contains the custom data types used by the BAG. The backups can be restored as:</p>
+    <p>The PostgreSQL files below contain the raw 3D BAG data for the whole of the Netherlands, including geometry and attributes. Beware, this is a very large file to download.</p>
     <div class="table-wrapper">
       <table>
         <thead>
