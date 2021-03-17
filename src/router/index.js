@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import ThreeViewer from '@/pages/Viewer';
-import Documentation from '@/pages/Documentation';
 import DownloadView from '@/pages/DownloadView';
 import i18n from "@/locale/i18n";
 
@@ -31,11 +30,6 @@ const router = new Router( {
 					name: 'Download',
 					component: DownloadView
 				},
-				{
-					path: 'docs',
-					name: 'Docs',
-					component: Documentation
-				}
 			],
 		},
 	],

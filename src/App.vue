@@ -59,37 +59,12 @@
           >
             {{ $t("nav.download") }}
           </router-link>
-          <div
-            class="navbar-item has-dropdown is-hoverable"
+          <a
+            href="https://docs.3dbag.nl"
+            class="navbar-item"
           >
-            <router-link
-              to="/docs"
-              active-class="is-active"
-              class="navbar-link"
-            >
-              {{ $t("nav.docs") }}
-            </router-link>
-            <div class="navbar-dropdown">
-              <router-link
-                to="/docs#features"
-                class="navbar-item"
-              >
-                {{ $t("nav.features") }}
-              </router-link>
-              <router-link
-                to="/docs#attributes"
-                class="navbar-item"
-              >
-                {{ $t("nav.attributes") }}
-              </router-link>
-              <router-link
-                to="/docs#changelog"
-                class="navbar-item"
-              >
-                {{ $t("nav.changelog") }}
-              </router-link>
-            </div>
-          </div>
+            {{ $t("nav.docs") }}
+          </a>
           <LocaleSwitcher />
         </div>
       </div>
@@ -115,24 +90,8 @@
             <p>This is a beta release of the renewed version of the 3D BAG service.</p>
             <ul>
               <li>Everything is still under development. Expect broken things.</li>
-              <li>We'll release an improved version of 3DBAG once a month.</li>
-              <li>
-                Check the <router-link to="/docs#changelog">
-                  changelog
-                </router-link> for what is new.
-              </li>
-              <li>
-                Check the <router-link to="/docs#faq">
-                  FAQ
-                </router-link> for a list of known issues.
-              </li>
               <li>If you find another issue you can use one of the red feedback buttons to report it.</li>
               <li>You can see the attributes of a building by clicking on it.</li>
-              <li>
-                You can download the data by clicking on a tile on the <router-link to="/download">
-                  download page
-                </router-link>.
-              </li>
             </ul>
 
             <h2 class="title is-5">
