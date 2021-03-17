@@ -22,11 +22,11 @@
         <tbody>
           <tr>
             <td>WMS</td>
-            <td><a :href="WMSURL">{{ WMSURL }}</a></td>
+            <td><a :href="WMSURL+'?request=getcapabilities'">{{ WMSURL+'?request=getcapabilities' }}</a></td>
           </tr>
           <tr>
             <td>WFS</td>
-            <td><a :href="WFSURL">{{ WFSURL }}</a></td>
+            <td><a :href="WFSURL+'?request=getcapabilities'">{{ WFSURL+'?request=getcapabilities' }}</a></td>
           </tr>
         </tbody>
       </table>
@@ -190,6 +190,7 @@ import { Select as OLSelect } from 'ol/interaction';
 import { click as OLclick } from 'ol/events/condition';
 import { register as olproj4register } from 'ol/proj/proj4';
 import { get as olproj4get } from 'ol/proj';
+import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 
 
 export default {
@@ -255,7 +256,6 @@ export default {
 			this.setFormatData( "CityJSON" );
 			this.setFormatData( "OBJ" );
 			this.setFormatData( "GPKG" );
-			this.setFormatData( "CSV" );
 
 		},
 
@@ -311,13 +311,25 @@ export default {
 					source: new WMTSSource( ( brt_options ) )
 				} );
 
+				var vectorSource = new VectorSource( {
+					format: new GeoJSON(),
+					url: function ( extent ) {
+
+						return (
+							that.WFSURL + '?' +
+              'version=1.1.0&request=GetFeature&typename=BAG3d_v2:bag_tiles_3k&' +
+              'outputFormat=application/json&srsname=EPSG:28992&' +
+              'bbox=' +
+              extent.join( ',' ) +
+              ',EPSG:28992'
+						);
+
+					},
+					strategy: bboxStrategy,
+				} );
+
 				var bag_tiles = new VectorLayer( {
-					source: new VectorSource( {
-						url: './bag_tiles_3k.geojson',
-						format: new GeoJSON( {
-							dataProjection: dutchProjection
-						} ),
-					} ),
+					source: vectorSource,
 				} );
 
 				var view = new View( {
