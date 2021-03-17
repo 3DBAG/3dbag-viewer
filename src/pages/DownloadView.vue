@@ -175,6 +175,7 @@
   margin: auto;
   top: 2em;
   width: 80%;
+  max-width: 500px;
   box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%)
 }
 </style>
