@@ -97,6 +97,7 @@
             <th>Tile ID</th>
             <th>Format</th>
             <th>File</th>
+            <th>Download size</th>
             <th>Version</th>
           </tr>
         </thead>
@@ -113,6 +114,7 @@
                 download
               > {{ activeTileData[format]["fileURL"].split('/').pop() }} </a>
             </td>
+            <td>{{ activeTileData[format]["Content-Length"] }}</td>
             <td>{{ $root.$data[ "latest" ] }}</td>
           </tr>
         </tbody>
@@ -151,7 +153,7 @@
                 download
               > {{ PostgresFileURL.split('/').pop() }} </a>
             </td>
-            <td>>20GB</td>
+            <td>>20GB (>90GB unzipped)</td>
             <td>{{ $root.$data[ "latest" ] }}</td>
           </tr>
         </tbody>
@@ -192,6 +194,16 @@ import { register as olproj4register } from 'ol/proj/proj4';
 import { get as olproj4get } from 'ol/proj';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 
+function formatBytes( bytes, decimals ) {
+
+	if ( bytes == 0 ) return '0 Bytes';
+	var k = 1024,
+		dm = decimals || 2,
+		sizes = [ 'Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' ],
+		i = Math.floor( Math.log( bytes ) / Math.log( k ) );
+	return parseFloat( ( bytes / Math.pow( k, i ) ).toFixed( dm ) ) + ' ' + sizes[ i ];
+
+}
 
 export default {
 
@@ -266,18 +278,24 @@ export default {
 
 			// we should be able to figure out md5 hasd and files size with a HEAD request
 			// also can check if the file exists to not put broken link
-			// fetch( this.activeTileData[ format ][ "fileURL" ], {
-			// 	method: 'HEAD'
-			// } )
-			// 	.then( response => {
+			fetch( this.activeTileData[ format ][ "fileURL" ], {
+				method: 'HEAD'
+			} )
+				.then( response => {
 
-			// 		if ( ! response.ok ) {
+					if ( response.ok ) {
 
-			// 			this.activeTileData[ format ][ "fileURL" ] = null;
+						this.activeTileData[ format ][ "Content-Length" ] = formatBytes( parseFloat( response.headers.get( 'Content-Length' ) ), 2 );
 
-			// 		}
+					}
 
-			// 	} );
+				} )
+				.catch( ( error ) => {
+
+					this.activeTileData[ format ][ "fileURL" ] = "";
+					this.activeTileData[ format ][ "Content-Length" ] = "";
+
+				} );
 
 		},
 
