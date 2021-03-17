@@ -320,6 +320,12 @@ export default {
 		},
 		setCameraPosFromRoute( q ) {
 
+			if ( ! this.tiles.root ) {
+
+				return;
+
+			}
+
 			let rd_x = parseFloat( q.rdx );
 			let rd_y = parseFloat( q.rdy );
 			let ox = parseFloat( q.ox );
@@ -356,6 +362,12 @@ export default {
 		},
 		setRouteFromCameraPos() {
 
+			if ( ! this.tiles.root ) {
+
+				return;
+
+			}
+
 			// compute current camera position relative to target
 			let local_x = this.controls.target.x;
 			let local_z = this.controls.target.z;
@@ -374,8 +386,15 @@ export default {
 			// emit camera offset for url generation in the parent app
 			this.$emit( 'cam-offset', cam_offset );
 			// push values to url, catch errors (ie NavigationDuplicated, when pushin a route that is equal to the current route)
+			let q = Object.assign( {}, this.$router.currentRoute.query );
+			q.rdx = RdX;
+			q.rdy = RdY;
+			q.ox = cam_offset.x;
+			q.oy = cam_offset.y;
+			q.oz = cam_offset.z;
+
 			this.$router.push(
-				{ url: '/', query: { rdx: RdX, rdy: RdY, ox: cam_offset.x, oy: cam_offset.y, oz: cam_offset.z } }
+				{ url: '/', query: q }
 			).catch( err => {} );
 
 			// console.log( {rdx: RdX, rdy: RdY, cam_offset: cam_offset} );
