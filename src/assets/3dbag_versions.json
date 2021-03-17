@@ -8,7 +8,7 @@
 
       "CityJSON" : "https://data.3dbag.nl/cityjson/v21031_7425c21b/3dbag_v21031_7425c21b_{TID}.json",
       
-      "GPKG" : "https://data.3dbag.nl/gpkg/v21031_7425c21b/3dbag_v21031_7425c21b_{TID}.gpkg",
+      "GPKG" : "https://data.3dbag.nl/gpkg/v21031_7425c21b/part_A/3dbag_v21031_7425c21b_{TID}.gpkg",
 
       "WFS" : "https://data.3dbag.nl/api/BAG3D_v2/wfs?request=getcapabilities",
 
