@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import ThreeViewer from '@/pages/Viewer';
+import Documentation from '@/pages/Documentation';
 import DownloadView from '@/pages/DownloadView';
 import i18n from "@/locale/i18n";
 
@@ -30,6 +31,11 @@ const router = new Router( {
 					name: 'Download',
 					component: DownloadView
 				},
+				{
+					path: 'docs',
+					name: 'Docs',
+					component: Documentation
+				}
 			],
 		},
 	],
@@ -68,7 +74,7 @@ for ( var i = 0; i < routes.length; i ++ ) {
 
 router.beforeEach( ( to, from, next )=> {
 
-	if ( Object.keys( from.query ).length != 0 )
+	if ( from.name == "Viewer" && Object.keys( from.query ).length != 0 )
 		previousQuery = from.query;
 
 	// Check if locale is valid or otherwise if the route directs to an existing page

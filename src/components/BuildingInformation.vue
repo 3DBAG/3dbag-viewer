@@ -36,6 +36,14 @@
             <td>Batch ID</td>
             <td>{{ building.batchID }}</td>
           </tr>
+          <tr>
+            <td>Tile ID</td>
+            <td>
+              <router-link :to="{ path: 'download', query: { tid: building.tileID } }">
+                {{ building.tileID }}
+              </router-link>
+            </td>
+          </tr>
           <tr
             v-for="[name, val] in Object.entries(building.attributes)"
             :key="name"

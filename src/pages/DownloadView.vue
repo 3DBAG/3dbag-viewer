@@ -210,18 +210,12 @@ export default {
 
 	name: 'DownloadView',
 
-	// props: {
-	// 	selecTile: {
-	// 		type: Object
-	// 	},
-	// },
-
 	data() {
 
 		return {
 			mapVisible: false,
-			map: null,
 			selectedTile: null,
+			map: null,
 			tileFormats: [ "CityJSON", "OBJ", "GPKG" ],
 
 			PostgresFileURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "Postgres" ],
@@ -243,11 +237,15 @@ export default {
 
 		},
 
-		// $route( to, from ) {
+		$route( to ) {
 
-		// 	this.setSelectedTile( to.query.tid );
+			if ( to.query.tid ) {
 
-		// },
+				this.setSelectedTile( to.query.tid );
+
+			}
+
+		},
 	},
 
 	updated() {
@@ -255,6 +253,17 @@ export default {
 		if ( ! this.map ) {
 
 		  this.initiateMap();
+
+		}
+
+	},
+
+	mounted() {
+
+		const tid = this.$router.currentRoute.query.tid;
+		if ( tid ) {
+
+			this.setSelectedTile( tid );
 
 		}
 

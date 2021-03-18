@@ -739,16 +739,6 @@ export default {
 
 			}
 
-			for ( let i = 0; i < this.tiles.group.children.length; i ++ ) {
-
-				const geometry = this.tiles.group.children[ i ].children[ 0 ].geometry;
-				geometry.computeBoundingSphere();
-				geometry.boundingSphere.radius += 200;
-
-				geometry.boundingBox = new Box3( new Vector3( - 100000, - 100000, - 100000 ), new Vector3( 100000, 100000, 100000 ) );
-
-			}
-
 			// check if we are hitting a building
 			const results = this.raycaster.intersectObject( this.tiles.group, true );
 
@@ -764,6 +754,8 @@ export default {
 
 				const { face, object } = results[ 0 ];
 
+				const info = this.getTileInformationFromActiveObject( object );
+
 				// Get info from batchTable
 				const batch_id_table = object.geometry.getAttribute( '_batchid' );
 				const batch_id = batch_id_table.getX( face.a );
@@ -774,9 +766,8 @@ export default {
 				if ( keys.includes( "attributes" ) ) {
 
 					const attributes = JSON.parse( batchTable.getData( "attributes" )[ batch_id ] );
-					// eslint-disable-next-line no-console
-					// console.log( attributes );
-					this.$emit( 'object-picked', { "batchID": batch_id, "attributes": attributes } );
+					const tileID = info.id.replace( /^.*[\\\/]/, '' ).replace( '.b3dm', '' );
+					this.$emit( 'object-picked', { "batchID": batch_id, tileID, attributes } );
 
 				}
 
@@ -832,7 +823,8 @@ export default {
 					geometricError: targetTile.geometricError,
 					screenSpaceError: targetTile.__error,
 					depth: targetTile.__depth,
-					isLeaf: targetTile.__isLeaf
+					isLeaf: targetTile.__isLeaf,
+					id: targetTile.content.uri
 
 				};
 
