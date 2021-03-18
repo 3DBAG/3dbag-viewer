@@ -1,9 +1,9 @@
 {
   "nav": {
-    "3dmap": "3D kaart",
-    "download": "Download",
+    "3dmap": "3D Viewer",
+    "download": "Downloads",
     "changelog": "Changelog",
-	"docs": "Docs",
+	"docs": "Documentatie",
 	"features": "Features",
 	"attributes": "Attributen"
   },

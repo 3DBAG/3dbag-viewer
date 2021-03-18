@@ -591,7 +591,7 @@ export default {
 
 			let canvas = document.getElementById( "canvas" );
 
-			this.renderer = new WebGLRenderer( { antialias: false } );
+			this.renderer = new WebGLRenderer( { antialias: true } );
 			this.renderer.setPixelRatio( window.devicePixelRatio );
 			this.renderer.setSize( canvas.clientWidth, canvas.clientHeight );
 			this.renderer.setClearColor( 0xd9eefc );

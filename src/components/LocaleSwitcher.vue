@@ -8,14 +8,12 @@
     >
 			<router-link
 				:to="createRoute( $i18n.availableLocales[ 0 ] )"
-				active-class="is-active"
 				class="navbar-item"
 			>
 				<span>{{ localeName($i18n.availableLocales[ 0 ]) }}</span>
 			</router-link>
 			<router-link
 				:to="createRoute( $i18n.availableLocales[ 1 ] )"
-				active-class="is-active"
 				class="navbar-item"
 			>
 				<span>{{ localeName($i18n.availableLocales[ 1 ]) }}</span>
