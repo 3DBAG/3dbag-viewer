@@ -356,6 +356,7 @@ export default {
 			if ( q.placeMarker == "true" ) {
 
 				this.placeMarkerOnPoint( new Vector3( local_x, local_y, local_z ) );
+				delete q.placeMarker;
 
 			}
 
