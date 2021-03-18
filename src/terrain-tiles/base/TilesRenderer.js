@@ -22,7 +22,7 @@ export class TilesRenderer {
 
 		this.tileLevel = 0;
 
-		this.resFactor = 8;
+		this.resFactor = 4.5;
 
 		this.tileMatrixLevels = null;
 		this.activeTiles = new Set();
