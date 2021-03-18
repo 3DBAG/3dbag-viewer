@@ -738,6 +738,16 @@ export default {
 
 			}
 
+			for ( let i = 0; i < this.tiles.group.children.length; i ++ ) {
+
+				const geometry = this.tiles.group.children[ i ].children[ 0 ].geometry;
+				geometry.computeBoundingSphere();
+				geometry.boundingSphere.radius += 200;
+
+				geometry.boundingBox = new Box3( new Vector3( - 100000, - 100000, - 100000 ), new Vector3( 100000, 100000, 100000 ) );
+
+			}
+
 			// check if we are hitting a building
 			const results = this.raycaster.intersectObject( this.tiles.group, true );
 
@@ -780,6 +790,56 @@ export default {
 			}
 
 			this.needsRerender = 1;
+
+		},
+		getTileInformationFromActiveObject( object ) {
+
+			// Find which tile this scene is associated with. This is slow and
+			// intended for debug purposes only.
+			let targetTile = null;
+			const activeTiles = this.tiles.activeTiles;
+			activeTiles.forEach( tile => {
+
+				if ( targetTile ) {
+
+					return true;
+
+				}
+
+				const scene = tile.cached.scene;
+				if ( scene ) {
+
+					scene.traverse( c => {
+
+						if ( c === object ) {
+
+							targetTile = tile;
+
+						}
+
+					} );
+
+				}
+
+			} );
+
+			if ( targetTile ) {
+
+				return {
+
+					distanceToCamera: targetTile.cached.distance,
+					geometricError: targetTile.geometricError,
+					screenSpaceError: targetTile.__error,
+					depth: targetTile.__depth,
+					isLeaf: targetTile.__isLeaf
+
+				};
+
+			} else {
+
+				return null;
+
+			}
 
 		},
 		renderScene( ) {
