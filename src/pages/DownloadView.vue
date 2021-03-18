@@ -248,16 +248,6 @@ export default {
 		},
 	},
 
-	updated() {
-
-		if ( ! this.map ) {
-
-		  this.initiateMap();
-
-		}
-
-	},
-
 	mounted() {
 
 		const tid = this.$router.currentRoute.query.tid;
@@ -404,6 +394,12 @@ export default {
 		showMap() {
 
 			this.mapVisible = true;
+
+			if ( ! this.map ) {
+
+		    this.initiateMap();
+
+			}
 
 		},
 
