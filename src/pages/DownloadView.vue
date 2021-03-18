@@ -373,15 +373,13 @@ export default {
 					that.map.addInteraction( select );
 					select.on( 'select', function ( e ) {
 
-						// that.$router.push(
-						// 	{ url: '/', query: { tid: e.selected[ 0 ].get( 'tile_id' ) } }
-						// ).catch( err => {
+						that.$router.push(
+							{ url: '/', query: { tid: e.selected[ 0 ].get( 'tile_id' ) } }
+						).catch( err => {
 
-						// 	console.log( err );
+							console.log( err );
 
-						// } );
-						that.selectedTile = e.selected[ 0 ].get( 'tile_id' );
-						// setTimeout( that.hideMap, 100 );
+						} );
 
 					} );
 
