@@ -394,7 +394,7 @@ export default {
 }
 #building-info .message-body {
 	overflow: auto;
-	height: 500px;
+	max-height: 1%;
 }
 
 #map-options {

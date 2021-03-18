@@ -33,10 +33,6 @@
         </thead>
         <tbody>
           <tr>
-            <td>Batch ID</td>
-            <td>{{ building.batchID }}</td>
-          </tr>
-          <tr>
             <td>Tile ID</td>
             <td>
               <router-link :to="{ path: 'download', query: { tid: building.tileID } }">
