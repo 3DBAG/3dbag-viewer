@@ -190,6 +190,7 @@ export default {
 		this.errorThreshold = 60;
 
 		this.castOnHover = false;
+		this.overrideCast = false; // Defines if we should override the original TilesRenderer raycasting
 
 		this.enableWMS = true;
 		this.pane = null;
@@ -288,6 +289,7 @@ export default {
 				title: 'Misc',
 			} );
 			f6.addInput( this, "castOnHover" );
+			f6.addInput( this, "overrideCast" );
 
 			// stats
 			const f7 = this.pane.addFolder( {
@@ -741,7 +743,22 @@ export default {
 			}
 
 			// check if we are hitting a building
-			const results = this.raycaster.intersectObject( this.tiles.group, true );
+			let results = [];
+
+			if ( this.overrideCast ) {
+
+				for ( let i = 0; i < this.tiles.group.children.length; i ++ ) {
+
+					const c = this.tiles.group.children[ i ].children[ 0 ];
+					Object.getPrototypeOf( c ).raycast.call( c, this.raycaster, results );
+
+				}
+
+			} else {
+
+				results = this.raycaster.intersectObject( this.tiles.group, true );
+
+			}
 
 			// Set up the highlighted batchid to the material of new object
 			if ( this.selectedObject ) {
