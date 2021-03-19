@@ -77,11 +77,8 @@ router.beforeEach( ( to, from, next )=> {
 	if ( Object.keys( from.query ).length != 0 ) {
 
 		previousQuery[ from.name ] = from.query;
-		console.log( from.name );
 
 	}
-
-	console.log( previousQuery );
 
 	// Check if locale is valid or otherwise if the route directs to an existing page
 	if ( ! i18n.availableLocales.includes( to.params.locale ) ) {
