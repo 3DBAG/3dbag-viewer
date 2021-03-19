@@ -772,7 +772,7 @@ export default {
 
 			if ( results.length ) {
 
-				const { face, object } = results[ 0 ];
+				const { face, point, object } = results[ 0 ];
 
 				const info = this.getTileInformationFromActiveObject( object );
 
@@ -787,7 +787,8 @@ export default {
 
 					const attributes = JSON.parse( batchTable.getData( "attributes" )[ batch_id ] );
 					const tileID = info.id.replace( /^.*[\\\/]/, '' ).replace( '.b3dm', '' );
-					this.$emit( 'object-picked', { "batchID": batch_id, tileID, attributes } );
+					const pz = point.y;
+					this.$emit( 'object-picked', { "batchID": batch_id, tileID, pz, attributes } );
 
 				}
 

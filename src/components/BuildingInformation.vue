@@ -20,9 +20,7 @@
     </div>
     <div class="message-body">
       <p class="content">
-        See the <router-link to="/docs#attributes">
-          documentation
-        </router-link> for the attribute descriptions.
+        You clicked on this building <b>{{ building.pz.toFixed(1) }} meters</b> above the ground.
       </p>
       <table class="table has-text-left">
         <thead>
