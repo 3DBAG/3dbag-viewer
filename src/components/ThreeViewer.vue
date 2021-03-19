@@ -190,7 +190,7 @@ export default {
 		this.errorThreshold = 60;
 
 		this.castOnHover = false;
-		this.overrideCast = false; // Defines if we should override the original TilesRenderer raycasting
+		this.overrideCast = true; // Defines if we should override the original TilesRenderer raycasting
 
 		this.enableWMS = true;
 		this.pane = null;
@@ -753,6 +753,8 @@ export default {
 					Object.getPrototypeOf( c ).raycast.call( c, this.raycaster, results );
 
 				}
+
+				results.sort( ( a, b ) => a.distance - b.distance );
 
 			} else {
 
