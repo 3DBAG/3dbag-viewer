@@ -27,8 +27,11 @@ import {
 	Sprite,
 	SpriteMaterial
 } from 'three';
+// import {
+// 	TilesRenderer
+// } from '../../3DTilesRendererJS/src/index.js';
 import {
-	TilesRenderer
+	DebugTilesRenderer as TilesRenderer
 } from '../../3DTilesRendererJS/src/index.js';
 import {
 	WMSTilesRenderer,
@@ -474,6 +477,9 @@ export default {
 			}
 
 			this.tiles = new TilesRenderer( this.tilesUrl );
+
+			this.tiles.displayBoxBounds = true;
+
 			this.tiles.lruCache.minSize = this.lruCacheMinSize;
 			this.tiles.lruCache.maxSize = this.lruCacheMaxSize;
 
@@ -580,7 +586,7 @@ export default {
 		initScene() {
 
 			this.scene = new Scene();
-			this.scene.background = new Color( this.fogColor );
+			this.scene.background = new Color( "#000000" );
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
 
 			this.material = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
@@ -740,8 +746,13 @@ export default {
 
 			}
 
+
+
 			// check if we are hitting a building
 			const results = this.raycaster.intersectObject( this.tiles.group, true );
+
+			console.log( this.raycaster );
+			console.log( this.tiles.group );
 
 			// Set up the highlighted batchid to the material of new object
 			if ( this.selectedObject ) {
@@ -753,7 +764,9 @@ export default {
 
 			if ( results.length ) {
 
-				const { face, object } = results[ 0 ];
+				const { face, object, point } = results[ 0 ];
+
+				console.log( point.y );
 
 				const info = this.getTileInformationFromActiveObject( object );
 
@@ -872,6 +885,7 @@ export default {
 
 				}
 
+				this.offsetParent.remove( this.terrainTiles.group );
 				if ( this.meshShading == "normal" ) {
 
 					// this.renderer.autoClear is set to false, so we need to clear manually. Because don't want to clear when second scene is rendered.
@@ -883,6 +897,7 @@ export default {
 					this.composer.render();
 
 				}
+				this.offsetParent.add( this.terrainTiles.group );
 
 			}
 
