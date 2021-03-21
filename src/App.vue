@@ -10,12 +10,20 @@
           to="/viewer"
           class="navbar-item"
         >
+          <span
+            class="logo-text"
+            style="margin-right:0.4em"
+          >3D BAG </span>
+          <span
+            class="logo-text"
+            style="color:#ccc; font-weight:300; margin-right:0.2em"
+          >by</span>
           <img
             src="@/assets/logo.svg"
             width="28"
             height="28"
           >
-          <span class="logo-text">3D BAG </span>
+          <span class="logo-text">tudelft3d</span>
         </router-link>
         <a
           role="button"
