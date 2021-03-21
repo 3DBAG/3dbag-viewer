@@ -18,7 +18,7 @@
         @click="$emit('close-info')"
       />
     </div>
-    <div class="message-body">
+    <div v-if="show" class="message-body">
       <p class="content">
         You clicked on this building <b>{{ building.pz.toFixed(1) }} meters</b> above the ground.
       </p>
