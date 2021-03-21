@@ -6,9 +6,9 @@
       aria-label="dropdown navigation"
     >
       <div class="navbar-brand">
-        <router-link
-          to="/viewer"
+        <a
           class="navbar-item"
+          @click="showAbout=true"
         >
           <span
             class="logo-text"
@@ -24,7 +24,7 @@
             height="28"
           >
           <span class="logo-text">tudelft3d</span>
-        </router-link>
+        </a>
         <a
           role="button"
           class="navbar-burger"
@@ -48,7 +48,7 @@
             <span class="tag">{{ $root.$data['latest'] }}</span>
             <a
               class="tag is-danger"
-              @click="showWelcome=true"
+              @click="showAbout=true"
             >beta</a>
           </div>
         </div>
@@ -79,18 +79,18 @@
     </nav>
     <div
       class="modal"
-      :class="{ 'is-active' : showWelcome }"
+      :class="{ 'is-active' : showAbout }"
     >
       <div class="modal-background" />
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">
-            Welcome to 3D BAG v2
+            About 3D BAG
           </p>
           <button
             class="delete"
             aria-label="close"
-            @click="showWelcome = false"
+            @click="showAbout = false"
           />
         </header>
         <section class="modal-card-body">
@@ -102,11 +102,19 @@
               <li>You can see the attributes of a building by clicking on it.</li>
             </ul>
 
-            <h2 class="title is-5">
+            <h2 class="title is-4">
               Terms of use
             </h2>
             <ul>
               <li>Please do not publicly share or promote this website at this time.</li>
+            </ul>
+
+            <h2 class="title is-4">
+              Attribution
+            </h2>
+            <ul>
+              <li>3D BAG by the 3D geoinformation group @ TU Delft</li>
+              <li>Baselayers from PDOK</li>
             </ul>
           </div>
         </section>
@@ -132,7 +140,7 @@ export default {
 		return {
 
 			showBurgerMenu: false,
-			showWelcome: false,
+			showAbout: false,
 
 		};
 
