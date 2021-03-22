@@ -80,7 +80,7 @@
           </a>
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              More
+              {{ $t("nav.more") }}
             </a>
 
             <div class="navbar-dropdown is-right">
@@ -88,20 +88,20 @@
                 class="navbar-item"
                 @click="showAbout=true"
               >
-                About
+                {{ $t("nav.about") }}
               </a>
               <a
                 class="navbar-item"
                 @click="showAbout=true"
               >
-                Copyright
+                {{ $t("nav.copyright") }}
               </a>
               <hr class="navbar-divider">
               <a
                 class="navbar-item"
                 href="https://docs.google.com/forms/d/e/1FAIpQLSe2XLCYNmoFVHrgt_uRXeLLwfzDK7gS2kE7mGH8rnk6ltE0LQ/viewform?"
               >
-                Give feedback
+                {{ $t("nav.feedback") }}
               </a>
             </div>
           </div>

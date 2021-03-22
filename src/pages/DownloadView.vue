@@ -8,7 +8,7 @@
     </h1>
 
     <p>
-      These allow you to explore the entire dataset in another software (eg. QGIS) without having to download anything beforehand.
+      {{ $t("download.webservicespar") }}
     </p>
 
     <div class="table-wrapper">
@@ -36,11 +36,18 @@
       id="downloads"
       class="title is-3"
     >
-      Static downloads {{ selectedTile ? 'for tile number ' + selectedTile : 'per tile' }}
+    <template v-if="selectedTile">
+      {{ $t("download.statictitle") }} {{ $t("download.staticpicked") }} {{ selectedTile }}
+      </template>
+
+      <template v-else>
+        {{ $t("download.statictitle") }} {{ $t("download.staticunpicked") }}
+      </template>
+
     </h1>
 
     <p>
-      To keep filesizes manageable the 3D BAG dataset is subdived in tiles. For each tile we offer the data in a number of different file formats. Use the button below to select the tile of interest to see the download options.
+      {{ $t("download.staticpar") }}
     </p>
 
     <div
@@ -61,7 +68,7 @@
           class="message is-primary"
         >
           <div class="message-header">
-            Pick a tile
+            {{ $t("download.picktile") }}
             <button
               class="delete"
               aria-label="delete"
@@ -70,17 +77,17 @@
           </div>
           <div class="message-body">
             <p v-if="selectedTile">
-              You have selected tile number <b>{{ selectedTile }}</b>
+              {{ $t("download.selectedtiletrue") }} <b>{{ selectedTile }}</b> {{ $t("download.selectedtiletrue2") }}
             </p>
             <p v-else>
-              Select a tile from the map
+              {{ $t("download.selectedtilefalse") }}
             </p>
             <button
               v-if="selectedTile"
               class="button is-primary"
               @click="hideMap()"
             >
-              Confirm selection
+              {{ $t("download.confirm") }}
             </button>
           </div>
         </div>
@@ -95,10 +102,10 @@
         <thead>
           <tr>
             <th>Tile ID</th>
-            <th>Format</th>
-            <th>File</th>
-            <th>Download size</th>
-            <th>Version</th>
+            <th>{{ $t("download.format") }}</th>
+            <th>{{ $t("download.file") }}</th>
+            <th>{{ $t("download.downloadsize") }}</th>
+            <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
         <tbody>
@@ -125,7 +132,12 @@
       class="mx-1 button is-primary"
       @click="showMap()"
     >
-      Pick a{{ selectedTile ? 'nother' : '' }} tile
+      <p v-if="selectedTile">
+        {{ $t("download.picktile2true") }}
+      </p>
+      <p v-else>
+        {{ $t("download.picktile2false") }}
+      </p>
     </button>
 
     <h1
@@ -135,14 +147,14 @@
       PostgreSQL data dump
     </h1>
 
-    <p>The PostgreSQL files below contain the raw 3D BAG data for the whole of the Netherlands, including geometry and attributes. Beware, this is a very large file to download.</p>
+    <p>{{ $t("download.psqlpar") }}</p>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>File</th>
-            <th>Size</th>
-            <th>Version</th>
+            <th>{{ $t("download.file") }}</th>
+            <th>{{ $t("download.size") }}</th>
+            <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
         <tbody>
@@ -153,7 +165,7 @@
                 download
               > {{ PostgresFileURL.split('/').pop() }} </a>
             </td>
-            <td>>20GB (>90GB unzipped)</td>
+            <td>>20GB (>90GB {{ $t("download.unzipped") }})</td>
             <td>{{ $root.$data[ "latest" ] }}</td>
           </tr>
         </tbody>
