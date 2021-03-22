@@ -192,7 +192,7 @@ export default {
 		this.castOnHover = false;
 		this.overrideCast = true; // Defines if we should override the original TilesRenderer raycasting
 
-		this.enableWMS = true;
+		this.showTerrain = true;
 		this.pane = null;
 
 		this.selectedObject = null;
@@ -288,6 +288,20 @@ export default {
 				expanded: false,
 				title: 'Misc',
 			} );
+			f6.addInput( this, "showTerrain" )
+				.on( 'change', ( val ) => {
+
+					if ( val ) {
+
+						this.offsetParent.add( this.terrainTiles.group );
+
+					} else {
+
+						this.offsetParent.remove( this.terrainTiles.group );
+
+					}
+
+				} );
 			f6.addInput( this, "castOnHover" );
 			f6.addInput( this, "overrideCast" );
 
@@ -888,7 +902,11 @@ export default {
 
 				if ( this.sceneTransform ) {
 
-					this.terrainTiles.update( this.sceneTransform, this.camera );
+					if ( this.showTerrain ) {
+
+						this.terrainTiles.update( this.sceneTransform, this.camera );
+
+					}
 
 				}
 
