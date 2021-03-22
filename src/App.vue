@@ -6,14 +6,16 @@
       aria-label="dropdown navigation"
     >
       <div class="navbar-brand">
-        <a
+        <div
           class="navbar-item"
-          @click="showAbout=true"
         >
-          <span
+          <router-link
+            to="/"
             class="logo-text"
-            style="margin-right:0.4em"
-          >3D BAG </span>
+            style="margin-right:0.4em; color: #000"
+          >
+            3D BAG
+          </router-link>
           <span
             class="logo-text"
             style="color:#ccc; font-weight:300; margin-right:0.2em"
@@ -23,8 +25,11 @@
             width="28"
             height="28"
           >
-          <span class="logo-text">tudelft3d</span>
-        </a>
+          <a
+            href="https://3d.bk.tudelft.nl"
+            class="logo-text"
+          >tudelft3d</a>
+        </div>
         <a
           role="button"
           class="navbar-burger"
@@ -73,6 +78,33 @@
           >
             {{ $t("nav.docs") }}
           </a>
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              More
+            </a>
+
+            <div class="navbar-dropdown is-right">
+              <a
+                class="navbar-item"
+                @click="showAbout=true"
+              >
+                About
+              </a>
+              <a
+                class="navbar-item"
+                @click="showAbout=true"
+              >
+                Copyright
+              </a>
+              <hr class="navbar-divider">
+              <a
+                class="navbar-item"
+                href="https://docs.google.com/forms/d/e/1FAIpQLSe2XLCYNmoFVHrgt_uRXeLLwfzDK7gS2kE7mGH8rnk6ltE0LQ/viewform?"
+              >
+                Give feedback
+              </a>
+            </div>
+          </div>
           <LocaleSwitcher />
         </div>
       </div>
@@ -103,10 +135,11 @@
             </ul>
 
             <h2 class="title is-4">
-              Terms of use
+              Copyright and licensing
             </h2>
             <ul>
               <li>Please do not publicly share or promote this website at this time.</li>
+              <li>See xx docs page for all the information on this.</li>
             </ul>
 
             <h2 class="title is-4">
@@ -115,6 +148,7 @@
             <ul>
               <li>3D BAG by the 3D geoinformation group @ TU Delft</li>
               <li>Baselayers from PDOK</li>
+              <li>See yy docs page for full attribution</li>
             </ul>
           </div>
         </section>
