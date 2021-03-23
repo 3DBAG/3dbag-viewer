@@ -39,8 +39,6 @@ import {
 	WMTSTilesRenderer
 } from '../terrain-tiles';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 // import TWEEN from '@tweenjs/tween.js';
 import markerSprite from '@/assets/locationmarker.png';
 
@@ -281,7 +279,6 @@ export default {
 			f5.addInput( this, "dirY", { min: 0, max: 1, step: 0.01 } );
 			f5.addInput( this, "dirZ", { min: 0, max: 1, step: 0.01 } );
 
-			f4.addInput( this, "meshShading", { options: { normal: "normal", SSAO: "ssao" } } );
 			f4.addInput( this, "meshColor" ).on( 'change', ( val ) => {
 
 				this.material.uniforms.diffuse.value = new Color( val ).convertSRGBToLinear();
@@ -664,11 +661,6 @@ export default {
 			this.renderer.domElement.addEventListener( 'pointerup', this.onPointerUp, false );
 			this.renderer.domElement.addEventListener( 'pointerleave', this.onPointerLeave, false );
 
-			this.composer = new EffectComposer( this.renderer );
-			var ssaoPass = new SSAOPass( this.scene, this.camera, canvas.cliendWidth, canvas.clientHeight );
-			ssaoPass.kernelRadius = 16;
-			this.composer.addPass( ssaoPass );
-
 			// lights
 			this.pLight = new PointLight( 0xffffff, this.pointIntensity, 0, 1 );
 			this.camera.add( this.pLight );
@@ -996,17 +988,10 @@ export default {
 
 				}
 
-				if ( this.meshShading == "normal" ) {
+				// this.renderer.autoClear is set to false, so we need to clear manually. Because don't want to clear when second scene is rendered.
+				this.renderer.clear();
+				this.renderer.render( this.scene, this.camera );
 
-					// this.renderer.autoClear is set to false, so we need to clear manually. Because don't want to clear when second scene is rendered.
-					this.renderer.clear();
-					this.renderer.render( this.scene, this.camera );
-
-				} else if ( this.meshShading == "ssao" ) {
-
-					this.composer.render();
-
-				}
 
 			}
 
