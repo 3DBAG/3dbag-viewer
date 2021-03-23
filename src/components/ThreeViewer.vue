@@ -816,7 +816,9 @@ export default {
 					point.x + normal.x,
 					point.y + normal.y,
 					point.z + normal.z
-				 );
+				);
+
+				const azimuthAngle = normal.angleTo( new Vector3( 0, 1, 0 ) ) * 180 / Math.PI;
 
 				this.rayIntersect.visible = true;
 
@@ -835,7 +837,13 @@ export default {
 					const attributes = JSON.parse( batchTable.getData( "attributes" )[ batch_id ] );
 					const tileID = info.id.replace( /^.*[\\\/]/, '' ).replace( '.b3dm', '' );
 					const pz = point.y;
-					this.$emit( 'object-picked', { "batchID": batch_id, tileID, pz, attributes } );
+					this.$emit( 'object-picked', {
+						"batchID": batch_id,
+						tileID,
+						pz,
+						azimuthAngle,
+						attributes
+					} );
 
 				}
 

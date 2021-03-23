@@ -78,6 +78,14 @@
         <b>{{ h_clicked }}</b> m
       </b-button>
     </div>
+    <div class="control">
+      <b-button
+        type="is-static"
+        :icon-left="'angle-acute'"
+      >
+        <b>{{ azimuthAngle }}</b> °
+      </b-button>
+    </div>
   </div>
 </template>
 
@@ -120,6 +128,13 @@ export default {
 		h_clicked: function () {
 
 			if ( this.building.pz ) return this.building.pz.toFixed( 1 );
+			return null;
+
+		},
+
+		azimuthAngle: function () {
+
+			if ( this.building.azimuthAngle ) return this.building.azimuthAngle.toFixed( 1 );
 			return null;
 
 		}
