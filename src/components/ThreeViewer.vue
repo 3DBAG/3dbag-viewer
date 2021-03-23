@@ -33,7 +33,7 @@ import {
 } from 'three';
 import {
 	TilesRenderer
-} from '../../3DTilesRendererJS/src/index.js';
+} from '3d-tiles-renderer';
 import {
 	WMSTilesRenderer,
 	WMTSTilesRenderer
@@ -182,6 +182,9 @@ export default {
 		this.nearPlane = 2;
 		this.farPlane = 300000;
 		this.dummyFarPlane = 3500;
+
+		this.maxDistShowTiles = 1750 * 1750;
+		this.show3DTiles = true;
 
 		this.fog = null;
 		this.enableFog = false;
@@ -635,6 +638,7 @@ export default {
 			this.mouse = new Vector2();
 
 			this.reinitTiles( true );
+			this.show3DTiles = true;
 
 			this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 			this.controls.screenSpacePanning = false;
@@ -976,7 +980,29 @@ export default {
 
 				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
 
-				this.tiles.update();
+				const camdist = this.camera.position.distanceToSquared( this.controls.target );
+
+				if ( camdist < 1750 * 1750 ) {
+
+					this.tiles.update();
+
+					if ( ! this.show3DTiles ) {
+
+						this.offsetParent.add( this.tiles.group );
+						this.show3DTiles = true;
+
+					}
+
+				} else {
+
+					if ( this.show3DTiles ) {
+
+						this.offsetParent.remove( this.tiles.group );
+						this.show3DTiles = false;
+
+					}
+
+				}
 
 				if ( this.sceneTransform ) {
 
