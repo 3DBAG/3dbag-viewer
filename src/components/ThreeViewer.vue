@@ -726,7 +726,7 @@ export default {
 		},
 		onPointerMove( evt ) {
 
-			if ( this.castOnHover ) {
+			if ( this.castOnHover || evt.altKey ) {
 
 				this.castRay( evt.clientX, evt.clientY );
 
