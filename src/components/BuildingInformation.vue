@@ -28,6 +28,7 @@
       >
         <table
           class="table is-fullwidth is-striped has-text-left"
+          style="margin-bottom: 0.75rem"
         >
           <thead>
             <tr>
@@ -66,7 +67,12 @@
             </tr>
           </tbody>
         </table>
-        <p><a @click="$emit('report-data')">{{ $t("viewer.report-1") }}</a> {{ $t("viewer.report-2") }}</p>
+        <p>
+          <a
+            class="tag is-danger"
+            @click="$emit('report-data')"
+          >{{ $t("viewer.issue") }}</a>
+        </p>
       </b-dropdown-item>
     </b-dropdown>
     <div class="control">

@@ -16,8 +16,7 @@
   },
   "viewer": {
     "feedback": "Geef feedback",
-    "report-1": "Rapporteer een probleem",
-    "report-2": "als er iets mis is met dit gebouw.",
+    "issue": "Rapporteer een probleem",
     "baselayer1": "Basislaag van",
     "baselayer2": "Basislaag"
   },

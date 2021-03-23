@@ -15,8 +15,7 @@
   },
   "viewer": {
     "feedback": "Give feedback",
-    "report-1": "Report a problem",
-    "report-2": "if something is wrong with this building.",
+    "issue": "Report a problem",
     "baselayer1": "Baselayer from",
     "baselayer2": "Baselayer"
   },

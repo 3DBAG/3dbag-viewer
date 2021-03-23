@@ -55,7 +55,7 @@
             {{ basemapOptions.attribution }}
           </span> |
         </span>
-        © <a @click="$emit('show-about')">tudelft3d</a>
+        <a @click="$emit('show-about')">© tudelft3d</a>
       </p>
     </div>
     <div id="debug-panel" />
