@@ -1,6 +1,7 @@
 {
   "tilenumber": "Tegelnummer",
   "attribute": "Attribuut",
+  "attributes": "Attributen",
   "value": "Waarde",
   "nav": {
     "3dmap": "3D Viewer",

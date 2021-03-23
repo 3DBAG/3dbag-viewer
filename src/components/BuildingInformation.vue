@@ -18,7 +18,7 @@
           :icon-left="'table'"
           :icon-right="active ? 'menu-down' : 'menu-up'"
         >
-          <span class="is-hidden-mobile">Attributes</span>
+          <span class="is-hidden-mobile">{{ $t("attributes") }}</span>
         </b-button>
       </template>
 

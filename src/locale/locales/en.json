@@ -1,6 +1,7 @@
 {
   "tilenumber": "Tile number",
   "attribute": "Attribute",
+  "attributes": "Attributes",
   "value": "Value",
   "nav": {
     "3dmap": "3D Viewer",
