@@ -1,4 +1,7 @@
 {
+  "tilenumber": "Tegelnummer",
+  "attribute": "Attribuut",
+  "value": "Waarde",
   "nav": {
     "3dmap": "3D Viewer",
     "download": "Downloads",
@@ -13,7 +16,8 @@
   },
   "viewer": {
     "feedback": "Geef feedback",
-    "issue": "Rapporteer dataprobleem",
+    "report-1": "Rapporteer een probleem",
+    "report-2": "als er iets mis is met dit gebouw.",
     "baselayer1": "Basislaag van",
     "baselayer2": "Basislaag"
   },

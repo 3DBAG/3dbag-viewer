@@ -1,11 +1,13 @@
 {
+  "tilenumber": "Tile number",
+  "attribute": "Attribute",
+  "value": "Value",
   "nav": {
     "3dmap": "3D Viewer",
     "download": "Downloads",
     "changelog": "Changelog",
     "docs": "Documentation",
     "features": "Features",
-    "attributes": "Attributes",
     "more": "More",
     "about": "About",
     "copyright": "Copyright",
@@ -13,7 +15,8 @@
   },
   "viewer": {
     "feedback": "Give feedback",
-    "issue": "Report data issue",
+    "report-1": "Report a problem",
+    "report-2": "if something is wrong with this building.",
     "baselayer1": "Baselayer from",
     "baselayer2": "Baselayer"
   },

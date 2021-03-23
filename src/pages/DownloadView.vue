@@ -100,7 +100,7 @@
       <table>
         <thead>
           <tr>
-            <th>Tile ID</th>
+            <th>{{ $t("tilenumber") }}</th>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.file") }}</th>
             <th>{{ $t("download.version") }}</th>

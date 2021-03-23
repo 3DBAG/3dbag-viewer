@@ -31,13 +31,13 @@
         >
           <thead>
             <tr>
-              <th>Attribute</th>
-              <th>Value</th>
+              <th>{{ $t("attribute") }}</th>
+              <th>{{ $t("value") }}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Tile ID</td>
+              <td>{{ $t("tilenumber") }}</td>
               <td>
                 <span>
                   <router-link
@@ -61,12 +61,12 @@
             >
               <td>{{ name }}</td>
               <td class="table-value">
-                {{ building.attributes[name] }}
+                <code>{{ building.attributes[name] }}</code>
               </td>
             </tr>
           </tbody>
         </table>
-        <p><a @click="$emit('report-data')">Report a problem</a> if something is wrong with this building.</p>
+        <p><a @click="$emit('report-data')">{{ $t("viewer.report-1") }}</a> {{ $t("viewer.report-2") }}</p>
       </b-dropdown-item>
     </b-dropdown>
     <div class="control">
