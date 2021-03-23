@@ -15,7 +15,6 @@
         :options="lods"
       />
       <search-bar
-        @menu-clicked="$emit('hamburger-clicked')"
         @select-place="moveToPlace"
       />
       <Compass
@@ -38,7 +37,15 @@
       @cam-offset="onCamOffset"
       @cam-rotation-z="onCamRotationZ"
     />
+    <button
+      class="button"
+      style="position:absolute; right:0.5em; bottom:0.5em"
+      @click="$emit('show-about')"
+    >
+      <b-icon icon="copyright" />
+    </button>
     <div
+      v-if="false"
       id="attribution"
       class="has-background-white has-text-grey"
     >

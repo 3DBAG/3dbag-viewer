@@ -28,6 +28,7 @@
           <a
             href="https://3d.bk.tudelft.nl"
             class="logo-text"
+            style="color: #333"
           >tudelft3d</a>
         </div>
         <a
@@ -90,12 +91,6 @@
               >
                 About
               </a>
-              <a
-                class="navbar-item"
-                @click="showAbout=true"
-              >
-                Copyright
-              </a>
               <hr class="navbar-divider">
               <a
                 class="navbar-item"
@@ -154,7 +149,9 @@
         </section>
       </div>
     </div>
-    <router-view />
+    <router-view
+      @show-about="showAbout=true"
+    />
   </div>
 </template>
 
