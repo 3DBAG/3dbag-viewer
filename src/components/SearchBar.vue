@@ -1,37 +1,55 @@
 <template>
-  <b-autocomplete
-    id="search-input"
-    class="control"
-    field="weergavenaam"
-    :data="geocodeResult"
-    :loading="isGeocoding"
-    :placeholder="$t('SearchBar.search')"
-    icon-right="magnify"
-    @typing="doGeocode"
-    @select="selectPlace"
-  >
-    <template slot="empty">
-      {{ $t("SearchBar.empty") }}
-    </template>
-    <template slot-scope="props">
-      <div class="media">
-        <div class="media-left">
-          <b-icon
-            icon="map-marker"
-            size="is-small"
-          />
-        </div>
-        <div class="media-content">
-          <p class="has-text-left">
-            {{ props.option.display_name }}
-            <small>
-              {{ props.option.type }} ({{ props.option.class }})
-            </small>
-          </p>
-        </div>
-      </div>
-    </template>
-  </b-autocomplete>
+  <div class="control">
+    <b-button
+      icon-left="magnify"
+      class="is-primary"
+      @click="isModalActive = true"
+    >
+      <span class="is-hidden-mobile">{{ $t("SearchBar.search") }}</span>
+    </b-button>
+
+
+    <b-modal
+      v-model="isModalActive"
+      has-modal-card
+      trap-focus
+      @after-enter="focusSearchBar"
+    >
+      <b-autocomplete
+        id="search-input"
+        field="display_name"
+        :autofocus="true"
+        :data="geocodeResult"
+        :loading="isGeocoding"
+        :placeholder="$t('SearchBar.search')"
+        icon-right="magnify"
+        @typing="doGeocode"
+        @select="selectPlace"
+      >
+        <template slot="empty">
+          {{ $t("SearchBar.empty") }}
+        </template>
+        <template slot-scope="props">
+          <div class="media">
+            <div class="media-left">
+              <b-icon
+                icon="map-marker"
+                size="is-small"
+              />
+            </div>
+            <div class="media-content">
+              <p class="has-text-left">
+                {{ props.option.display_name }} <br>
+                <small>
+                  {{ props.option.type }} ({{ props.option.class }})
+                </small>
+              </p>
+            </div>
+          </div>
+        </template>
+      </b-autocomplete>
+    </b-modal>
+  </div>
 </template>
 
 <script>
@@ -65,11 +83,17 @@ export default {
 			*/
 			geocodeResult: [],
 			// Flag to indicate that geocoding is underway
-	  	isGeocoding: false
+	  	isGeocoding: false,
+			isModalActive: false
 	  };
 
 	},
 	methods: {
+		focusSearchBar: function () {
+
+			document.getElementById( 'search-input' ).focus();
+
+		},
 		/**
 		 * Select the specified location.
 		 *
@@ -84,6 +108,7 @@ export default {
        */
 
 			this.$emit( 'select-place', res );
+			this.isModalActive = false;
 
 		},
 		/**
@@ -148,3 +173,16 @@ export default {
 	}
 };
 </script>
+
+<style>
+	#map-options .animation-content {
+		width: 80%;
+		margin-top: 10%;
+	}
+	#map-options .modal {
+		justify-content: unset;
+	}
+	#map-options .dropdown-content {
+		max-height: 100%;
+	}
+</style>
