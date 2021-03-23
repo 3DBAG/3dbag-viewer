@@ -43,7 +43,7 @@
                   {{ building.tileID }}
                   <router-link
                     :to="{ path: 'download', query: { tid: building.tileID } }"
-                    class="tag"
+                    class="tag is-primary"
                     @click="showAbout=true"
                   >
                     <b-icon
