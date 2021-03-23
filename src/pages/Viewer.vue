@@ -373,7 +373,6 @@ export default {
 	margin: 0 0.5rem;
 }
 .table-value {
-	max-width: 170px;
 	overflow-x: auto;
 }
 #building-info .message-body {

@@ -60,8 +60,8 @@
               :key="name"
             >
               <td>{{ name }}</td>
-              <td class="table-value">
-                <code>{{ building.attributes[name] }}</code>
+              <td>
+                <code style="color:inherit">{{ building.attributes[name] }}</code>
               </td>
             </tr>
           </tbody>
