@@ -808,8 +808,7 @@ export default {
 
 				const { face, point, object } = results[ 0 ];
 
-				const info = this.getTileInformationFromActiveObject( object );
-
+				// Compute and show a marker at the intersection point
 				this.rayIntersect.position.copy( point );
 				const normal = face.normal;
 				normal.transformDirection( object.matrixWorld );
@@ -819,7 +818,10 @@ export default {
 					point.z + normal.z
 				 );
 
-				 this.rayIntersect.visible = true;
+				this.rayIntersect.visible = true;
+
+				// Get the active tile
+				const info = this.getTileInformationFromActiveObject( object );
 
 				// Get info from batchTable
 				const batch_id_table = object.geometry.getAttribute( '_batchid' );
@@ -844,6 +846,7 @@ export default {
 			} else {
 
 				this.$emit( 'object-picked', undefined );
+				this.rayIntersect.visible = false;
 
 			}
 
