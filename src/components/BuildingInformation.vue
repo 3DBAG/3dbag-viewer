@@ -134,8 +134,13 @@ export default {
 
 		azimuthAngle: function () {
 
-			if ( this.building.azimuthAngle ) return this.building.azimuthAngle.toFixed( 1 );
-			return null;
+			if ( this.building.azimuthAngle !== undefined ) {
+
+				return this.building.azimuthAngle.toFixed( 1 );
+
+			}
+
+			return '-';
 
 		}
 
