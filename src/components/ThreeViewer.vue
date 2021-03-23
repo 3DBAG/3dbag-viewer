@@ -25,7 +25,11 @@ import {
 	UniformsUtils,
 	TextureLoader,
 	Sprite,
-	SpriteMaterial
+	SpriteMaterial,
+	MeshBasicMaterial,
+	Mesh,
+	CylinderBufferGeometry,
+	TorusBufferGeometry
 } from 'three';
 import {
 	TilesRenderer
@@ -198,6 +202,8 @@ export default {
 		this.selectedObject = null;
 
 		this.sceneTransform = null;
+
+		this.rayIntersect = null;
 
 	},
 	mounted() {
@@ -678,6 +684,20 @@ export default {
 			//this.hemLight = new HemisphereLight( 0xffffbb, 0x080820, 1 );
 			//this.scene.add(this.hemLight);
 
+			this.rayIntersect = new Group();
+
+			const rayIntersectMat = new MeshBasicMaterial( { color: 0xe91e63 } );
+			const rayMesh = new Mesh( new CylinderBufferGeometry( 0.25, 0.25, 6 ), rayIntersectMat );
+			rayMesh.rotation.x = Math.PI / 2;
+			rayMesh.position.z += 3;
+			this.rayIntersect.add( rayMesh );
+
+			const rayRing = new Mesh( new TorusBufferGeometry( 1.5, 0.2, 16, 100 ), rayIntersectMat );
+			this.rayIntersect.add( rayRing );
+			this.scene.add( this.rayIntersect );
+			this.rayIntersect.visible = false;
+
+
 			this.offsetParent.rotation.x = - Math.PI / 2;
 
 			this.reinitBasemap();
@@ -789,6 +809,17 @@ export default {
 				const { face, point, object } = results[ 0 ];
 
 				const info = this.getTileInformationFromActiveObject( object );
+
+				this.rayIntersect.position.copy( point );
+				const normal = face.normal;
+				normal.transformDirection( object.matrixWorld );
+				this.rayIntersect.lookAt(
+					point.x + normal.x,
+					point.y + normal.y,
+					point.z + normal.z
+				 );
+
+				 this.rayIntersect.visible = true;
 
 				// Get info from batchTable
 				const batch_id_table = object.geometry.getAttribute( '_batchid' );
