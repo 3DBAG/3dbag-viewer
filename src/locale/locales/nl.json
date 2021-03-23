@@ -3,20 +3,45 @@
     "3dmap": "3D Viewer",
     "download": "Downloads",
     "changelog": "Changelog",
-	"docs": "Documentatie",
-	"features": "Features",
-	"attributes": "Attributen"
+    "docs": "Documentatie",
+    "features": "Features",
+    "attributes": "Attributen",
+    "more": "Meer",
+    "about": "Over ons",
+    "copyright": "Copyright",
+    "feedback": "Geef feedback"
   },
   "viewer": {
-	"feedback": "Geef feedback",
-	"issue": "Rapporteer dataprobleem",
-	"baselayer1": "Basislaag van",
-	"3dgeoinfo1": "3DBAG door de",
-	"3dgeoinfo2": "3D geoinformation groep",
-	"baselayer2": "Basislaag"
+    "feedback": "Geef feedback",
+    "issue": "Rapporteer dataprobleem",
+    "baselayer1": "Basislaag van",
+    "3dgeoinfo1": "3DBAG door de",
+    "3dgeoinfo2": "3D geoinformation groep",
+    "baselayer2": "Basislaag"
   },
     "SearchBar": {
-	"search": "Zoeken",
-	"empty": "Geen resultaten gevonden"
-	}
+    "search": "Zoeken",
+    "empty": "Geen resultaten gevonden"
+    },
+  "download": {
+    "webservicespar": "Deze laten je de gehele dataset verkennen in andere software (bijvoorbeeld QGIS) zonder iets van tevoren hoeven te downloaden.",
+    "statictitle": "Statische downloads",
+    "staticpicked": "voor tegelnummer ",
+    "staticunpicked": "per tegel",
+    "staticpar": "Om bestandsgrootten beheersbaar te houden is de 3D BAG data opgedeeld in tegels. Voor iedere tegel bieden we de data aan in verschillende bestandsformaten. Klik op de onderstaande knop om de gewilde tegel te kiezen en de downloadopties te zien.",
+    "picktile": "Kies een tegel",
+    "psqlpar": "Het onderstaande PostgreSQL-bestand bevat de rauwe 3D BAG data voor geheel Nederland, inclusief geometrie en attributen. Let op: het is een erg groot bestand.",
+    "selectedtiletrue": "Je hebt tegelnummer ",
+    "selectedtiletrue2": " geselecteerd",
+    "selectedtilefalse": "Selecteer een tegel op de kaart",
+    "confirm": "Bevestig selectie",
+    "format": "Formaat",
+    "downloadsize": "Downloadgrootte",
+    "file": "Bestand",
+    "size": "Grootte",
+    "version": "Versie",
+    "picktile2true": "Kies een andere tegel",
+    "picktile2false": "Kies een tegel",
+    "unzipped": "ongezipt"
+  }
 }
