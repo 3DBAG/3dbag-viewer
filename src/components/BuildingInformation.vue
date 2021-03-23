@@ -40,7 +40,6 @@
               <td>Tile ID</td>
               <td>
                 <span>
-                  {{ building.tileID }}
                   <router-link
                     :to="{ path: 'download', query: { tid: building.tileID } }"
                     class="tag is-primary"
@@ -51,7 +50,7 @@
                       size="is-small"
                       icon="download"
                     />
-                    download
+                    {{ building.tileID }}
                   </router-link>
                 </span>
               </td>
