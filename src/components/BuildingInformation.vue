@@ -3,7 +3,7 @@
     v-show="show"
     id="building-info"
     class="field has-addons"
-    style="z-index:100"
+    style="z-index:1"
   >
     <b-dropdown
       aria-role="list"
