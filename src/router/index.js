@@ -106,6 +106,9 @@ router.beforeEach( ( to, from, next )=> {
 		var queryCopy = JSON.parse( JSON.stringify( previousQuery[ to.name ] ) );
 		delete previousQuery[ to.name ];
 
+		// use new parameters
+		Object.assign( queryCopy, to.query );
+
 		next( { name: to.name, query: queryCopy, params: { locale: i18n.locale } } );
 
 	}	else {

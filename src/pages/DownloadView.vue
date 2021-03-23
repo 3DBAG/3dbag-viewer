@@ -117,7 +117,7 @@
               <a
                 :href="activeTileData[format]['fileURL']"
                 download
-              > {{ activeTileData[format]["fileURL"].split('/').pop() }} </a>
+              > {{ getFileName( format ) }} </a>
             </td>
             <td>{{ $root.$data[ "latest" ] }}</td>
           </tr>
@@ -223,10 +223,10 @@ export default {
 
 		return {
 			mapVisible: false,
-			selectedTile: null,
 			map: null,
 			tileFormats: [ "CityJSON", "OBJ", "GPKG" ],
 
+			selectedTile: null,
 			PostgresFileURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "Postgres" ],
 			WFSURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "WFS" ],
 			WMSURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "WMS" ],
@@ -240,21 +240,27 @@ export default {
 	},
 
 	watch: {
-		selectedTile: function ( newTile, oldTile ) {
 
-			this.setSelectedTile( newTile );
+		$route( to, from ) {
 
-		},
-
-		$route( to ) {
+			console.log( to );
 
 			if ( to.query.tid ) {
 
-				this.setSelectedTile( to.query.tid );
+				this.updateTileData( to.query.tid );
 
 			}
 
 		},
+
+		selectedTile: function ( ) {
+
+			this.setFormatData( "CityJSON" );
+			this.setFormatData( "OBJ" );
+			this.setFormatData( "GPKG" );
+
+		}
+
 	},
 
 	mounted() {
@@ -262,7 +268,7 @@ export default {
 		const tid = this.$router.currentRoute.query.tid;
 		if ( tid ) {
 
-			this.setSelectedTile( tid );
+			this.updateTileData( tid );
 
 		}
 
@@ -270,13 +276,33 @@ export default {
 
 	methods: {
 
-		setSelectedTile( tid ) {
+		setActiveTile( tid ) {
+
+			this.$router.push(
+				{ url: '/', query: { tid: tid } }
+			).catch( err => {
+
+				console.log( err );
+
+			} );
+			this.updateTileData( tid );
+			// this.$forceUpdate();
+
+		},
+
+		getFileName( format ) {
+
+			const data = this.activeTileData[ format ];
+			if ( data.fileURL )
+				return data.fileURL.split( '/' ).pop();
+			else
+				return null;
+
+		},
+
+		updateTileData( tid ) {
 
 			this.selectedTile = tid;
-
-			this.setFormatData( "CityJSON" );
-			this.setFormatData( "OBJ" );
-			this.setFormatData( "GPKG" );
 
 		},
 
@@ -382,13 +408,7 @@ export default {
 					that.map.addInteraction( select );
 					select.on( 'select', function ( e ) {
 
-						that.$router.push(
-							{ url: '/', query: { tid: e.selected[ 0 ].get( 'tile_id' ) } }
-						).catch( err => {
-
-							console.log( err );
-
-						} );
+						that.setActiveTile( e.selected[ 0 ].get( 'tile_id' ) );
 
 					} );
 
