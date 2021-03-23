@@ -17,7 +17,7 @@ const router = new Router( {
 		{
 			path: '/:locale',
 			component: {
-				template: '<router-view />',
+				template: '<router-view @show-about="$emit(\'show-about\')" />',
 			},
 			name: 'pages',
 			children: [
