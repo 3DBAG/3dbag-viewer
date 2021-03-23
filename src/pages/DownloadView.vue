@@ -1,39 +1,7 @@
 <template>
   <section class="section content">
     <h1
-      id="webservices"
-      class="title is-3"
-    >
-      Webservices
-    </h1>
-
-    <p>
-      {{ $t("download.webservicespar") }}
-    </p>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>URL</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>WMS</td>
-            <td><a :href="WMSURL+'?request=getcapabilities'">{{ WMSURL+'?request=getcapabilities' }}</a></td>
-          </tr>
-          <tr>
-            <td>WFS</td>
-            <td><a :href="WFSURL+'?request=getcapabilities'">{{ WFSURL+'?request=getcapabilities' }}</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h1
-      id="downloads"
+      id="tile-downloads"
       class="title is-3"
     >
       <template v-if="selectedTile">
@@ -136,6 +104,38 @@
         {{ $t("download.picktile2false") }}
       </p>
     </button>
+
+    <h1
+      id="webservices"
+      class="title is-3"
+    >
+      Webservices
+    </h1>
+
+    <p>
+      {{ $t("download.webservicespar") }}
+    </p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>WMS</td>
+            <td><a :href="WMSURL+'?request=getcapabilities'">{{ WMSURL+'?request=getcapabilities' }}</a></td>
+          </tr>
+          <tr>
+            <td>WFS</td>
+            <td><a :href="WFSURL+'?request=getcapabilities'">{{ WFSURL+'?request=getcapabilities' }}</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <h1
       id="downloads-postgres"
