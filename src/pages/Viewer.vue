@@ -37,27 +37,12 @@
       @cam-offset="onCamOffset"
       @cam-rotation-z="onCamRotationZ"
     />
-    <button
-      class="button"
-      style="position:absolute; right:0.5em; bottom:0.5em"
-      @click="$emit('show-about')"
-    >
-      <b-icon icon="copyright" />
-    </button>
     <div
-      v-if="false"
+      v-if="true"
       id="attribution"
       class="has-background-white has-text-grey"
     >
-      <p class="is-size-7">
-        <a
-          class="tag is-danger"
-          :href="reportDataIssueUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {{ $t("viewer.issue") }}
-        </a> |
+      <p>
         <span v-if="basemapOptions.attribution">
           {{ $t("viewer.baselayer1") }}
           <a
@@ -70,7 +55,7 @@
             {{ basemapOptions.attribution }}
           </span> |
         </span>
-        {{ $t("viewer.3dgeoinfo1") }} <a href="https://3d.bk.tudelft.nl/">{{ $t("viewer.3dgeoinfo2") }}</a>
+        © <a @click="$emit('show-about')">tudelft3d</a>
       </p>
     </div>
     <div id="debug-panel" />
@@ -412,7 +397,9 @@ export default {
 
 #attribution {
 	position: absolute;
-	padding: 0.2rem;
+	padding: 0 0.1rem;
+	font-size: 13px;
+	line-height: 15px;
 	right: 0;
 	bottom: 0;
 	opacity: 0.8;

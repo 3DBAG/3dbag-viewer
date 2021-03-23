@@ -1,83 +1,82 @@
 <template>
-  <div>
-    <div
-      v-show="show"
-      id="building-info"
-      class="field has-addons"
+  <div
+    v-show="show"
+    id="building-info"
+    class="field has-addons"
+    style="z-index:100"
+  >
+    <b-dropdown
+      aria-role="list"
+      :can-close="['escape']"
+      :mobile-modal="false"
+      class="control dropdown is-hoverable is-up"
     >
-      <b-dropdown
-        aria-role="list"
-        :can-close="['escape']"
-        :mobile-modal="false"
-        class="control dropdown is-hoverable is-up"
-      >
-        <template #trigger="{ active }">
-          <b-button
-            aria-haspopup="true"
-            type="is-warning"
-            :icon-left="'table'"
-            :icon-right="active ? 'menu-down' : 'menu-up'"
-          >
-            <span class="is-hidden-mobile">Attributes</span>
-          </b-button>
-        </template>
-
-        <b-dropdown-item
-          custom
-          aria-role="listitem"
-        >
-          <table
-            class="table is-fullwidth is-striped has-text-left"
-          >
-            <thead>
-              <tr>
-                <th>Attribute</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Tile ID</td>
-                <td>
-                  <span>
-                    {{ building.tileID }}
-                    <router-link
-                      :to="{ path: 'download', query: { tid: building.tileID } }"
-                      class="tag"
-                      @click="showAbout=true"
-                    >
-                      <b-icon
-                        class="mr-1"
-                        size="is-small"
-                        icon="download"
-                      />
-                      download
-                    </router-link>
-                  </span>
-                </td>
-              </tr>
-              <tr
-                v-for="name in attr_names"
-                :key="name"
-              >
-                <td>{{ name }}</td>
-                <td class="table-value">
-                  {{ building.attributes[name] }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <p><a @click="$emit('report-data')">Report a problem</a> if something is wrong with this building.</p>
-        </b-dropdown-item>
-      </b-dropdown>
-      <div class="control">
+      <template #trigger="{ active }">
         <b-button
-          type="is-static"
-          :icon-left="'cursor-default-click'"
+          aria-haspopup="true"
+          type="is-warning"
+          :icon-left="'table'"
+          :icon-right="active ? 'menu-down' : 'menu-up'"
         >
-          <b>{{ h_clicked }}</b> m
+          <span class="is-hidden-mobile">Attributes</span>
         </b-button>
-      </div>
+      </template>
+
+      <b-dropdown-item
+        custom
+        aria-role="listitem"
+      >
+        <table
+          class="table is-fullwidth is-striped has-text-left"
+        >
+          <thead>
+            <tr>
+              <th>Attribute</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tile ID</td>
+              <td>
+                <span>
+                  {{ building.tileID }}
+                  <router-link
+                    :to="{ path: 'download', query: { tid: building.tileID } }"
+                    class="tag"
+                    @click="showAbout=true"
+                  >
+                    <b-icon
+                      class="mr-1"
+                      size="is-small"
+                      icon="download"
+                    />
+                    download
+                  </router-link>
+                </span>
+              </td>
+            </tr>
+            <tr
+              v-for="name in attr_names"
+              :key="name"
+            >
+              <td>{{ name }}</td>
+              <td class="table-value">
+                {{ building.attributes[name] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p><a @click="$emit('report-data')">Report a problem</a> if something is wrong with this building.</p>
+      </b-dropdown-item>
+    </b-dropdown>
+    <div class="control">
+      <b-button
+        type="is-static"
+        :icon-left="'arrow-expand-vertical'"
+      >
+        <b>{{ h_clicked }}</b> m
+      </b-button>
     </div>
   </div>
 </template>
