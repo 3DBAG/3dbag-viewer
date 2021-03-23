@@ -728,7 +728,14 @@ export default {
 
 			if ( this.castOnHover || evt.altKey ) {
 
-				this.castRay( evt.clientX, evt.clientY );
+				let snapTolerance = 0;
+				if ( evt.ctrlKey ) {
+
+					snapTolerance = 5;
+
+				}
+
+				this.castRay( evt.clientX, evt.clientY, snapTolerance );
 
 			}
 
@@ -751,7 +758,7 @@ export default {
 			}
 
 		},
-		castRay( clientX, clientY ) {
+		castRay( clientX, clientY, snapTolerance = 0 ) {
 
 			const rect = this.renderer.domElement.getBoundingClientRect();
 			this.mouse.x = ( ( clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
@@ -808,14 +815,51 @@ export default {
 
 				const { face, point, object } = results[ 0 ];
 
+				let closestPoint = null;
+
+				if ( snapTolerance > 0 ) {
+
+					// Snap to closest point
+					const position = object.geometry.getAttribute( 'position' );
+					const m = object.matrixWorld;
+					const points = [
+						new Vector3( position.getX( face.a ), position.getY( face.a ), position.getZ( face.a ) ).applyMatrix4( m ),
+						new Vector3( position.getX( face.b ), position.getY( face.b ), position.getZ( face.b ) ).applyMatrix4( m ),
+						new Vector3( position.getX( face.c ), position.getY( face.c ), position.getZ( face.c ) ).applyMatrix4( m )
+					];
+					let dist = snapTolerance;
+					for ( let i = 0; i < 3; i ++ ) {
+
+						const newDist = point.distanceTo( points[ i ] );
+						if ( newDist < dist ) {
+
+							closestPoint = points[ i ];
+							dist = newDist;
+
+						}
+
+					}
+
+					if ( closestPoint === null ) {
+
+						closestPoint = point;
+
+					}
+
+				} else {
+
+					closestPoint = point;
+
+				}
+
 				// Compute and show a marker at the intersection point
-				this.rayIntersect.position.copy( point );
+				this.rayIntersect.position.copy( closestPoint );
 				const normal = face.normal;
 				normal.transformDirection( object.matrixWorld );
 				this.rayIntersect.lookAt(
-					point.x + normal.x,
-					point.y + normal.y,
-					point.z + normal.z
+					closestPoint.x + normal.x,
+					closestPoint.y + normal.y,
+					closestPoint.z + normal.z
 				);
 
 				const azimuthAngle = normal.angleTo( new Vector3( 0, 1, 0 ) ) * 180 / Math.PI;
@@ -836,7 +880,7 @@ export default {
 
 					const attributes = JSON.parse( batchTable.getData( "attributes" )[ batch_id ] );
 					const tileID = info.id.replace( /^.*[\\\/]/, '' ).replace( '.b3dm', '' );
-					const pz = point.y;
+					const pz = closestPoint.y;
 					this.$emit( 'object-picked', {
 						"batchID": batch_id,
 						tileID,
