@@ -23,7 +23,7 @@
     },
   "download": {
     "webservicespar": "These allow you to explore the entire dataset in another software (eg. QGIS) without having to download anything beforehand.",
-    "statictitle": "Static downloads",
+    "statictitle": "Downloads",
     "staticpicked": "for tile number ",
     "staticunpicked": "per tile",
     "staticpar": "To keep filesizes manageable the 3D BAG dataset is subdived in tiles. For each tile we offer the data in a number of different file formats. Use the button below to select the tile of interest to see the download options.",

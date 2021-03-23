@@ -23,7 +23,7 @@
     },
   "download": {
     "webservicespar": "Deze laten je de gehele dataset verkennen in andere software (bijvoorbeeld QGIS) zonder iets van tevoren hoeven te downloaden.",
-    "statictitle": "Statische downloads",
+    "statictitle": "Downloads",
     "staticpicked": "voor tegelnummer ",
     "staticunpicked": "per tegel",
     "staticpar": "Om bestandsgrootten beheersbaar te houden is de 3D BAG data opgedeeld in tegels. Voor iedere tegel bieden we de data aan in verschillende bestandsformaten. Klik op de onderstaande knop om de gewilde tegel te kiezen en de downloadopties te zien.",

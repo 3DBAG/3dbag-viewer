@@ -103,7 +103,6 @@
             <th>Tile ID</th>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.file") }}</th>
-            <th>{{ $t("download.downloadsize") }}</th>
             <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
@@ -120,7 +119,6 @@
                 download
               > {{ activeTileData[format]["fileURL"].split('/').pop() }} </a>
             </td>
-            <td>{{ activeTileData[format]["Content-Length"] }}</td>
             <td>{{ $root.$data[ "latest" ] }}</td>
           </tr>
         </tbody>
