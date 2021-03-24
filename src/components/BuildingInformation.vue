@@ -67,6 +67,9 @@
             </tr>
           </tbody>
         </table>
+        <p class="mb-2">
+          {{ $t("BuildingInfo.attr1") }} <a :href="'https://docs.3dbag.nl/'+this.$route.params.locale+'/schema/attributes/' ">{{ $t("documentation") }}</a>.
+        </p>
         <p>
           <a
             class="tag is-danger"

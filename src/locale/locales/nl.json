@@ -3,6 +3,7 @@
   "attribute": "Attribuut",
   "attributes": "Attributen",
   "value": "Waarde",
+  "documentation": "documentatie",
   "nav": {
     "3dmap": "3D Viewer",
     "download": "Downloads",
@@ -17,12 +18,15 @@
   },
   "viewer": {
     "feedback": "Geef feedback",
-    "issue": "Rapporteer een probleem",
+    "issue": "Rapporteer een probleem met dit gebouw",
     "baselayer1": "Basislaag van",
     "baselayer2": "Basislaag"
   },
-    "SearchBar": {
-    "search": "Zoek een plaatsnaam",
+  "BuildingInfo": {
+    "attr1": "Attribuut beschrijvingen in de "
+  },
+  "SearchBar": {
+    "search": "Zoek een plaats",
     "empty": "Geen resultaten gevonden"
     },
   "download": {

@@ -16,9 +16,12 @@
   },
   "viewer": {
     "feedback": "Give feedback",
-    "issue": "Report a problem",
+    "issue": "Report a problem with this building",
     "baselayer1": "Baselayer from",
     "baselayer2": "Baselayer"
+  },
+  "BuildingInfo": {
+    "attr1": "Attribute descriptions in the "
   },
   "SearchBar": {
     "search": "Search for a place",
