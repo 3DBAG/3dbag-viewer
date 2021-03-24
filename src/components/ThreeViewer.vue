@@ -615,6 +615,7 @@ export default {
 
 			// enable AA only for non high DPI screens
 			this.renderer = new WebGLRenderer( { antialias: window.devicePixelRatio > 1 ? false : true } );
+			// this.renderer = new WebGLRenderer( { antialias: false } );
 			this.renderer.setPixelRatio( window.devicePixelRatio );
 			this.renderer.setSize( canvas.clientWidth, canvas.clientHeight );
 			this.renderer.setClearColor( 0xd9eefc );

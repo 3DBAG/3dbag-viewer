@@ -74,7 +74,7 @@
             {{ $t("nav.download") }}
           </router-link>
           <a
-            href="https://docs.3dbag.nl"
+            :href="'https://docs.3dbag.nl/' + $root.$i18n.locale"
             class="navbar-item"
           >
             {{ $t("nav.docs") }}
@@ -104,11 +104,10 @@
         </div>
       </div>
     </nav>
-    <div
-      class="modal"
-      :class="{ 'is-active' : showAbout }"
+    <b-modal
+      v-model="showAbout"
+      has-modal-card
     >
-      <div class="modal-background" />
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">
@@ -133,22 +132,14 @@
               Copyright and licensing
             </h2>
             <ul>
+              <li>3D BAG by the 3D geoinformation group @ TU Delft</li>
               <li>Please do not publicly share or promote this website at this time.</li>
               <li>See xx docs page for all the information on this.</li>
-            </ul>
-
-            <h2 class="title is-4">
-              Attribution
-            </h2>
-            <ul>
-              <li>3D BAG by the 3D geoinformation group @ TU Delft</li>
-              <li>Baselayers from PDOK</li>
-              <li>See yy docs page for full attribution</li>
             </ul>
           </div>
         </section>
       </div>
-    </div>
+    </b-modal>
     <router-view
       @show-about="showAbout=true"
     />
