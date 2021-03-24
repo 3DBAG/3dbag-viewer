@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <nav
-      class="navbar is-fixed-top is-white has-shadow"
+      class="navbar is-fixed-top is-white"
       role="navigation"
       aria-label="dropdown navigation"
     >
@@ -52,30 +52,30 @@
         <div class="navbar-start">
           <div class="navbar-item tags has-addons">
             <span class="tag">{{ $root.$data['latest'] }}</span>
-            <a
+            <span
               class="tag is-danger"
               @click="showAbout=true"
-            >beta</a>
+            >beta</span>
           </div>
         </div>
         <div class="navbar-end">
           <router-link
             to="/viewer"
-            active-class="is-active"
+            :class="{'is-active': currentRouteName=='Viewer'}"
             class="navbar-item"
           >
             {{ $t("nav.3dmap") }}
           </router-link>
           <router-link
             to="/download"
-            active-class="is-active"
+            :class="{'is-active': currentRouteName=='Download'}"
             class="navbar-item"
           >
             {{ $t("nav.download") }}
           </router-link>
           <a
-            :href="'https://docs.3dbag.nl/' + $root.$i18n.locale"
-            class="navbar-item"
+            :href="'https://docs.3dbag.nl/' + currentLocale"
+            class="navbar-item docs-link"
           >
             {{ $t("nav.docs") }}
           </a>
@@ -174,6 +174,11 @@ export default {
 			return this.$route.params.locale;
 
 		},
+		currentRouteName() {
+
+			return this.$route.name;
+
+		}
 	},
 
 };
@@ -199,8 +204,16 @@ html, body {
 
 }
 
+nav.navbar {
+  box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%);
+}
+
 .logo-text {
   font-family: 'Barlow', sans-serif;
   font-weight: bold;
+}
+
+.docs-link {
+  background-color: rgb(250 250 250 / 1);
 }
 </style>
