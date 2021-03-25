@@ -723,10 +723,10 @@ export default {
 		},
 		onPointerMove( evt ) {
 
-			if ( this.castOnHover || evt.altKey ) {
+			if ( this.castOnHover || evt.ctrlKey ) {
 
 				let snapTolerance = 0;
-				if ( evt.ctrlKey ) {
+				if ( evt.altKey ) {
 
 					snapTolerance = 5;
 
