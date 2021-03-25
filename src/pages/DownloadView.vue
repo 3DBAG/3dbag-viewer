@@ -83,7 +83,9 @@
             <td>{{ selectedTile }}</td>
             <td>{{ format }}</td>
             <td>
-              <a :href="activeTileData[format]['docsURL']" target="_blank"
+              <a
+                :href="activeTileData[format]['docsURL']"
+                target="_blank"
               >{{ $t("download.docsRead") }}</a>
             </td>
             <td>
@@ -134,7 +136,9 @@
           <tr>
             <td>WMS</td>
             <td>
-              <a :href="'https://docs.3dbag.nl/' + this.$route.params.locale + 'delivery/webservices#wms'" target="_blank"
+              <a
+                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/webservices#wms'"
+                target="_blank"
               >{{ $t("download.docsRead") }}</a>
             </td>
             <td><a :href="WMSURL+'?request=getcapabilities'">{{ WMSURL+'?request=getcapabilities' }}</a></td>
@@ -142,7 +146,9 @@
           <tr>
             <td>WFS</td>
             <td>
-              <a :href="'https://docs.3dbag.nl/' + this.$route.params.locale + 'delivery/webservices#wfs'" target="_blank"
+              <a
+                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/webservices#wfs'"
+                target="_blank"
               >{{ $t("download.docsRead") }}</a>
             </td>
             <td><a :href="WFSURL+'?request=getcapabilities'">{{ WFSURL+'?request=getcapabilities' }}</a></td>
@@ -178,7 +184,9 @@
               > {{ PostgresFileURL.split('/').pop() }} </a>
             </td>
             <td>
-              <a :href="'https://docs.3dbag.nl/' + this.$route.params.locale + 'delivery/postgresql'" target="_blank"
+              <a
+                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/postgresql'"
+                target="_blank"
               >{{ $t("download.docsRead") }}</a>
             </td>
             <td>>20GB (>90GB {{ $t("download.unzipped") }})</td>
@@ -329,8 +337,8 @@ export default {
 
 			const latest = this.$root.$data[ "latest" ];
 			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "versions" ][ latest ][ format ].replace( "{TID}", this.selectedTile );
-			const format_lower = this.$root.$data[ "versions" ][ latest ][ format ].toLowerCase();
-      this.activeTileData[ format ][ "docsURL" ] = 'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery' + format_lower;
+			const format_lower = format.toLowerCase();
+			this.activeTileData[ format ][ "docsURL" ] = 'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/' + format_lower;
 
 			// we should be able to figure out md5 hasd and files size with a HEAD request
 			// also can check if the file exists to not put broken link
@@ -349,25 +357,6 @@ export default {
 				.catch( ( error ) => {
 
 					this.activeTileData[ format ][ "fileURL" ] = "";
-					this.activeTileData[ format ][ "Content-Length" ] = "";
-
-				} );
-			// BD: I don't know what am I doing here...
-			fetch( this.activeTileData[ format ][ "docsURL" ], {
-				method: 'HEAD'
-			} )
-				.then( response => {
-
-					if ( response.ok ) {
-
-						this.activeTileData[ format ][ "Content-Length" ] = formatBytes( parseFloat( response.headers.get( 'Content-Length' ) ), 2 );
-
-					}
-
-				} )
-				.catch( ( error ) => {
-
-					this.activeTileData[ format ][ "docsURL" ] = "";
 					this.activeTileData[ format ][ "Content-Length" ] = "";
 
 				} );
