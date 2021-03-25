@@ -215,7 +215,10 @@ export default {
 </script>
 
 <style>
-@import 'https://fonts.googleapis.com/css?family=Barlow';
+@import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter&family=Roboto+Mono&display=swap');
+
 
 html, body {
   height: 100%;
