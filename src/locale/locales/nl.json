@@ -23,7 +23,7 @@
     "baselayer2": "Basislaag"
   },
   "BuildingInfo": {
-    "attr1": "Attribuut beschrijvingen in de "
+    "attr1": "Attribuut omschrijvingen vind je in de "
   },
   "SearchBar": {
     "search": "Zoek een plaats",
@@ -36,7 +36,7 @@
     "staticunpicked": "per tegel",
     "staticpar": "Om bestandsgrootten beheersbaar te houden is de 3D BAG data opgedeeld in tegels. Voor iedere tegel bieden we de data aan in verschillende bestandsformaten. Klik op de onderstaande knop om de gewilde tegel te kiezen en de downloadopties te zien.",
     "picktile": "Kies een tegel",
-    "psqlpar": "Het onderstaande PostgreSQL-bestand bevat de rauwe 3D BAG data voor geheel Nederland, inclusief geometrie en attributen. Let op: het is een erg groot bestand.",
+    "psqlpar": "Het onderstaande PostgreSQL-bestand bevat de ruwe 3D BAG data voor geheel Nederland, inclusief geometrie en attributen. Let op: het is een erg groot bestand.",
     "selectedtiletrue": "Je hebt tegelnummer ",
     "selectedtiletrue2": " geselecteerd",
     "selectedtilefalse": "Selecteer een tegel op de kaart",

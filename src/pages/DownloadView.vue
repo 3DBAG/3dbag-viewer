@@ -70,7 +70,6 @@
           <tr>
             <th>{{ $t("tilenumber") }}</th>
             <th>{{ $t("download.format") }}</th>
-            <th>{{ $t("download.documentation") }}</th>
             <th>{{ $t("download.file") }}</th>
             <th>{{ $t("download.version") }}</th>
           </tr>
@@ -81,12 +80,14 @@
             :key="format"
           >
             <td>{{ selectedTile }}</td>
-            <td>{{ format }}</td>
             <td>
-              <a
+              {{ format }} <a
                 :href="activeTileData[format]['docsURL']"
                 target="_blank"
-              >{{ $t("download.docsRead") }}</a>
+              ><b-icon
+                size="is-small"
+                icon="help-circle"
+              /></a>
             </td>
             <td>
               <a
@@ -128,28 +129,31 @@
         <thead>
           <tr>
             <th>Type</th>
-            <th>{{ $t("download.documentation") }}</th>
             <th>URL</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>WMS</td>
             <td>
-              <a
+              WMS <a
                 :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/webservices#wms'"
                 target="_blank"
-              >{{ $t("download.docsRead") }}</a>
+              ><b-icon
+                size="is-small"
+                icon="help-circle"
+              /></a>
             </td>
             <td><a :href="WMSURL+'?request=getcapabilities'">{{ WMSURL+'?request=getcapabilities' }}</a></td>
           </tr>
           <tr>
-            <td>WFS</td>
             <td>
-              <a
+              WFS <a
                 :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/webservices#wfs'"
                 target="_blank"
-              >{{ $t("download.docsRead") }}</a>
+              ><b-icon
+                size="is-small"
+                icon="help-circle"
+              /></a>
             </td>
             <td><a :href="WFSURL+'?request=getcapabilities'">{{ WFSURL+'?request=getcapabilities' }}</a></td>
           </tr>
@@ -170,7 +174,7 @@
         <thead>
           <tr>
             <th>{{ $t("download.file") }}</th>
-            <th>{{ $t("download.documentation") }}</th>
+            <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.size") }}</th>
             <th>{{ $t("download.version") }}</th>
           </tr>
@@ -184,10 +188,14 @@
               > {{ PostgresFileURL.split('/').pop() }} </a>
             </td>
             <td>
+              PostgreSQL
               <a
                 :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/postgresql'"
                 target="_blank"
-              >{{ $t("download.docsRead") }}</a>
+              ><b-icon
+                size="is-small"
+                icon="help-circle"
+              /></a>
             </td>
             <td>>20GB (>90GB {{ $t("download.unzipped") }})</td>
             <td>{{ $root.$data[ "latest" ] }}</td>
