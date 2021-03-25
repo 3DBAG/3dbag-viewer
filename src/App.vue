@@ -52,10 +52,8 @@
         <div class="navbar-start">
           <div class="navbar-item tags has-addons">
             <span class="tag">{{ $root.$data['latest'] }}</span>
-            <span
-              class="tag is-danger"
-              @click="showAbout=true"
-            >beta</span>
+            <a class="tag is-danger" :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#21031-20210326-beta'">beta
+	    </a>
           </div>
         </div>
         <div class="navbar-end">
