@@ -131,11 +131,14 @@
             <h2 class="title is-4">
               Copyright and licensing
             </h2>
-            <ul>
-              <li>3D BAG by the 3D geoinformation group @ TU Delft</li>
-              <li>Please do not publicly share or promote this website at this time.</li>
-              <li>See xx docs page for all the information on this.</li>
-            </ul>
+             <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
+	     <a property="dct:title" rel="cc:attributionURL" href="https://3dbag.nl">3D BAG</a> by 
+	     <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://3d.bk.tudelft.nl/">3D geoinformation research group</a> is licensed under 
+	     <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a>
+	     </p>
+	     <p>
+	       Read the <a href="https://docs.3dbag.nl/en/copyright">terms of use for the 3D BAG</a>.
+	     </p>
           </div>
         </section>
       </div>
