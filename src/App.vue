@@ -51,7 +51,7 @@
       >
         <div class="navbar-start">
           <div class="navbar-item tags has-addons">
-	    <a
+            <a
               class="tag"
               :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#21031-20210326-beta'"
             >{{ $root.$data['latest'] }}
