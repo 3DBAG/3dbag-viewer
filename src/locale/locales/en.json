@@ -40,6 +40,8 @@
     "selectedtilefalse": "Select a tile from the map",
     "confirm": "Confirm selection",
     "format": "Format",
+    "documentation": "Documentation",
+    "docsRead": "Read",
     "downloadsize": "Download size",
     "file": "File",
     "size": "Size",
