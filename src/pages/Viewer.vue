@@ -325,7 +325,7 @@ export default {
 			if ( res ) {
 
 				this.$router.push( {
-					path: '/viewer',
+					path: '/en/viewer',
 					query: {
 						rdx: res.rd_x,
 						rdy: res.rd_y,
