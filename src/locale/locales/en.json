@@ -3,6 +3,7 @@
   "attribute": "Attribute",
   "attributes": "Attributes",
   "value": "Value",
+  "documentation": "documentation",
   "nav": {
     "3dmap": "3D Viewer",
     "download": "Downloads",
