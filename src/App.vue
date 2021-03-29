@@ -95,7 +95,7 @@
               <hr class="navbar-divider">
               <a
                 class="navbar-item"
-                href="https://docs.google.com/forms/d/e/1FAIpQLSe2XLCYNmoFVHrgt_uRXeLLwfzDK7gS2kE7mGH8rnk6ltE0LQ/viewform?"
+                :href="currentLocale == 'en' ? 'https://forms.gle/NZg83heXM75pAmfVA' : 'https://forms.gle/N1FPRp3RG45EaBjUA'"
               >
                 {{ $t("nav.feedback") }}
               </a>
