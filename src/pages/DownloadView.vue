@@ -197,7 +197,7 @@
                 icon="help-circle"
               /></a>
             </td>
-            <td>>20GB (>90GB {{ $t("download.unzipped") }})</td>
+            <td>>20GB (>75GB {{ $t("download.restored") }})</td>
             <td>{{ $root.$data[ "latest" ] }}</td>
           </tr>
         </tbody>

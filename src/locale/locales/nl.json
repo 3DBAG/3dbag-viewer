@@ -50,6 +50,6 @@
     "version": "Versie",
     "picktile2true": "Kies een andere tegel",
     "picktile2false": "Kies een tegel",
-    "unzipped": "ongezipt"
+    "restored": "in PostgreSQL"
   }
 }

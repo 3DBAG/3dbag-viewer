@@ -49,6 +49,6 @@
     "version": "Version",
     "picktile2true": "Pick another tile",
     "picktile2false": "Pick a tile",
-    "unzipped": "unzipped"
+    "restored": "in PostgreSQL"
   }
 }
