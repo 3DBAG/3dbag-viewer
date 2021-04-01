@@ -356,14 +356,22 @@ export default {
 
 			const loader = new GLTFLoader();
 
+			const locs = [
+				[ 85060.23826214890, 447470.4011195615, 0, 4.1, 0.7 ], //delft
+				[ 93061.99483551063, 436492.4248654108, - 80, 3.8, 1.0 ] //rotterdam
+			];
+			const i = Math.floor( Math.random() * 2 );
 			loader.load( '/godzilla.glb', ( gltf ) => {
 
 				this.godzilla = gltf.scene;
-				let pos = this.rd2local( 93061.99483551063, 436492.4248654108, - 80 );
+				let pos = this.rd2local( locs[ i ][ 0 ], locs[ i ][ 1 ], locs[ i ][ 2 ] );
 				this.godzilla.position.x += pos.x;
 				this.godzilla.position.y += pos.y;
 				this.godzilla.position.z += pos.z;
-				this.godzilla.rotation.y = 3.8;
+				this.godzilla.scale.x = locs[ i ][ 4 ];
+				this.godzilla.scale.y = locs[ i ][ 4 ];
+				this.godzilla.scale.z = locs[ i ][ 4 ];
+				this.godzilla.rotation.y = locs[ i ][ 3 ];
 				this.scene.add( this.godzilla );
 
 			}, undefined, function ( error ) {
