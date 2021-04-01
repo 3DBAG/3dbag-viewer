@@ -39,6 +39,7 @@ import {
 	WMTSTilesRenderer
 } from '../terrain-tiles';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // import TWEEN from '@tweenjs/tween.js';
 import markerSprite from '@/assets/locationmarker.png';
 
@@ -155,6 +156,7 @@ export default {
 		this.box = null;
 
 		this.tiles = null;
+		this.godzilla = null;
 
 		this.needsRerender = 0;
 
@@ -338,6 +340,37 @@ export default {
 				} );
 
 			this.pane.on( "change", ( val ) => this.needsRerender = 1 );
+
+		},
+		rd2local( rd_x, rd_y, rd_z ) {
+
+			const tileset_offset_x = this.sceneTransform.x;
+			const tileset_offset_y = this.sceneTransform.y;
+			const local_x = rd_x - tileset_offset_x;
+			const local_y = rd_z;
+			const local_z = - ( rd_y - tileset_offset_y );
+			return new Vector3( local_x, local_y, local_z );
+
+		},
+		loadGodzilla() {
+
+			const loader = new GLTFLoader();
+
+			loader.load( '/godzilla.glb', ( gltf ) => {
+
+				this.godzilla = gltf.scene;
+				let pos = this.rd2local( 93061.99483551063, 436492.4248654108, - 80 );
+				this.godzilla.position.x += pos.x;
+				this.godzilla.position.y += pos.y;
+				this.godzilla.position.z += pos.z;
+				this.godzilla.rotation.y = 3.8;
+				this.scene.add( this.godzilla );
+
+			}, undefined, function ( error ) {
+
+				console.error( error );
+
+			} );
 
 		},
 		setCameraPosFromRoute( q ) {
@@ -537,6 +570,8 @@ export default {
 
 				const transform = this.tiles.root.cached.transform;
 				this.sceneTransform = new Vector2( transform.elements[ 12 ], transform.elements[ 13 ] );
+
+				this.loadGodzilla();
 
 				this.needsRerender = 2;
 
@@ -990,6 +1025,7 @@ export default {
 					if ( ! this.show3DTiles ) {
 
 						this.offsetParent.add( this.tiles.group );
+						this.scene.add( this.godzilla );
 						this.show3DTiles = true;
 
 					}
@@ -999,6 +1035,7 @@ export default {
 					if ( this.show3DTiles ) {
 
 						this.offsetParent.remove( this.tiles.group );
+						this.scene.remove( this.godzilla );
 						this.show3DTiles = false;
 
 					}
