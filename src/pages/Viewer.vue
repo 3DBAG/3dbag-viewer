@@ -233,7 +233,7 @@ export default {
 					attribution: "PDOK",
 					attributionURL: "https://www.pdok.nl/",
 					options: {
-						url: 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts?',
+						url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0?',
 						layer: '2020_ortho25',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
