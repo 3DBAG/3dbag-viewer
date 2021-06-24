@@ -418,7 +418,7 @@ export default {
 
 			var that = this;
 
-			fetch( 'https://geodata.nationaalgeoregister.nl/wmts?request=GetCapabilities' ).then( function ( response ) {
+			fetch( 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?request=getcapabilities&service=wmts' ).then( function ( response ) {
 
 				return response.text();
 
@@ -428,7 +428,7 @@ export default {
 				// console.log( result );
 
 				var brt_options = WMTSoptionsFromCapabilities( result, {
-					layer: 'brtachtergrondkaart',
+					layer: 'standaard',
 					matrixSet: 'EPSG:28992',
 					format: 'image/png8',
 					crossOrigin: 'anonymous'

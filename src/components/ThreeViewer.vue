@@ -105,8 +105,8 @@ export default {
 				return {
 					type: "wmts",
 					options: {
-						url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
-						layer: 'brtachtergrondkaart',
+						url: 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?',
+						layer: 'standaard',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
 						service: "WMTS",
