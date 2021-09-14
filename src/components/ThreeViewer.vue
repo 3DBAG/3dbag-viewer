@@ -195,7 +195,7 @@ export default {
 		this.errorThreshold = 60;
 
 		this.castOnHover = false;
-		this.overrideCast = true; // Defines if we should override the original TilesRenderer raycasting
+		this.overrideCast = false; // Defines if we should override the original TilesRenderer raycasting
 
 		this.showTerrain = true;
 		this.pane = null;
