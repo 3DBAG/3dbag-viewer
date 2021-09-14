@@ -24,12 +24,13 @@ class Tile {
 
 	}
 
-	getCenterPosition( offset = new Vector2() ) {
+	getCenterPosition( offset = new Vector3() ) {
 
 		const x = this.tileMatrix.minX + this.col * this.tileMatrix.tileSpanX + this.tileMatrix.tileSpanX / 2 - offset.x;
 		const y = this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY - this.tileMatrix.tileSpanY / 2 - offset.y;
+		const z = - offset.z;
 
-		return new Vector2( x, y );
+		return new Vector3( x, y, z );
 
 	}
 
