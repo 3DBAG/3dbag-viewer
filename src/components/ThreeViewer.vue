@@ -32,7 +32,7 @@ import {
 	TorusBufferGeometry
 } from 'three';
 import {
-	TilesRenderer
+	DebugTilesRenderer as TilesRenderer
 } from '3d-tiles-renderer';
 import {
 	WMSTilesRenderer,
@@ -496,6 +496,8 @@ export default {
 			}
 
 			this.tiles = new TilesRenderer( this.tilesUrl );
+			this.tiles.displayBoxBounds = true;
+			this.tiles.colorMode = 7;
 			this.tiles.lruCache.minSize = this.lruCacheMinSize;
 			this.tiles.lruCache.maxSize = this.lruCacheMaxSize;
 
@@ -536,7 +538,7 @@ export default {
 				}
 
 				const transform = this.tiles.root.cached.transform;
-				this.sceneTransform = new Vector2( transform.elements[ 12 ], transform.elements[ 13 ] );
+				this.sceneTransform = new Vector3( transform.elements[ 12 ], transform.elements[ 13 ], transform.elements[ 14 ] );
 
 				this.needsRerender = 2;
 
@@ -555,7 +557,7 @@ export default {
 						if ( c.geometry ) {
 
 							c.geometry.computeBoundingBox();
-							c.position.y = offset_z;
+							// c.position.y = offset_z;
 
 						}
 
@@ -602,7 +604,7 @@ export default {
 		initScene() {
 
 			this.scene = new Scene();
-			this.scene.background = new Color( this.fogColor );
+			this.scene.background = new Color( "#000000" );
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
 
 			this.material = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
@@ -1015,10 +1017,13 @@ export default {
 
 				}
 
+				// this.offsetParent.remove( this.terrainTiles.group );
+
 				// this.renderer.autoClear is set to false, so we need to clear manually. Because don't want to clear when second scene is rendered.
 				this.renderer.clear();
 				this.renderer.render( this.scene, this.camera );
 
+				// this.offsetParent.add( this.terrainTiles.group );
 
 			}
 
