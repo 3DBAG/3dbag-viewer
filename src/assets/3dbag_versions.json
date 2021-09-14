@@ -15,7 +15,7 @@
       "WMS" : "https://data.3dbag.nl/api/BAG3D_v2/wms",
 
       "3DTilesets" : {
-        "lod22": "https://3dbag.nl/download/3dtiles/v21031_7425c21b/lod22/tileset.json",
+        "lod22": "http://localhost:8080/lod22/tileset.json",
 				"lod13": "https://3dbag.nl/download/3dtiles/v21031_7425c21b/lod13/tileset.json",
 				"lod12": "https://3dbag.nl/download/3dtiles/v21031_7425c21b/lod12/tileset.json"
       }
