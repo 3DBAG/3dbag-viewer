@@ -42,10 +42,10 @@ export class TilesRenderer {
 
 	}
 
-	update( sceneCenter, camera ) {
+	update( sceneCenter, camera, controls ) {
 
 		// Get indices of all tiles that are in view
-		const tiles = this.tileScheme.getTilesInView( camera, this.resFactor, sceneCenter );
+		const tiles = this.tileScheme.getTilesInView( camera, controls, this.resFactor, sceneCenter );
 		this.tilesInView = tiles;
 
 		// check if we just changed tileLevel
