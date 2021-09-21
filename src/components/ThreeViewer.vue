@@ -32,7 +32,7 @@ import {
 	TorusBufferGeometry
 } from 'three';
 import {
-	DebugTilesRenderer as TilesRenderer
+	TilesRenderer
 } from '3d-tiles-renderer';
 import {
 	WMSTilesRenderer,
