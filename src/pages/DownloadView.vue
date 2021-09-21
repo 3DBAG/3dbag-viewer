@@ -449,7 +449,7 @@ export default {
 					// 3Dgeoinfo office
 					center: [ 85177.9151549, 446749.16831151 ],
 					maxZoom: 13,
-					zoom: 6
+					zoom: 12
 				} );
 
 				that.map = new Map( {
