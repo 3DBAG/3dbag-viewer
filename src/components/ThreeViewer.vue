@@ -360,6 +360,7 @@ export default {
 				return;
 
 			}
+
 			let tileset_offset_x = this.tiles.root.cached.transform.elements[ 12 ];
 			let tileset_offset_y = this.tiles.root.cached.transform.elements[ 13 ];
 			let local_x = rd_x - tileset_offset_x;
@@ -470,6 +471,7 @@ export default {
 				TWEEN.update( time );
 
 			}
+
 			requestAnimationFrame( animate );
 
 			new TWEEN.Tween( oldPos )
@@ -546,7 +548,7 @@ export default {
 
 			this.tiles.onLoadModel = ( s ) => {
 
-				const offset_z = this.tiles.root.cached.transform.elements[ 14 ];
+				// const offset_z = this.tiles.root.cached.transform.elements[ 14 ];
 				s.traverse( c => {
 
 					if ( c.material ) {

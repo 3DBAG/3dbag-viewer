@@ -136,7 +136,7 @@
           <tr>
             <td>
               WMS <a
-                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/webservices#wms'"
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#wms'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -148,7 +148,7 @@
           <tr>
             <td>
               WFS <a
-                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/webservices#wfs'"
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#wfs'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -190,7 +190,7 @@
             <td>
               PostgreSQL
               <a
-                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/postgresql'"
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/postgresql'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -243,24 +243,6 @@
     </p>
   </section>
 </template>
-
-<style>
-#map {
-  width: 98%;
-  height:98%;
-  margin: 1%;
-  padding: 0;
-  position: absolute;
-}
-#tilemap-overlay {
-  position: relative;
-  margin: auto;
-  top: 2em;
-  width: 80%;
-  max-width: 500px;
-  box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%)
-}
-</style>
 
 <script>
 import "ol/ol.css";
@@ -516,3 +498,21 @@ export default {
 };
 
 </script>
+
+<style>
+#map {
+  width: 98%;
+  height:98%;
+  margin: 1%;
+  padding: 0;
+  position: absolute;
+}
+#tilemap-overlay {
+  position: relative;
+  margin: auto;
+  top: 2em;
+  width: 80%;
+  max-width: 500px;
+  box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%)
+}
+</style>

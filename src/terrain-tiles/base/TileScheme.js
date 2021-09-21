@@ -1,5 +1,4 @@
 import {
-	Vector2,
 	Vector3,
 	Plane,
 	Raycaster,
