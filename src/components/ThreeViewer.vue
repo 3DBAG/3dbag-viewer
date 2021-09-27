@@ -117,6 +117,10 @@ export default {
 				};
 
 			}
+		},
+		animationStarted: {
+			type: Boolean,
+			default: false
 		}
 	},
 	watch: {
@@ -137,6 +141,14 @@ export default {
 			this.setCameraPosFromRoute( to.query );
 
 		},
+		animationStarted: function ( val ) {
+
+			if ( val )
+				this.controls.enabled = false;
+			else
+				this.controls.enabled = true;
+
+		}
 	},
 	beforeCreate() {
 
@@ -471,6 +483,7 @@ export default {
 
 			}
 			requestAnimationFrame( animate );
+			this.animationStarted = true;
 
 			new TWEEN.Tween( oldPos )
 				.to( newPos, 500 )
@@ -482,6 +495,11 @@ export default {
 					this.camera.lookAt( this.controls.target );
 
 					this.needsRerender = 1;
+
+				} )
+				.onComplete( () => {
+
+					this.animationStarted = false;
 
 				} )
 				.start();
@@ -602,7 +620,7 @@ export default {
 		initScene() {
 
 			this.scene = new Scene();
-			this.scene.background = new Color( "#ADD8E6" );
+			this.scene.background = new Color( this.fogColor );
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
 
 			this.material = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
@@ -640,8 +658,6 @@ export default {
 
 			this.reinitTiles( true );
 			this.show3DTiles = true;
-
-			this.animationStarted = false;
 
 			this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 			this.controls.screenSpacePanning = false;
@@ -717,8 +733,6 @@ export default {
 
 			if ( ! this.animationStarted && this.controls.maxPolarAngle > this.farMaxAngle && dist > this.angleDistThreshold ) {
 
-				this.animationStarted = true;
-
 				function animate( time ) {
 
 					requestAnimationFrame( animate );
@@ -726,7 +740,7 @@ export default {
 
 				}
 				requestAnimationFrame( animate );
-
+				this.animationStarted = true;
 				var angle = { x: this.controls.maxPolarAngle };
 
 				new TWEEN.Tween( angle )
