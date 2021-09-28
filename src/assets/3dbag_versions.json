@@ -2,13 +2,13 @@
   "latest": "v21.09.8",
   "versions": {
     "v21.09.8" : {
-      "PostgreSQL" : "https://data.3dbag.nl/postgres/bag3d_v210908_fd2cee53.zip",
+      "PostgreSQL" : "https://data.3dbag.nl/postgres/3dbag_v210908_fd2cee53.zip",
 
-      "OBJ" : "https://data.3dbag.nl/obj/v210908_fd2cee53/bag3d_v210908_fd2cee53_{TID}.zip",
+      "OBJ" : "https://data.3dbag.nl/obj/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.zip",
 
-      "CityJSON" : "https://data.3dbag.nl/cityjson/v210908_fd2cee53/bag3d_v210908_fd2cee53_{TID}.json",
+      "CityJSON" : "https://data.3dbag.nl/cityjson/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.json",
       
-      "GPKG" : "https://data.3dbag.nl/gpkg/v210908_fd2cee53/bag3d_v210908_fd2cee53_{TID}.gpkg",
+      "GPKG" : "https://data.3dbag.nl/gpkg/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.gpkg",
 
       "WFS" : "https://data.3dbag.nl/api/BAG3D_v2/wfs",
 
