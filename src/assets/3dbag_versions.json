@@ -1,5 +1,5 @@
 {
-  "latest": "v21.03.1",
+  "latest": "v21.09.8",
   "versions": {
     "v21.09.8" : {
       "PostgreSQL" : "https://data.3dbag.nl/postgres/bag3d_v210908_fd2cee53.zip",

@@ -448,7 +448,7 @@ export default {
 					// center: [120953, 486328],
 					// 3Dgeoinfo office
 					center: [ 85177.9151549, 446749.16831151 ],
-					maxZoom: 13,
+					maxZoom: 19,
 					zoom: 12
 				} );
 
