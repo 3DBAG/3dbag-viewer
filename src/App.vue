@@ -53,7 +53,7 @@
           <div class="navbar-item tags has-addons">
             <a
               class="tag"
-              :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#21031-20210326-beta'"
+              :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#21098-beta'"
             >{{ $root.$data['latest'] }}
             </a>
             <span class="tag is-danger">beta</span>

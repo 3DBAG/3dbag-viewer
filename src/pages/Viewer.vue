@@ -55,7 +55,7 @@
             {{ basemapOptions.attribution }}
           </span> |
         </span>
-        <a :href="'https://docs.3dbag.nl/'+this.$route.params.locale+'/copyright' ">© 3D BAG by tudelft3d</a>
+        <a :href="'https://docs.3dbag.nl/'+$route.params.locale+'/copyright' ">© 3D BAG by tudelft3d</a>
       </p>
     </div>
     <div id="debug-panel" />
