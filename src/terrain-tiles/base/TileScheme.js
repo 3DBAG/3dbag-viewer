@@ -307,63 +307,6 @@ class BaseTileScheme {
 
 	}
 
-	growRegion( centerTile, camera, transform, cameraCenter ) {
-
-		let visited = new Set( centerTile.getId() );
-		let queue = [ centerTile ];
-		let tilesInView = [ centerTile ];
-
-		let frustum = new Frustum();
-		let projScreenMatrix = new Matrix4();
-		projScreenMatrix.multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse );
-		frustum.setFromProjectionMatrix( new Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
-
-		let counter = 0;
-
-		const distThreshold = centerTile.tileMatrix.tileSpanX * 15;
-
-		while ( queue.length != 0 ) {
-
-			const tile = queue.pop();
-			var neighbours = tile.getNeighbours();
-
-			for ( const n of neighbours ) {
-
-				// Continue if tile already visited
-				if ( visited.has( n.getId() ) ) {
-
-					continue;
-
-				}
-
-				visited.add( n.getId() );
-
-				const dist = cameraCenter.distanceTo( n.getCenterPosition() );
-
-				if ( dist < distThreshold && n.inFrustum( frustum, transform ) ) {
-
-					queue.push( n );
-					tilesInView.push( n );
-
-				}
-
-			}
-
-			// prevent infinite loop
-			counter ++;
-			if ( counter == 300 ) {
-
-				console.log( "Too many tiles in view! Skipping at 300..." );
-				break;
-
-			}
-
-		}
-
-		return ( tilesInView );
-
-	}
-
 }
 
 export { Tile, TileMatrix, BaseTileScheme };
