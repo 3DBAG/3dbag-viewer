@@ -3,8 +3,6 @@ import {
 	Vector3,
 	Plane,
 	Raycaster,
-	Frustum,
-	Matrix4,
 	Sphere
 } from 'three';
 
@@ -172,6 +170,94 @@ class BaseTileScheme {
 
 	}
 
+	createGrid( dimension ) {
+
+		var grid = [];
+		for ( let i = 0; i < dimension; i ++ ) {
+
+			grid.push( [] );
+
+			for ( let j = 0; j < dimension; j ++ ) {
+
+				grid[ i ].push( 0 );
+
+			}
+
+		}
+
+		return grid;
+
+	}
+
+	createQuadtree( centerTile, distThreshold, n ) {
+
+		var quadtree = [];
+
+		const dist = distThreshold * n;
+
+		const rootTileMatrix = this.tileMatrixSet[ centerTile.tileMatrix.level - n ];
+
+		const centerPosition = centerTile.getCenterPosition();
+
+		const rootCenterTile = rootTileMatrix.getTileAt( centerPosition );
+
+		quadtree.push( rootCenterTile );
+
+		const neighbours = rootCenterTile.getNeighbours();
+
+		for ( let i = 0; i < neighbours.length; i ++ ) {
+
+			quadtree.push( neighbours[ i ] );
+
+		}
+
+		return quadtree;
+
+	}
+
+	traverseNode( node, n, distThreshold, qtLevels, tiles, center ) {
+
+		const dist = center.distanceTo( node.getCenterPosition() );
+
+		if ( n != qtLevels && dist < distThreshold * ( qtLevels - n ) * 2 ) {
+
+			var children = [];
+			var higherTileLevel = this.tileMatrixSet[ node.tileMatrix.level + 1 ];
+			var topLeft = new Tile( higherTileLevel, node.col * 2, node.row * 2 );
+			var topRight = new Tile( higherTileLevel, topLeft.col + 1, topLeft.row );
+			var bottomLeft = new Tile( higherTileLevel, topLeft.col, topLeft.row + 1 );
+			var bottomRight = new Tile( higherTileLevel, topLeft.col + 1, topLeft.row + 1 );
+
+			children.push( topLeft );
+			children.push( topRight );
+			children.push( bottomLeft );
+			children.push( bottomRight );
+
+			for ( let i = 0; i < children.length; i ++ ) {
+
+				this.traverseNode( children[ i ], n + 1, distThreshold, qtLevels, tiles, center )
+
+			}
+
+
+		} else {
+
+			tiles.push( node );
+
+		}
+
+	}
+
+	traverseQuadtree( root, distThreshold, qtLevels, tiles, center ) {
+
+		for ( let i = 0; i < root.length; i ++ ) {
+
+			this.traverseNode( root[ i ], 0, distThreshold, qtLevels, tiles, center );
+
+		}
+
+	}
+
 	getTilesInView( camera, controls, resFactor, transform ) {
 
 		if ( this.tileMatrixSet.length == 0 ) {
@@ -195,8 +281,8 @@ class BaseTileScheme {
 		tilePosition.x = position.x + transform.x;
 		tilePosition.y = - position.z + transform.y;
 
-		const angle = controls.getPolarAngle();
-		var multiplier = 1;
+		// const angle = controls.getPolarAngle();
+		// var multiplier = 1;
 
 		// if ( angle > Math.PI / 4 ) {
 
@@ -210,7 +296,12 @@ class BaseTileScheme {
 
 		position.set( position.x + transform.x, - position.z + transform.y, position.y + transform.z );
 
-		const tiles = this.growRegion( centerTile, camera, transform, position );
+		const qtLevels = 4;
+		const distThreshold = centerTile.tileMatrix.tileSpanX * 5;
+		const root = this.createQuadtree( centerTile, distThreshold, qtLevels );
+
+		var tiles = [];
+		this.traverseQuadtree( root, distThreshold, qtLevels, tiles, centerTile.getCenterPosition() );
 
 		return tiles;
 
