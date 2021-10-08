@@ -3,6 +3,8 @@ import {
 	Vector3,
 	Plane,
 	Raycaster,
+	Frustum,
+	Matrix4,
 	Sphere
 } from 'three';
 
@@ -296,12 +298,139 @@ class BaseTileScheme {
 
 		position.set( position.x + transform.x, - position.z + transform.y, position.y + transform.z );
 
-		const qtLevels = 4;
-		const distThreshold = centerTile.tileMatrix.tileSpanX * 5;
-		const root = this.createQuadtree( centerTile, distThreshold, qtLevels );
-
+		const algorithm = "edges";
 		var tiles = [];
-		this.traverseQuadtree( root, distThreshold, qtLevels, tiles, centerTile.getCenterPosition() );
+
+		if ( algorithm == "edges" ) {
+
+			const levels = 4;
+			tiles = this.createTiles( levels, centerTile );
+
+		} else if ( algorithm == "quadtree" ) {
+
+			const qtLevels = 4;
+			const distThreshold = centerTile.tileMatrix.tileSpanX * 5;
+			const root = this.createQuadtree( centerTile, distThreshold, qtLevels );
+
+			this.traverseQuadtree( root, distThreshold, qtLevels, tiles, centerTile.getCenterPosition() );
+
+		}
+
+
+		// var output = ``;
+		// for ( let i = 0; i < tiles.length; i ++ ) {
+
+		// 	output += tiles[ i ].getWkt();
+
+		// }
+
+		// console.log( output );
+
+		return tiles;
+
+	}
+
+	createTileEdge( dimension, tileMatrix, topLeft ) {
+
+		var edge = [];
+
+		for ( let i = 0; i < dimension; i ++ ) {
+
+			if ( i == 0 || i == dimension - 1 ) {
+
+				for ( let j = 0; j < dimension; j ++ ) {
+
+					edge.push( new Tile( tileMatrix, topLeft.col + i, topLeft.row + j ) );
+
+				}
+
+			} else {
+
+				edge.push( new Tile( tileMatrix, topLeft.col + i, topLeft.row ) );
+				edge.push( new Tile( tileMatrix, topLeft.col + i, topLeft.row + dimension - 1 ) );
+
+			}
+
+		}
+
+		return edge;
+
+	}
+
+	createTileGrid( dimension, tileMatrix, topLeft ) {
+
+		var grid = [];
+
+		for ( let i = 0; i < dimension; i ++ ) {
+
+			for ( let j = 0; j < dimension; j ++ ) {
+
+				grid.push( new Tile( tileMatrix, topLeft.col + i, topLeft.row + j ) );
+
+			}
+
+		}
+
+		return grid;
+
+	}
+
+	createTiles( levels, centerTile ) {
+
+		var topLeft;
+		var posTopleft;
+		var posBottomRight;
+		var bottomRight;
+		var tileMatrix;
+		var dimension;
+		var edge;
+		var tiles = [];
+
+		var maxDist = 0;
+		for ( let i = 0; i < levels - 1; i ++ ) {
+
+			let tileMatrix = this.tileMatrixSet[ centerTile.tileMatrix.level - i - 1 ];
+			maxDist += tileMatrix.tileSpanX * Math.sqrt( 2 );
+
+		}
+
+		posTopleft = centerTile.getCenterPosition();
+		posBottomRight = centerTile.getCenterPosition();
+		posTopleft.add( new Vector2( - maxDist, maxDist ) );
+		posBottomRight.add( new Vector2( maxDist, - maxDist ) );
+
+		tileMatrix = this.tileMatrixSet[ centerTile.tileMatrix.level - ( levels - 1 ) ];
+		topLeft = tileMatrix.getTileAt( posTopleft );
+		bottomRight = tileMatrix.getTileAt( posBottomRight )
+
+		dimension =  bottomRight.col - topLeft.col + 1;
+		edge = this.createTileEdge( dimension, tileMatrix, topLeft );
+		tiles.push.apply( tiles, edge );
+
+		for ( let n = 0; n < levels - 1; n ++ ) {
+
+			var edge = this.createTileEdge( dimension, tileMatrix, topLeft );
+			tiles.push.apply( tiles, edge );
+			
+			var pos = topLeft.getCenterPosition();
+			pos.add( new Vector2( tileMatrix.tileSpanX - 1, - ( tileMatrix.tileSpanX - 1 ) ) );
+			tileMatrix = this.tileMatrixSet[ tileMatrix.level + 1 ];
+
+			if ( n != levels - 2 ) {
+
+				topLeft = tileMatrix.getTileAt( pos );
+
+				dimension = ( dimension - 2 ) * 2;
+
+			}
+
+		}
+
+		tileMatrix = centerTile.tileMatrix;
+		topLeft = tileMatrix.getTileAt( pos );
+		dimension = ( dimension - 2 ) * 2;
+		const grid = this.createTileGrid( dimension, tileMatrix, topLeft );
+		tiles.push.apply( tiles, grid );
 
 		return tiles;
 
