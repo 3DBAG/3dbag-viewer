@@ -24,13 +24,12 @@ class Tile {
 
 	}
 
-	getCenterPosition( offset = new Vector3() ) {
+	getCenterPosition( offset = new Vector2() ) {
 
 		const x = this.tileMatrix.minX + this.col * this.tileMatrix.tileSpanX + this.tileMatrix.tileSpanX / 2 - offset.x;
 		const y = this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY - this.tileMatrix.tileSpanY / 2 - offset.y;
-		const z = - offset.z;
 
-		return new Vector3( x, y, z );
+		return new Vector2( x, y );
 
 	}
 
@@ -61,15 +60,22 @@ class Tile {
 		// Calculate tile bounds and center
 		var upperLeft = new Vector3();
 		upperLeft.x = this.tileMatrix.minX + this.col * this.tileMatrix.tileSpanX - transform.x;
-		upperLeft.y = 0;
-		upperLeft.z = - ( this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY - transform.y );
+		upperLeft.y = this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY - transform.y;
+		upperLeft.z = 0;
 
-		var upperRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, 0, upperLeft.z );
-		var lowerLeft = new Vector3( upperLeft.x, 0, upperLeft.z + this.tileMatrix.tileSpanY );
-		var lowerRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, 0, upperLeft.z + this.tileMatrix.tileSpanY );
-		var centre = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX / 2, 0, upperLeft.z + this.tileMatrix.tileSpanY / 2 );
+		var upperRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, upperLeft.y, 0 );
+		var lowerLeft = new Vector3( upperLeft.x, upperLeft.y - this.tileMatrix.tileSpanY, 0 );
+		var lowerRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, upperLeft.y - this.tileMatrix.tileSpanY, 0 );
+		var centre = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX / 2, upperLeft.y + this.tileMatrix.tileSpanY / 2, 0 );
 
 		return [ centre, lowerLeft, upperRight, upperLeft, lowerRight ];
+
+	}
+
+	getWkt() {
+
+		var points = this.getExtentPoints( new Vector2( 0, 0 ) );
+		return `POLYGON ( ( ${points[ 1 ].x} ${points[ 1 ].y}, ${points[ 3 ].x} ${points[ 3 ].y}, ${points[ 2 ].x} ${points[ 2 ].y}, ${points[ 4 ].x} ${points[ 4 ].y}, ${points[ 1 ].x} ${points[ 1 ].y} ) ) \n`;
 
 	}
 
