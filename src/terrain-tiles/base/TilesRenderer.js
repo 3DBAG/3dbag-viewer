@@ -20,7 +20,7 @@ export class TilesRenderer {
 
 	constructor() {
 
-		this.tileLevel = 0;
+		this.tileLevel = -1;
 
 		this.resFactor = 4.5;
 
@@ -45,16 +45,20 @@ export class TilesRenderer {
 	update( sceneCenter, camera, controls ) {
 
 		// Get indices of all tiles that are in view
-		const tiles = this.tileScheme.getTilesInView( camera, controls, this.resFactor, sceneCenter );
+		const [ tiles, tileLevel ] = this.tileScheme.getTilesInView( camera, controls, this.resFactor, sceneCenter );
+
+		if ( this.tileLevel == - 1 )
+			this.tileLevel = tileLevel;
+		
 		this.tilesInView = tiles;
 
 		// check if we just changed tileLevel
-		if ( tiles.length && tiles[ 0 ].tileMatrix.level != this.tileLevel ) {
+		if ( tiles.length && tileLevel != this.tileLevel ) {
 
 			this.abortDownloads();
 			this.changeRenderOrder();
 			this.needsTileLevelClean = true;
-			this.tileLevel = tiles[ 0 ].tileMatrix.level;
+			this.tileLevel = tileLevel;
 
 		} else {
 
@@ -82,10 +86,12 @@ export class TilesRenderer {
 
 		}
 
-		// Create tiles that hadn't been created yet
+		// Create tiles that hadn't been created yet and remove ones out of view
+		var tilesIds = new Set();
 		tiles.forEach( function ( ti ) {
 
 			const tileId = ti.getId();
+			tilesIds.add( tileId );
 
 			if ( ! this.activeTiles.has( tileId ) ) {
 
@@ -97,11 +103,35 @@ export class TilesRenderer {
 
 		}, this );
 
-		if ( this.needsTileLevelClean && this.downloadQueue.size == 0 ) {
 
-			this.cleanTileLevels();
 
-		}
+		this.activeTiles.forEach( function ( tid ) {
+
+			if ( ! tilesIds.has( tid ) ) {
+
+				this.activeTiles.delete( tid );
+				this.disposeTileId( tid );
+
+			}
+
+		}, this );
+
+		// if ( this.needsTileLevelClean && this.downloadQueue.size == 0 ) {
+
+		// 	this.cleanTileLevels();
+
+		// }
+
+	}
+
+	disposeTileId( tid ) {
+
+		const mesh = this.group.getObjectByName( tid );
+		if ( mesh.material.map)
+			mesh.material.map.dispose();
+		mesh.geometry.dispose();
+		mesh.material.dispose();
+		this.group.remove( mesh );
 
 	}
 
@@ -139,7 +169,9 @@ export class TilesRenderer {
 
 		for ( let i = this.group.children.length - 1; i > 0; i -- ) {
 
-			if ( this.group.children[ i ].name != this.tileLevel ) {
+			const tileLevel = this.group.children[ i ].name.split( '-' )[ 0 ];
+
+			if ( tileLevel != this.tileLevel ) {
 
 				this.group.remove( this.group.children[ i ] );
 				this.resourceTracker.untrack( this.group.children[ i ] );
@@ -169,7 +201,7 @@ export class TilesRenderer {
 		var geometry = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
 
 		var mesh = new Mesh( geometry, this.tempMaterial );
-		mesh.name = this.tileLevel;
+		mesh.name = tile.getId();
 		// The temporary (white) tiles on the bottom
 		mesh.renderOrder = 0;
 		this.group.add( mesh );

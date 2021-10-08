@@ -298,7 +298,7 @@ class BaseTileScheme {
 
 		position.set( position.x + transform.x, - position.z + transform.y, position.y + transform.z );
 
-		const algorithm = "edges";
+		const algorithm = "quadtree";
 		var tiles = [];
 
 		if ( algorithm == "edges" ) {
@@ -316,7 +316,6 @@ class BaseTileScheme {
 
 		}
 
-
 		// var output = ``;
 		// for ( let i = 0; i < tiles.length; i ++ ) {
 
@@ -326,7 +325,7 @@ class BaseTileScheme {
 
 		// console.log( output );
 
-		return tiles;
+		return [ tiles, centerTile.tileMatrix.level ];
 
 	}
 
