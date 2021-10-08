@@ -5,10 +5,7 @@ import {
 	Raycaster,
 	Frustum,
 	Matrix4,
-	Sphere,
-	MeshBasicMaterial,
-	Mesh,
-	BoxGeometry
+	Sphere
 } from 'three';
 
 class Tile {
@@ -187,30 +184,6 @@ class BaseTileScheme {
 
 		const dist = camera.position.distanceTo( position );
 
-		// const difference = new Vector3();
-		// difference.subVectors( camera.position, position );
-		// difference.multiplyScalar( 0.5 );
-		// position.addVectors( camera.position, difference );
-		// position.setComponent( 1, 0 );
-
-		// const position2d = new Vector2( position.x, position.z );
-		// const camPosition2d = new Vector2( camera.position.x, camera.position.z );
-		// const dist2d = camPosition2d.distanceTo( position2d );
-
-
-		// if ( dist2d > 200 ) {
-
-		// 	const worldDir = new Vector3();
-		// 	camera.getWorldDirection( worldDir );
-		// 	worldDir.setComponent( 1, 0 );
-		// 	// worldDir.normalize();
-		// 	worldDir.multiplyScalar( 200 );
-		// 	const camPos = new Vector3( camera.position.x, 0, camera.position.z );
-		// 	position.addVectors( camPos, worldDir );
-		// 	// position.add( worldDir );
-
-		// }
-
 		const tilePosition = position.clone();
 
 		tilePosition.x = position.x + transform.x;
@@ -219,43 +192,16 @@ class BaseTileScheme {
 		const angle = controls.getPolarAngle();
 		var multiplier = 1;
 
-		if ( angle > Math.PI / 4 ) {
+		// if ( angle > Math.PI / 4 ) {
 
-			multiplier = ( Math.PI - angle ) / Math.PI;
+		// 	multiplier = ( Math.PI - angle ) / Math.PI;
 
-		}
+		// }
 
 		const tileMatrix = this.getTileMatrix( dist * resFactor );
 
 		const centerTile = tileMatrix.getTileAt( tilePosition );
 
-		// const worldPos = new Vector3();
-		// const worldDir = new Vector3();
-		// camera.getWorldPosition( worldPos );
-		// camera.getWorldDirection( worldDir );
-
-		// if ( worldDir.y > - 0.4 ) {
-
-		// 	worldDir.setComponent( 1, - 0.4 );
-
-		// }
-
-		// raycaster.set( worldPos, worldDir );
-		// let cameraCenter = new Vector3();
-		// raycaster.ray.intersectPlane( new Plane( new Vector3( 0, 1, 0 ), 0 ), cameraCenter );
-
-		// const geometry = new BoxGeometry( 10, 10, 100 );
-		// const material = new MeshBasicMaterial( { color: 0x00ff00 } );
-		// const cube = new Mesh( geometry, material );
-		// const cubePos = position.clone();
-		// cubePos.set( cubePos.x, - cubePos.z, 0 );
-		// cube.position.set( cubePos.x, cubePos.y, cubePos.z );
-		// cube.name = "cube";
-		// const oldCube = group.getObjectByName( "cube" );
-		// group.remove( oldCube );
-		// group.add( cube );
-
-		// cameraCenter.set( cameraCenter.x + transform.x, - cameraCenter.z + transform.y, cameraCenter.y + transform.z );
 		position.set( position.x + transform.x, - position.z + transform.y, position.y + transform.z );
 
 		const tiles = this.growRegion( centerTile, camera, transform, position );
