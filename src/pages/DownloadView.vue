@@ -173,7 +173,7 @@
       class="alert alert-warning"
       role="alert"
     >
-      <b>WARNING: do to an error the <code>pand</code> table for v21.09.8 is currently empty!</b> We'll try to fix this as soon as possible.
+      <b>WARNING: due to an error the <code>pand</code> table for v21.09.8 is currently empty!</b> We'll try to fix this as soon as possible.
     </div>
     <div class="table-wrapper">
       <table>
