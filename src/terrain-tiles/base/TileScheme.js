@@ -107,17 +107,84 @@ class Tile {
 
 	}
 
+	intersectsWith() {
+
+		var ids = [];
+		const level = this.tileMatrix.level;
+		const tileMatrixSet = this.tileMatrix.tileMatrixSet;
+
+		if ( level != 0 ) {
+
+			const parentTileMatrix = tileMatrixSet[ level - 1 ];
+			const parent = new Tile( parentTileMatrix, Math.floor( this.col / 2 ), Math.floor( this.row / 2 ) );
+			ids.push( parent.getId() );
+
+		}
+
+		// var children = [];
+		// this.getChildren( this, children, 3 );
+		// children.forEach( c => ids.push( c.getId() ) );
+
+		if ( level != tileMatrixSet.length - 1 ) {
+
+			const childTileMatrix = tileMatrixSet[ level + 1 ];
+			const baseCol = this.col * 2;
+			const baseRow = this.row * 2;
+			const child1 = new Tile( childTileMatrix, baseCol, baseRow );
+			const child2 = new Tile( childTileMatrix, baseCol + 1, baseRow );
+			const child3 = new Tile( childTileMatrix, baseCol, baseRow + 1 );
+			const child4 = new Tile( childTileMatrix, baseCol + 1, baseRow + 1 );
+
+			ids.push.apply( ids, [ child1.getId(), child2.getId(), child3.getId(), child4.getId() ] );
+
+		}
+
+		return ids;
+
+	}
+
+	// getChildren( tile, result, depth ) {
+
+	// 	const level = tile.tileMatrix.level;
+	// 	const tileMatrixSet = tile.tileMatrix.tileMatrixSet;
+
+	// 	if ( depth != 0 && level != tileMatrixSet.length - 1 ) {
+
+	// 		var children = [];
+
+	// 		const childTileMatrix = tileMatrixSet[ level + 1 ];
+	// 		const baseCol = this.col * 2;
+	// 		const baseRow = this.row * 2;
+	// 		children.push( new Tile( childTileMatrix, baseCol, baseRow ) );
+	// 		children.push( new Tile( childTileMatrix, baseCol + 1, baseRow ) );
+	// 		children.push( new Tile( childTileMatrix, baseCol, baseRow + 1 ) );
+	// 		children.push( new Tile( childTileMatrix, baseCol + 1, baseRow + 1 ) );
+
+	// 		result.push.apply( result, children );
+	// 		for ( let i = 0; i < children.length; i ++ ) {
+
+	// 			this.getChildren( children[ i ], result, depth - 1 );
+
+	// 		}
+
+	// 	}
+
+	// 	return;
+
+	// }
+
 }
 
 class TileMatrix {
 
-	constructor( level, matrixHeight, matrixWidth, scaleDenominator, tileHeight, tileWidth, topLeftCorner ) {
+	constructor( level, tileMatrixSet, matrixHeight, matrixWidth, scaleDenominator, tileHeight, tileWidth, topLeftCorner ) {
 
 		const pixelSpan = scaleDenominator * 0.00028;
 		const tileSpanX = tileWidth * pixelSpan;
 		const tileSpanY = tileHeight * pixelSpan;
 
 		this.level = level;
+		this.tileMatrixSet = tileMatrixSet;
 
 		this.minX = topLeftCorner.x;
 		this.maxY = topLeftCorner.y;
@@ -237,7 +304,7 @@ class BaseTileScheme {
 
 			for ( let i = 0; i < children.length; i ++ ) {
 
-				this.traverseNode( children[ i ], n + 1, distThreshold, qtLevels, tiles, center )
+				this.traverseNode( children[ i ], n + 1, distThreshold, qtLevels, tiles, center );
 
 			}
 
@@ -313,17 +380,9 @@ class BaseTileScheme {
 			const root = this.createQuadtree( centerTile, distThreshold, qtLevels );
 
 			this.traverseQuadtree( root, distThreshold, qtLevels, tiles, centerTile.getCenterPosition() );
+			tiles.reverse();
 
 		}
-
-		// var output = ``;
-		// for ( let i = 0; i < tiles.length; i ++ ) {
-
-		// 	output += tiles[ i ].getWkt();
-
-		// }
-
-		// console.log( output );
 
 		return [ tiles, centerTile.tileMatrix.level ];
 
@@ -400,9 +459,9 @@ class BaseTileScheme {
 
 		tileMatrix = this.tileMatrixSet[ centerTile.tileMatrix.level - ( levels - 1 ) ];
 		topLeft = tileMatrix.getTileAt( posTopleft );
-		bottomRight = tileMatrix.getTileAt( posBottomRight )
+		bottomRight = tileMatrix.getTileAt( posBottomRight );
 
-		dimension =  bottomRight.col - topLeft.col + 1;
+		dimension = bottomRight.col - topLeft.col + 1;
 		edge = this.createTileEdge( dimension, tileMatrix, topLeft );
 		tiles.push.apply( tiles, edge );
 
@@ -410,7 +469,7 @@ class BaseTileScheme {
 
 			var edge = this.createTileEdge( dimension, tileMatrix, topLeft );
 			tiles.push.apply( tiles, edge );
-			
+
 			var pos = topLeft.getCenterPosition();
 			pos.add( new Vector2( tileMatrix.tileSpanX - 1, - ( tileMatrix.tileSpanX - 1 ) ) );
 			tileMatrix = this.tileMatrixSet[ tileMatrix.level + 1 ];

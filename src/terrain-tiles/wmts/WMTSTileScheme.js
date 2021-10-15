@@ -74,7 +74,7 @@ export class WMTSTileScheme extends BaseTileScheme {
 		const topLeftCornerStr = tileMatrixData[ "TopLeftCorner" ].split( " " );
 		const topLeftCorner = new Vector2( parseFloat( topLeftCornerStr[ 0 ] ), parseFloat( topLeftCornerStr[ 1 ] ) );
 
-		return new TileMatrix( level, matrixHeight, matrixWidth, scaleDenominator, tileHeight, tileWidth, topLeftCorner );
+		return new TileMatrix( level, this.tileMatrixSet, matrixHeight, matrixWidth, scaleDenominator, tileHeight, tileWidth, topLeftCorner );
 
 	}
 
