@@ -39,7 +39,6 @@ import {
 	WMTSTilesRenderer
 } from '../terrain-tiles';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-// import TWEEN from '@tweenjs/tween.js';
 import markerSprite from '@/assets/locationmarker.png';
 
 const Tweakpane = require( 'tweakpane' );
@@ -548,7 +547,6 @@ export default {
 
 			this.tiles.onLoadModel = ( s ) => {
 
-				// const offset_z = this.tiles.root.cached.transform.elements[ 14 ];
 				s.traverse( c => {
 
 					if ( c.material ) {
@@ -559,7 +557,6 @@ export default {
 						if ( c.geometry ) {
 
 							c.geometry.computeBoundingBox();
-							// c.position.y = offset_z;
 
 						}
 
@@ -1019,13 +1016,9 @@ export default {
 
 				}
 
-				// this.offsetParent.remove( this.terrainTiles.group );
-
 				// this.renderer.autoClear is set to false, so we need to clear manually. Because don't want to clear when second scene is rendered.
 				this.renderer.clear();
 				this.renderer.render( this.scene, this.camera );
-
-				// this.offsetParent.add( this.terrainTiles.group );
 
 			}
 
