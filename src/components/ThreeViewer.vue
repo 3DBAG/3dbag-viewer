@@ -464,6 +464,8 @@ export default {
 			const oldPos = { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z };
 			const newPos = { x: x, y: this.camera.position.y, z: z };
 
+			const duration = 1000 * ( Math.abs( this.camera.rotation.z ) / 3.14 );
+
 			function animate( time ) {
 
 				requestAnimationFrame( animate );
@@ -474,7 +476,7 @@ export default {
 			requestAnimationFrame( animate );
 
 			new TWEEN.Tween( oldPos )
-				.to( newPos, 500 )
+				.to( newPos, duration )
 				.easing( TWEEN.Easing.Quadratic.Out )
 				.onUpdate( () => {
 
