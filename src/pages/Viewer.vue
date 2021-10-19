@@ -22,11 +22,16 @@
         :rotation="camRotationZ"
         @orient-north="orientNorth"
       />
-  	<transition name="fade">
-	  <div class="box" id="locationbox" v-if="showLocationBox" @click="toggleLocationBox">
-		{{ locationBoxText }}
-	  </div>
-	</transition>
+      <transition name="fade">
+        <div
+          v-if="showLocationBox"
+          id="locationbox"
+          class="box"
+          @click="toggleLocationBox"
+        >
+          {{ locationBoxText }}
+        </div>
+      </transition>
     </section>
     <BuildingInformation
       :building="pickedBuilding"
