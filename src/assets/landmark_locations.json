@@ -1,6 +1,6 @@
 {
   "delft": {
-    "name": "TU Delft Faculty of Architecture, Delft",
+    "name": "TU Delft Faculteit Bouwkunde en Gebouwde Omgeving, Delft",
     "rdx": "85181.55571255696",
     "rdy": "446859.38171179296",
     "ox": "-223.36609616703936",
@@ -104,7 +104,7 @@
     "oz": "-167.17199751079715"
   },
   "haarlem": {
-    "name": "Kathedrale basiliek Sint Bavo, Haarlem",
+    "name": "Kathedrale Basiliek Sint Bavo, Haarlem",
     "rdx": "102906.67749027324",
     "rdy": "487898.2626223865",
     "ox": "161.54593323657173",
