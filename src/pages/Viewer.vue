@@ -22,6 +22,11 @@
         :rotation="camRotationZ"
         @orient-north="orientNorth"
       />
+  	<transition name="fade">
+	  <div class="box" id="locationbox" v-if="showLocationBox" @click="toggleLocationBox">
+		{{ locationBoxText }}
+	  </div>
+	</transition>
     </section>
     <BuildingInformation
       :building="pickedBuilding"
@@ -86,7 +91,7 @@ export default {
 		return {
 
 			customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
-			BAG3DVersion: this.$root.$data[ 'versions' ][ this.$root.$data[ "latest" ] ],
+			BAG3DVersion: this.$root.$data[ 'BAG3D' ][ 'versions' ][ this.$root.$data[ 'BAG3D' ][ "latest" ] ],
 
 			camOffset: {
 				x: 400,
@@ -110,6 +115,9 @@ export default {
 					icon: "map"
 				}
 			},
+
+			showLocationBox: false,
+			locationBoxText: "",
 
 			tileset: 'lod22',
 			lods: {
@@ -359,6 +367,12 @@ export default {
 
 			window.open( this.reportDataIssueUrl + `&entry.547110854=${ identificatie }`, '_blank' );
 
+		},
+
+		toggleLocationBox: function () {
+
+			this.showLocationBox = ! this.showLocationBox;
+
 		}
 
 	}
@@ -393,7 +407,16 @@ export default {
 	height: 100%;
 
 }
-
+#locationbox {
+	position: absolute;
+	margin: 0px;
+	top: 2.75rem;
+	width: 100%;
+	padding: 0.5rem;
+	background: rgba(255,255,255,0.6);
+	border: 1px solid rgba(0,0,0,0.3);
+	transition: opacity 0.3s;
+}
 #attribution {
 	position: absolute;
 	padding: 0 0.1rem;

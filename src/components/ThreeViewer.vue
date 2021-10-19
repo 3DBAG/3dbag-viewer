@@ -527,14 +527,36 @@ export default {
 
 					} else {
 
-						// default viewport
+						// viewport randomly selected from landmarks
+						const landmarks = this.$root.$data[ 'landmarkLocations' ];
+						const keys = Object.keys( landmarks );
+						const landmark = landmarks[ keys[ keys.length * Math.random() << 0 ] ];
+
+						this.$parent.$data[ 'locationBoxText' ] = landmark.name;
+						this.$parent.$data[ 'showLocationBox' ] = true;
+
 						this.setCameraPosFromRoute( {
-							rdx: "85181.55571255696",
-							rdy: "446859.38171179296",
-							ox: "-223.36609616703936",
-							oy: "281.19798302772574",
-							oz: "-184.218705413541"
+							rdx: landmark.rdx,
+							rdy: landmark.rdy,
+							ox: landmark.ox,
+							oy: landmark.oy,
+							oz: landmark.oz
 						} );
+
+						var start = new Date().getTime();
+						var interval = setInterval( function () {
+
+							var timeLapsed = new Date().getTime() - start;
+							var stop = ( this.tiles.stats.downloading <= 2 && timeLapsed >= 10000 ) || timeLapsed > 25000;
+
+							if ( stop ) {
+
+								this.$parent.$data[ 'showLocationBox' ] = false;
+								clearInterval( interval );
+
+							}
+
+						}.bind( this ), 2000 );
 
 					}
 
