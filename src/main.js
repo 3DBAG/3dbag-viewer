@@ -5,12 +5,18 @@ import i18n from "./locale/i18n";
 import '@mdi/font/css/materialdesignicons.css';
 import Buefy from 'buefy';
 import '@/styles/bulma.scss';
+import { InlineSvgPlugin } from 'vue-inline-svg';
 
+import BAG3D from '@/assets/3dbag_versions.json';
+import landmarkLocations from '@/assets/landmark_locations.json';
+
+Vue.use( InlineSvgPlugin );
 Vue.use( Buefy );
 
 Vue.config.productionTip = false;
 
 new Vue( {
+	data: { BAG3D: BAG3D, landmarkLocations: landmarkLocations },
 	render: h => h( App ),
 	router,
 	i18n,

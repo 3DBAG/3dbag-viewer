@@ -1,22 +1,36 @@
 <template>
   <div id="app">
     <nav
-      class="navbar is-fixed-top is-white has-shadow"
+      class="navbar is-fixed-top is-white"
       role="navigation"
       aria-label="dropdown navigation"
     >
       <div class="navbar-brand">
-        <router-link
-          to="/viewer"
+        <div
           class="navbar-item"
         >
+          <router-link
+            to="/"
+            class="logo-text"
+            style="margin-right:0.4em; color: #000"
+          >
+            3D BAG
+          </router-link>
+          <span
+            class="logo-text"
+            style="color:#ccc; font-weight:300; margin-right:0.2em"
+          >by</span>
           <img
             src="@/assets/logo.svg"
             width="28"
             height="28"
           >
-          <span class="logo-text">3D BAG </span>
-        </router-link>
+          <a
+            href="https://3d.bk.tudelft.nl"
+            class="logo-text"
+            style="color: #333"
+          >tudelft3d</a>
+        </div>
         <a
           role="button"
           class="navbar-burger"
@@ -37,115 +51,128 @@
       >
         <div class="navbar-start">
           <div class="navbar-item tags has-addons">
-            <span class="tag">v20.11.0</span>
             <a
-              class="tag is-danger"
-              @click="showWelcome=true"
-            >beta</a>
+              class="tag"
+              :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#21098-beta'"
+            >{{ $root.$data['latest'] }}
+            </a>
+            <span class="tag is-danger">beta</span>
           </div>
         </div>
         <div class="navbar-end">
           <router-link
             to="/viewer"
-            active-class="is-active"
+            :class="{'is-active': currentRouteName=='Viewer'}"
             class="navbar-item"
           >
             {{ $t("nav.3dmap") }}
           </router-link>
           <router-link
             to="/download"
-            active-class="is-active"
+            :class="{'is-active': currentRouteName=='Download'}"
             class="navbar-item"
           >
             {{ $t("nav.download") }}
           </router-link>
-          <div
-            class="navbar-item has-dropdown is-hoverable"
+          <a
+            :href="'https://docs.3dbag.nl/' + currentLocale"
+            class="navbar-item docs-link"
           >
-            <router-link
-              to="/docs"
-              active-class="is-active"
-              class="navbar-link"
-            >
-              {{ $t("nav.docs") }}
-            </router-link>
-            <div class="navbar-dropdown">
-              <router-link
-                to="/docs#features"
+            {{ $t("nav.docs") }}
+          </a>
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              {{ $t("nav.more") }}
+            </a>
+
+            <div class="navbar-dropdown is-right">
+              <a
                 class="navbar-item"
+                @click="showAbout=true"
               >
-                {{ $t("nav.features") }}
-              </router-link>
-              <router-link
-                to="/docs#attributes"
+                {{ $t("nav.about") }}
+              </a>
+              <hr class="navbar-divider">
+              <a
                 class="navbar-item"
+                :href="currentLocale == 'en' ? 'https://forms.gle/NZg83heXM75pAmfVA' : 'https://forms.gle/N1FPRp3RG45EaBjUA'"
               >
-                {{ $t("nav.attributes") }}
-              </router-link>
-              <router-link
-                to="/docs#changelog"
-                class="navbar-item"
-              >
-                {{ $t("nav.changelog") }}
-              </router-link>
+                {{ $t("nav.feedback") }}
+              </a>
             </div>
           </div>
           <LocaleSwitcher />
         </div>
       </div>
     </nav>
-    <div
-      class="modal"
-      :class="{ 'is-active' : showWelcome }"
+    <b-modal
+      v-model="showAbout"
+      has-modal-card
     >
-      <div class="modal-background" />
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">
-            Welcome to 3D BAG v2
+            About 3D BAG
           </p>
           <button
             class="delete"
             aria-label="close"
-            @click="showWelcome = false"
+            @click="showAbout = false"
           />
         </header>
         <section class="modal-card-body">
           <div class="content">
             <p>This is a beta release of the renewed version of the 3D BAG service.</p>
-            <ul>
-              <li>Everything is still under development. Expect broken things.</li>
-              <li>We'll release an improved version of 3DBAG once a month.</li>
-              <li>
-                Check the <router-link to="/docs#changelog">
-                  changelog
-                </router-link> for what is new.
-              </li>
-              <li>
-                Check the <router-link to="/docs#faq">
-                  FAQ
-                </router-link> for a list of known issues.
-              </li>
-              <li>If you find another issue you can use one of the red feedback buttons to report it.</li>
-              <li>You can see the attributes of a building by clicking on it.</li>
-              <li>
-                You can download the data by clicking on a tile on the <router-link to="/download">
-                  download page
-                </router-link>.
-              </li>
-            </ul>
+            <p>
+              Read about <a
+                href="https://docs.3dbag.nl/en/"
+                target="_blank"
+              >who we are and why we created the 3D BAG</a>.
+            </p>
 
-            <h2 class="title is-5">
-              Terms of use
+            <h2 class="title is-4">
+              Copyright and licensing
             </h2>
-            <ul>
-              <li>Please do not publicly share or promote this website at this time.</li>
-            </ul>
+            <p
+              xmlns:cc="http://creativecommons.org/ns#"
+              xmlns:dct="http://purl.org/dc/terms/"
+            >
+              <a
+                property="dct:title"
+                rel="cc:attributionURL"
+                href="https://3dbag.nl"
+              >3D BAG</a> by
+              <a
+                rel="cc:attributionURL dct:creator"
+                property="cc:attributionName"
+                href="https://3d.bk.tudelft.nl/"
+              >3D geoinformation research group</a> is licensed under
+              <a
+                href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1"
+                target="_blank"
+                rel="license noopener noreferrer"
+                style="display:inline-block;"
+              >CC BY 4.0<img
+                style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
+                src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"
+              ><img
+                style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
+                src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"
+              ></a>
+            </p>
+            <p>
+              Read the <a
+                href="https://docs.3dbag.nl/en/copyright"
+                target="_blank"
+              >terms of use for the 3D BAG</a>.
+            </p>
           </div>
         </section>
       </div>
-    </div>
-    <router-view />
+    </b-modal>
+    <router-view
+      @show-about="showAbout=true"
+    />
   </div>
 </template>
 
@@ -165,7 +192,7 @@ export default {
 		return {
 
 			showBurgerMenu: false,
-			showWelcome: true,
+			showAbout: false,
 
 		};
 
@@ -177,13 +204,21 @@ export default {
 			return this.$route.params.locale;
 
 		},
+		currentRouteName() {
+
+			return this.$route.name;
+
+		}
 	},
 
 };
 </script>
 
 <style>
-@import 'https://fonts.googleapis.com/css?family=Barlow';
+@import url('https://fonts.googleapis.com/css2?family=Barlow&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter&family=Roboto+Mono&display=swap');
+
 
 html, body {
   height: 100%;
@@ -202,8 +237,16 @@ html, body {
 
 }
 
+nav.navbar {
+  box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%);
+}
+
 .logo-text {
   font-family: 'Barlow', sans-serif;
   font-weight: bold;
+}
+
+.docs-link {
+  background-color: rgb(250 250 250 / 1);
 }
 </style>

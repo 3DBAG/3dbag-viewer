@@ -7,10 +7,33 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "vuejs: chrome",
+            "name": "Launch Chrome",
             "url": "http://localhost:8080/3dbag-viewer",
             "webRoot": "${workspaceFolder}/src",
             "breakOnLoad": true,
+            "sourceMapPathOverrides": {
+                "webpack:///src/*": "${webRoot}/*"
+            }
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chromium",
+            "url": "http://localhost:8080/3dbag-viewer",
+            "webRoot": "${workspaceFolder}/src",
+            "breakOnLoad": true,
+            "sourceMapPathOverrides": {
+                "webpack:///src/*": "${webRoot}/*"
+            },
+            "runtimeExecutable": "/usr/bin/chromium"
+        },
+        {
+            "type": "chrome",
+            "request": "attach",
+            "port": 9222,
+            "name": "Attach Chrome (port: 9222)",
+            "url": "http://localhost:8080/",
+            "webRoot": "${workspaceFolder}/src",
             "sourceMapPathOverrides": {
                 "webpack:///src/*": "${webRoot}/*"
             }

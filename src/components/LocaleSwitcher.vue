@@ -1,12 +1,24 @@
 <template>
-  <div class="buttons">
-    <b-button
-      tag="router-link"
-      :to="createRoute( otherLocale )"
-      type="is-link"
+  <div class="navbar-item has-dropdown is-hoverable">
+    <a class="navbar-link">
+      <b-icon icon="translate" />
+    </a>
+    <div
+      class="navbar-dropdown is-right"
     >
-      <span>{{ localeName( otherLocale ) }}</span>
-    </b-button>
+      <router-link
+        :to="createRoute( $i18n.availableLocales[ 0 ] )"
+        class="navbar-item"
+      >
+        <span>{{ localeName($i18n.availableLocales[ 0 ]) }}</span>
+      </router-link>
+      <router-link
+        :to="createRoute( $i18n.availableLocales[ 1 ] )"
+        class="navbar-item"
+      >
+        <span>{{ localeName($i18n.availableLocales[ 1 ]) }}</span>
+      </router-link>
+    </div>
   </div>
 </template>
 

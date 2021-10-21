@@ -8,6 +8,8 @@ import i18n from "@/locale/i18n";
 Vue.use( Router );
 
 const router = new Router( {
+	linkActiveClass: "is-active",
+	mode: 'history',
 	routes: [
 		{
 			path: '/',
@@ -16,7 +18,7 @@ const router = new Router( {
 		{
 			path: '/:locale',
 			component: {
-				template: '<router-view />',
+				template: '<router-view @show-about="$emit(\'show-about\')" />',
 			},
 			name: 'pages',
 			children: [
@@ -54,14 +56,14 @@ const router = new Router( {
 	},
 } );
 
-var previousQuery;
+let previousQuery = {};
 const routes = router.options.routes;
-var routeNames = [];
-for ( var i = 0; i < routes.length; i ++ ) {
+let routeNames = [];
+for ( let i = 0; i < routes.length; i ++ ) {
 
 	if ( routes[ i ].name == 'pages' ) {
 
-		for ( var j = 0; j < routes[ i ].children.length; j ++ ) {
+		for ( let j = 0; j < routes[ i ].children.length; j ++ ) {
 
 			routeNames.push( routes[ i ].children[ j ].name );
 
@@ -73,8 +75,11 @@ for ( var i = 0; i < routes.length; i ++ ) {
 
 router.beforeEach( ( to, from, next )=> {
 
-	if ( Object.keys( from.query ).length != 0 )
-		previousQuery = from.query;
+	if ( Object.keys( from.query ).length != 0 ) {
+
+		previousQuery[ from.name ] = from.query;
+
+	}
 
 	// Check if locale is valid or otherwise if the route directs to an existing page
 	if ( ! i18n.availableLocales.includes( to.params.locale ) ) {
@@ -97,12 +102,15 @@ router.beforeEach( ( to, from, next )=> {
 		} else next( "/" );
 
 
-	} else if ( from.name != "Viewer" && to.name == "Viewer" && previousQuery != undefined ) {
+	} else if ( from.name != to.name && to.name in previousQuery ) {
 
-		var queryCopy = JSON.parse( JSON.stringify( previousQuery ) );
-		previousQuery = undefined;
+		var queryCopy = JSON.parse( JSON.stringify( previousQuery[ to.name ] ) );
+		delete previousQuery[ to.name ];
 
-		next( { name: "Viewer", query: queryCopy, params: { locale: i18n.locale } } );
+		// use new parameters
+		Object.assign( queryCopy, to.query );
+
+		next( { name: to.name, query: queryCopy, params: { locale: i18n.locale } } );
 
 	}	else {
 

@@ -15,9 +15,23 @@
         :options="lods"
       />
       <search-bar
-        @menu-clicked="$emit('hamburger-clicked')"
         @select-place="moveToPlace"
       />
+      <Compass
+        ref="compass"
+        :rotation="camRotationZ"
+        @orient-north="orientNorth"
+      />
+      <transition name="fade">
+        <div
+          v-if="showLocationBox"
+          id="locationbox"
+          class="box"
+          @click="toggleLocationBox"
+        >
+          {{ locationBoxText }}
+        </div>
+      </transition>
     </section>
     <BuildingInformation
       :building="pickedBuilding"
@@ -26,32 +40,19 @@
       @report-data="getReportDataIssuePathWithId( pickedBuilding.attributes.identificatie )"
     />
     <ThreeViewer
+      ref="threeviewer"
       :tiles-url="tilesUrl"
       :basemap-options="basemapOptions"
       @object-picked="objectPicked"
       @cam-offset="onCamOffset"
+      @cam-rotation-z="onCamRotationZ"
     />
     <div
+      v-if="true"
       id="attribution"
       class="has-background-white has-text-grey"
     >
-      <p class="is-size-7">
-        <a
-          class="tag"
-          href="https://docs.google.com/forms/d/e/1FAIpQLSe2XLCYNmoFVHrgt_uRXeLLwfzDK7gS2kE7mGH8rnk6ltE0LQ/viewform?"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {{ $t("viewer.feedback") }}
-        </a> |
-        <a
-          class="tag is-danger"
-          :href="reportDataIssueUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {{ $t("viewer.issue") }}
-        </a> |
+      <p>
         <span v-if="basemapOptions.attribution">
           {{ $t("viewer.baselayer1") }}
           <a
@@ -64,7 +65,7 @@
             {{ basemapOptions.attribution }}
           </span> |
         </span>
-        {{ $t("viewer.3dgeoinfo1") }} <a href="https://3d.bk.tudelft.nl/">{{ $t("viewer.3dgeoinfo2") }}</a>
+        <a :href="'https://docs.3dbag.nl/'+$route.params.locale+'/copyright' ">© 3D BAG by tudelft3d</a>
       </p>
     </div>
     <div id="debug-panel" />
@@ -76,6 +77,7 @@ import BuildingInformation from '@/components/BuildingInformation.vue';
 import DropDownSelector from '@/components/DropDownSelector.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
+import Compass from '@/components/Compass.vue';
 
 export default {
 
@@ -85,7 +87,8 @@ export default {
 		BuildingInformation,
 		DropDownSelector,
 		SearchBar,
-		ThreeViewer
+		ThreeViewer,
+		Compass
 	},
 
 	data() {
@@ -93,12 +96,14 @@ export default {
 		return {
 
 			customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
+			BAG3DVersion: this.$root.$data[ 'BAG3D' ][ 'versions' ][ this.$root.$data[ 'BAG3D' ][ "latest" ] ],
 
 			camOffset: {
 				x: 400,
 				y: 400,
 				z: 400
 			},
+			camRotationZ: 0,
 
 			basemapPreset: 'brtachtergrondkaart',
 			basemaps: {
@@ -110,11 +115,14 @@ export default {
 					name: "BRT Achtergrondkaart (Grijs)",
 					icon: "map"
 				},
-				luchtfoto2018wmts: {
-					name: "Luchtfoto 2018",
+				luchtfoto2020wmts: {
+					name: "Luchtfoto 2020",
 					icon: "map"
 				}
 			},
+
+			showLocationBox: false,
+			locationBoxText: "",
 
 			tileset: 'lod22',
 			lods: {
@@ -167,13 +175,7 @@ export default {
 
 			}
 
-			const sources = {
-				lod22: 'https://godzilla.bk.tudelft.nl/3dtiles/v20110_lod22/tileset_qt.json',
-				lod13: 'https://godzilla.bk.tudelft.nl/3dtiles/v20110_lod13/tileset_qt.json',
-				lod12: 'https://godzilla.bk.tudelft.nl/3dtiles/v20110_lod12/tileset_qt.json',
-			};
-
-			return sources[ this.tileset ];
+			return this.BAG3DVersion[ '3DTilesets' ][ this.tileset ];
 
 		},
 
@@ -212,8 +214,8 @@ export default {
 					attribution: "PDOK",
 					attributionURL: "https://www.pdok.nl/",
 					options: {
-						url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
-						layer: 'brtachtergrondkaart',
+						url: 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?',
+						layer: 'standaard',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
 						service: "WMTS",
@@ -228,8 +230,8 @@ export default {
 					attribution: "PDOK",
 					attributionURL: "https://www.pdok.nl/",
 					options: {
-						url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?',
-						layer: 'brtachtergrondkaartgrijs',
+						url: 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?',
+						layer: 'grijs',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
 						service: "WMTS",
@@ -239,13 +241,13 @@ export default {
 					}
 				},
 
-        	luchtfoto2018wmts: {
+				luchtfoto2020wmts: {
 					type: "wmts",
 					attribution: "PDOK",
 					attributionURL: "https://www.pdok.nl/",
 					options: {
-						url: 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts?',
-						layer: '2018_ortho25',
+						url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0?',
+						layer: '2020_ortho25',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
 						service: "WMTS",
@@ -268,12 +270,49 @@ export default {
 			return `https://docs.google.com/forms/d/e/
 				1FAIpQLScIVBEWkpOraOIpOb1SOwRvpSnlQxLFDDYsqK4MrZgOqvNjWw/viewform?
 				entry.401142300=${ this.tilesUrl }&
-				entry.1880096492=${ escape( "https://tudelft3d.github.io/3dbag-viewer/#" + this.$route.fullPath ) }`;
+				entry.1880096492=${ escape( "https://3dbag.nl/#" + this.$route.fullPath ) }`;
 
 		}
 
 	},
 
+	watch: {
+
+		$route( to, from ) {
+
+			if ( to.query.lod ) {
+
+				this.tileset = to.query.lod;
+
+			}
+
+		},
+
+		tileset( to, from ) {
+
+			if ( to != from ) {
+
+				let q = Object.assign( {}, this.$router.currentRoute.query );
+				q.lod = to;
+
+				this.$router.push(
+					{ url: '/', query: q }
+				).catch( err => {} );
+
+			}
+
+		}
+
+	},
+	mounted() {
+
+		if ( this.$router.currentRoute.query.lod ) {
+
+			this.tileset = this.$router.currentRoute.query.lod;
+
+		}
+
+	},
 	methods: {
 
 		onCamOffset: function ( event ) {
@@ -282,12 +321,24 @@ export default {
 
 		},
 
+		onCamRotationZ: function ( value ) {
+
+			this.$refs.compass.setRotation( value );
+
+		},
+
+		orientNorth: function ( value ) {
+
+			this.$refs.threeviewer.pointCameraToNorth();
+
+		},
+
 		moveToPlace: function ( res ) {
 
 			if ( res ) {
 
-			  this.$router.push( {
-					path: '/viewer',
+				this.$router.push( {
+					path: '/' + this.$route.params.locale + '/viewer',
 					query: {
 						rdx: res.rd_x,
 						rdy: res.rd_y,
@@ -321,6 +372,12 @@ export default {
 
 			window.open( this.reportDataIssueUrl + `&entry.547110854=${ identificatie }`, '_blank' );
 
+		},
+
+		toggleLocationBox: function () {
+
+			this.showLocationBox = ! this.showLocationBox;
+
 		}
 
 	}
@@ -330,36 +387,46 @@ export default {
 
 <style>
 #building-info {
-  position: absolute;
-  bottom: 0.5rem;
-  margin: 0 0.5rem;
+	position: absolute;
+	bottom: 0.5rem;
+	margin: 0 0.5rem;
 }
 .table-value {
-	max-width: 170px;
 	overflow-x: auto;
 }
 #building-info .message-body {
 	overflow: auto;
-	height: 500px;
+	max-height: 1%;
 }
 
 #map-options {
-  position: absolute;
+	position: absolute;
 	margin: 0px;
-  top: 3.75rem;
-  margin: 0 0.5rem;
+	top: 3.75rem;
+	margin: 0 0.5rem;
 }
 
 #viewer {
 
-  width: 100%;
-  height: 100%;
+	width: 100%;
+	height: 100%;
 
 }
-
+#locationbox {
+	position: absolute;
+	margin: 0px;
+	top: 2.75rem;
+	width: 100%;
+	padding: 0.5rem;
+	background: rgba(255,255,255,0.6);
+	border: 1px solid rgba(0,0,0,0.3);
+	transition: opacity 0.3s;
+}
 #attribution {
 	position: absolute;
-	padding: 0.2rem;
+	padding: 0 0.1rem;
+	font-size: 13px;
+	line-height: 15px;
 	right: 0;
 	bottom: 0;
 	opacity: 0.8;

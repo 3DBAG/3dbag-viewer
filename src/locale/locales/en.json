@@ -1,22 +1,54 @@
 {
+  "tilenumber": "Tile number",
+  "attribute": "Attribute",
+  "attributes": "Attributes",
+  "value": "Value",
+  "documentation": "documentation",
   "nav": {
-    "3dmap": "3D Map",
-		"download": "Download",
-		"changelog": "Changelog",
-	"docs": "Docs",
-	"features": "Features",
-	"attributes": "Attributes"
+    "3dmap": "3D Viewer",
+    "download": "Downloads",
+    "changelog": "Changelog",
+    "docs": "Documentation",
+    "features": "Features",
+    "more": "More",
+    "about": "About 3D BAG",
+    "copyright": "Copyright",
+    "feedback": "Give feedback"
   },
   "viewer": {
-	"feedback": "Give feedback",
-	"issue": "Report data issue",
-	"baselayer1": "Baselayer from",
-	"3dgeoinfo1": "3DBAG by the",
-	"3dgeoinfo2": "3D geoinformation group",
-	"baselayer2": "Baselayer"
+    "feedback": "Give feedback",
+    "issue": "Report a problem with this building",
+    "baselayer1": "Baselayer from",
+    "baselayer2": "Baselayer"
+  },
+  "BuildingInfo": {
+    "attr1": "Attribute descriptions you can find in the "
   },
   "SearchBar": {
-	"search": "Search",
-	"empty": "No results found"
-	}
+    "search": "Search for a place",
+    "empty": "No results found"
+    },
+  "download": {
+    "webservicespar": "These allow you to explore the entire dataset in another software (eg. QGIS) without having to download anything beforehand.",
+    "statictitle": "Downloads",
+    "staticpicked": "for tile number ",
+    "staticunpicked": "per tile",
+    "staticpar": "To keep filesizes manageable the 3D BAG dataset is subdived in tiles. For each tile we offer the data in a number of different file formats. Use the button below to select the tile of interest to see the download options.",
+    "picktile": "Pick a tile",
+    "psqlpar": "The PostgreSQL file below contain the raw 3D BAG data for the whole of the Netherlands, including geometry and attributes. Beware, this is a very large file to download.",
+    "selectedtiletrue": "You have selected tile number",
+    "selectedtiletrue2": "",
+    "selectedtilefalse": "Select a tile from the map",
+    "confirm": "Confirm selection",
+    "format": "Format",
+    "documentation": "Documentation",
+    "docsRead": "Read",
+    "downloadsize": "Download size",
+    "file": "File",
+    "size": "Size",
+    "version": "Version",
+    "picktile2true": "Pick another tile",
+    "picktile2false": "Pick a tile",
+    "restored": "in PostgreSQL"
+  }
 }

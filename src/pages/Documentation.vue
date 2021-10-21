@@ -546,10 +546,10 @@
     <p>
       Yes!
       <ol type="1">
-        <li> Some buildings have spikes; big peaks in the building geometry or a triangle that has one erroneous coordinate. </li>
+        <li> Some buildings have a spike; a big deviation in the building geometry due to one vertex with an erroneous coordinate. </li>
         <li> Not all buildings are geometrically valid (eg. missing faces). Note that this should be evident from the <code>val3dity_codes</code> attribute. </li>
         <li> Some building tiles may be missing. </li>
-        <li> Some buildings may be duplicated. </li>
+        <li> Sometimes a building is not properly highlighted when you click on it. </li>
       </ol>
     </p>
 

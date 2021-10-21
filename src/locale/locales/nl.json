@@ -1,22 +1,55 @@
 {
+  "tilenumber": "Tegelnummer",
+  "attribute": "Attribuut",
+  "attributes": "Attributen",
+  "value": "Waarde",
+  "documentation": "documentatie",
   "nav": {
-    "3dmap": "3D kaart",
-    "download": "Download",
+    "3dmap": "3D Viewer",
+    "download": "Downloads",
     "changelog": "Changelog",
-	"docs": "Docs",
-	"features": "Features",
-	"attributes": "Attributen"
+    "docs": "Documentatie",
+    "features": "Features",
+    "attributes": "Attributen",
+    "more": "Meer",
+    "about": "Over 3D BAG",
+    "copyright": "Copyright",
+    "feedback": "Geef feedback"
   },
   "viewer": {
-	"feedback": "Geef feedback",
-	"issue": "Rapporteer dataprobleem",
-	"baselayer1": "Basislaag van",
-	"3dgeoinfo1": "3DBAG door de",
-	"3dgeoinfo2": "3D geoinformation groep",
-	"baselayer2": "Basislaag"
+    "feedback": "Geef feedback",
+    "issue": "Rapporteer een probleem met dit gebouw",
+    "baselayer1": "Basislaag van",
+    "baselayer2": "Basislaag"
   },
-    "SearchBar": {
-	"search": "Zoeken",
-	"empty": "Geen resultaten gevonden"
-	}
+  "BuildingInfo": {
+    "attr1": "Attribuut omschrijvingen vind je in de "
+  },
+  "SearchBar": {
+    "search": "Zoek een plaats",
+    "empty": "Geen resultaten gevonden"
+    },
+  "download": {
+    "webservicespar": "Deze laten je de gehele dataset verkennen in andere software (bijvoorbeeld QGIS) zonder iets van tevoren hoeven te downloaden.",
+    "statictitle": "Downloads",
+    "staticpicked": "voor tegelnummer ",
+    "staticunpicked": "per tegel",
+    "staticpar": "Om bestandsgrootten beheersbaar te houden is de 3D BAG data opgedeeld in tegels. Voor iedere tegel bieden we de data aan in verschillende bestandsformaten. Klik op de onderstaande knop om de gewilde tegel te kiezen en de downloadopties te zien.",
+    "picktile": "Kies een tegel",
+    "psqlpar": "Het onderstaande PostgreSQL-bestand bevat de ruwe 3D BAG data voor geheel Nederland, inclusief geometrie en attributen. Let op: het is een erg groot bestand.",
+    "selectedtiletrue": "Je hebt tegelnummer ",
+    "selectedtiletrue2": " geselecteerd",
+    "selectedtilefalse": "Selecteer een tegel op de kaart",
+    "confirm": "Bevestig selectie",
+    "format": "Formaat",
+    "documentation": "Omschrijving",
+    "docsRead": "Lees",
+    "downloadsize": "Downloadgrootte",
+    "file": "Bestand",
+    "size": "Grootte",
+    "version": "Versie",
+    "picktile2true": "Kies een andere tegel",
+    "picktile2false": "Kies een tegel",
+    "restored": "in PostgreSQL"
+  }
 }

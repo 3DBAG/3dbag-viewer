@@ -1,0 +1,43 @@
+{
+  "latest": "v21.09.8",
+  "versions": {
+    "v21.09.8" : {
+      "PostgreSQL" : "https://data.3dbag.nl/postgres/3dbag_v210908_fd2cee53.zip",
+
+      "OBJ" : "https://data.3dbag.nl/obj/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.zip",
+
+      "CityJSON" : "https://data.3dbag.nl/cityjson/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.json",
+      
+      "GPKG" : "https://data.3dbag.nl/gpkg/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.gpkg",
+
+      "WFS" : "https://data.3dbag.nl/api/BAG3D_v2/wfs",
+
+      "WMS" : "https://data.3dbag.nl/api/BAG3D_v2/wms",
+
+      "3DTilesets" : {
+        "lod22": "https://3dbag.nl/download/3dtiles/v210908_fd2cee53/lod22/tileset.json",
+				"lod13": "https://3dbag.nl/download/3dtiles/v210908_fd2cee53/lod13/tileset.json",
+				"lod12": "https://3dbag.nl/download/3dtiles/v210908_fd2cee53/lod12/tileset.json"
+      }
+    },
+    "v21.03.1" : {
+      "PostgreSQL" : "https://data.3dbag.nl/postgres/3dbag_v21031_7425c21b.zip",
+
+      "OBJ" : "https://data.3dbag.nl/obj/v21031_7425c21b/3dbag_v21031_7425c21b_{TID}.zip",
+
+      "CityJSON" : "https://data.3dbag.nl/cityjson/v21031_7425c21b/3dbag_v21031_7425c21b_{TID}.json",
+      
+      "GPKG" : "https://data.3dbag.nl/gpkg/v21031_7425c21b/3dbag_v21031_7425c21b_{TID}.gpkg",
+
+      "WFS" : "https://data.3dbag.nl/api/BAG3D_v2/wfs",
+
+      "WMS" : "https://data.3dbag.nl/api/BAG3D_v2/wms",
+
+      "3DTilesets" : {
+        "lod22": "https://3dbag.nl/download/3dtiles/v21031_7425c21b/lod22/tileset.json",
+				"lod13": "https://3dbag.nl/download/3dtiles/v21031_7425c21b/lod13/tileset.json",
+				"lod12": "https://3dbag.nl/download/3dtiles/v21031_7425c21b/lod12/tileset.json"
+      }
+    }
+  }
+}

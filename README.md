@@ -1,6 +1,6 @@
 # 3D BAG Viewer
 
-This is the website for 3D BAG version 2.
+This is the repository for the components of the website and viewer of the 3D BAG. For general 3D BAG or data-related questions, issues see https://docs.3dbag.nl/en/contact/ . 
 
 ## Installation
 ```
