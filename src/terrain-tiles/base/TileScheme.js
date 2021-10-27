@@ -359,7 +359,7 @@ class BaseTileScheme {
 
 		// }
 
-		const tileMatrix = this.getTileMatrix( dist * resFactor );
+		const tileMatrix = this.getTileMatrix( dist * resFactor - 1 );
 
 		const centerTile = tileMatrix.getTileAt( tilePosition );
 
