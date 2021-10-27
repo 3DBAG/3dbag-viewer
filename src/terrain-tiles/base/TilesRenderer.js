@@ -40,6 +40,7 @@ export class TilesRenderer {
 		// this.tempMaterial = new MeshBasicMaterial( { color: 0xFFFFFF, transparent: true, opacity: 0.0 } );
 		this.tempMaterial = new MeshBasicMaterial( { color: 0xFFFFFF } );
 		this.tempMaterial.depthWrite = false;
+		this.geometries = {};
 
 	}
 
@@ -185,9 +186,22 @@ export class TilesRenderer {
 
 	createTile( tile, transform, intersectingTiles ) {
 
-		var geometry = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
+		if ( ! ( tile.tileMatrix.tileSpanX.toString() in this.geometries ) ) {
 
-		var mesh = new Mesh( geometry, this.tempMaterial );
+			this.geometries[ tile.tileMatrix.tileSpanX.toString() ] = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
+
+		}
+
+		const tex = new Texture();
+		tex.magFilter = LinearFilter;
+		tex.minFilter = LinearFilter;
+		tex.generateMipmaps = false;
+		tex.format = RGBFormat;
+		var material = new MeshBasicMaterial( { map: this.track( tex ) } );
+		material.color.set( 0xFFFFFF );
+		material.depthWrite = false;
+		var mesh = new Mesh( this.geometries[ tile.tileMatrix.tileSpanX.toString() ], this.tempMaterial );
+
 		mesh.name = tile.getId();
 		mesh.renderOrder = 0;
 		this.group.add( mesh );
@@ -207,21 +221,13 @@ export class TilesRenderer {
 
 			scope.downloadQueue.delete( tileId );
 
-			const tex = new Texture();
 			var image = new Image();
 			image.src = 'data:image/png;base64,' + arrayBuffer2Base64( buffer );
 			image.onload = function () {
 
-				tex.image = image;
-				tex.magFilter = LinearFilter;
-				tex.minFilter = LinearFilter;
-				tex.generateMipmaps = false;
-				tex.needsUpdate = true;
-				tex.format = RGBFormat;
-				var material = new MeshBasicMaterial( { map: scope.track( tex ) } );
-				material.depthWrite = false;
 				mesh.material = material;
-
+				tex.image = image;
+				tex.needsUpdate = true;
 				mesh.renderOrder = 2;
 				scope.disposeTileIds( intersectingTiles );
 
@@ -234,7 +240,7 @@ export class TilesRenderer {
 			// we end up here if abort() is called on the Abortcontroller attached to this tile
 			scope.downloadQueue.delete( tileId );
 			scope.activeTiles.delete( tileId );
-			scope.resourceTracker.untrack( geometry );
+			// scope.resourceTracker.untrack( geometry );
 			scope.disposeTileIds( [ tileId ] );
 
 		} );
