@@ -20,7 +20,7 @@ export class TilesRenderer {
 
 	constructor() {
 
-		this.tileLevel = - 1;
+		this.tileLevel = 0;
 
 		this.resFactor = 4.5;
 
@@ -37,118 +37,69 @@ export class TilesRenderer {
 
 		this.onLoadTile = null;
 
-		// this.tempMaterial = new MeshBasicMaterial( { color: 0xFFFFFF, transparent: true, opacity: 0.0 } );
 		this.tempMaterial = new MeshBasicMaterial( { color: 0xFFFFFF } );
 		this.tempMaterial.depthWrite = false;
-		this.geometries = {};
 
 	}
 
 	update( sceneCenter, camera, controls ) {
 
 		// Get indices of all tiles that are in view
-		const [ tiles, tileLevel ] = this.tileScheme.getTilesInView( camera, controls, this.resFactor, sceneCenter );
-
-		if ( this.tileLevel == - 1 )
-			this.tileLevel = tileLevel;
-
+		const tiles = this.tileScheme.getTilesInView( camera, controls, this.resFactor, sceneCenter );
 		this.tilesInView = tiles;
 
-		var tidsInView = new Set();
-		this.tilesInView.forEach( function ( ti ) {
+		// check if we just changed tileLevel
+		if ( tiles.length && tiles[ 0 ].tileMatrix.level != this.tileLevel ) {
 
-			tidsInView.add( ti.getId() );
+			this.abortDownloads();
+			this.changeRenderOrder();
+			this.needsTileLevelClean = true;
+			this.tileLevel = tiles[ 0 ].tileMatrix.level;
 
-		} );
+		} else {
 
-		// Cancel pending tile downloads that are not in view anymore
-		setTimeout( () => {
+			// Cancel pending tile downloads that are not in view anymore
+			setTimeout( () => {
 
-			for ( let [ tid, abortCtrl ] of this.downloadQueue.entries() ) {
+				var tidsInView = new Set();
+				this.tilesInView.forEach( function ( ti ) {
 
-				if ( ! tidsInView.has( tid ) ) {
+					tidsInView.add( ti.getId() );
 
-					abortCtrl.abort();
+				} );
+
+				for ( let [ tid, abortCtrl ] of this.downloadQueue.entries() ) {
+
+					if ( ! tidsInView.has( tid ) ) {
+
+						abortCtrl.abort();
+
+					}
 
 				}
 
-			}
+			} );
 
-		} );
+		}
 
-		var deleteLater = new Set();
-
-		this.tilesInView.forEach( function ( ti ) {
+		// Create tiles that hadn't been created yet
+		tiles.forEach( function ( ti ) {
 
 			const tileId = ti.getId();
 
 			if ( ! this.activeTiles.has( tileId ) ) {
 
-				const intersectingTiles = ti.intersectsWith();
-				intersectingTiles.forEach( tile => deleteLater.add( tile ) );
-
 				this.activeTiles.add( tileId );
-				this.createTile( ti, sceneCenter, intersectingTiles );
 
-			} else {
-
-				const intersectingTiles = ti.intersectsWith();
-				intersectingTiles.forEach( tile => deleteLater.add( tile ) );
-
-				const tile = this.group.getObjectByName( tileId );
-				tile.renderOrder = 2;
+				this.createTile( ti, sceneCenter );
 
 			}
 
 		}, this );
 
-		this.activeTiles.forEach( function ( tid ) {
+		if ( this.needsTileLevelClean && this.downloadQueue.size == 0 ) {
 
-			if ( ! tidsInView.has( tid ) && ! deleteLater.has( tid ) ) {
-
-				this.disposeTileIds( [ tid ] );
-
-			}
-
-		}, this );
-
-	}
-
-	removeOldTiles() {
-
-		for ( let i = this.group.children.length - 1; i > 0; i -- ) {
-
-			const obj = this.group.children[ i ];
-
-			if ( obj.renderOrder == 1 ) {
-
-				this.activeTiles.delete( obj.name );
-				this.disposeTileIds( [ obj.tid ] );
-
-			}
-
-		}
-
-	}
-
-	disposeTileIds( tids ) {
-
-		for ( let i = 0; i < tids.length; i ++ ) {
-
-			const tid = tids[ i ];
-			const mesh = this.group.getObjectByName( tid );
-
-			if ( mesh ) {
-
-				if ( mesh.material.map )
-					mesh.material.map.dispose();
-				mesh.geometry.dispose();
-				mesh.material.dispose();
-				this.group.remove( mesh );
-
-			}
-
-			this.activeTiles.delete( tid );
+			this.cleanTileLevels();
 
 		}
 
@@ -160,6 +111,7 @@ export class TilesRenderer {
 
 			if ( this.group.children[ i ].name != this.tileLevel ) {
 
+				// Place tiles of old tileLevel above temporary (white) tiles, but underneath fully loaded tiles of new tileLevel
 				this.group.children[ i ].renderOrder = 1;
 
 			}
@@ -180,29 +132,45 @@ export class TilesRenderer {
 
 	}
 
+	cleanTileLevels() {
+
+		this.needsOldTileLevelClean = false;
+		const scope = this;
+
+		for ( let i = this.group.children.length - 1; i > 0; i -- ) {
+
+			if ( this.group.children[ i ].name != this.tileLevel ) {
+
+				this.group.remove( this.group.children[ i ] );
+				this.resourceTracker.untrack( this.group.children[ i ] );
+
+			}
+
+		}
+
+		this.activeTiles.forEach( function ( tile ) {
+
+			if ( tile.split( "-" )[ 0 ] != scope.tileLevel ) {
+
+				scope.activeTiles.delete( tile );
+
+			}
+
+		} );
+
+	}
+
 	getRequestURL( tile ) {
 
 	}
 
-	createTile( tile, transform, intersectingTiles ) {
+	createTile( tile, transform ) {
 
-		if ( ! ( tile.tileMatrix.tileSpanX.toString() in this.geometries ) ) {
+		var geometry = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
 
-			this.geometries[ tile.tileMatrix.tileSpanX.toString() ] = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
-
-		}
-
-		const tex = new Texture();
-		tex.magFilter = LinearFilter;
-		tex.minFilter = LinearFilter;
-		tex.generateMipmaps = false;
-		tex.format = RGBFormat;
-		var material = new MeshBasicMaterial( { map: this.track( tex ) } );
-		material.color.set( 0xFFFFFF );
-		material.depthWrite = false;
-		var mesh = new Mesh( this.geometries[ tile.tileMatrix.tileSpanX.toString() ], this.tempMaterial );
-
-		mesh.name = tile.getId();
+		var mesh = new Mesh( geometry, this.tempMaterial );
+		mesh.name = this.tileLevel;
+		// The temporary (white) tiles on the bottom
 		mesh.renderOrder = 0;
 		this.group.add( mesh );
 
@@ -221,16 +189,23 @@ export class TilesRenderer {
 
 			scope.downloadQueue.delete( tileId );
 
+			// Place tiles of new/current tile level with loaded texture completely on top
+			mesh.renderOrder = 2;
+
+			const tex = new Texture();
 			var image = new Image();
 			image.src = 'data:image/png;base64,' + arrayBuffer2Base64( buffer );
 			image.onload = function () {
 
-				mesh.material = material;
 				tex.image = image;
+				tex.magFilter = LinearFilter;
+				tex.minFilter = LinearFilter;
+				tex.generateMipmaps = false;
 				tex.needsUpdate = true;
-				mesh.renderOrder = 2;
-				scope.disposeTileIds( intersectingTiles );
-
+				tex.format = RGBFormat;
+				var material = new MeshBasicMaterial( { map: scope.track( tex ) } );
+				material.depthWrite = false;
+				mesh.material = material;
 				scope.onLoadTile();
 
 			};
@@ -240,8 +215,7 @@ export class TilesRenderer {
 			// we end up here if abort() is called on the Abortcontroller attached to this tile
 			scope.downloadQueue.delete( tileId );
 			scope.activeTiles.delete( tileId );
-			// scope.resourceTracker.untrack( geometry );
-			scope.disposeTileIds( [ tileId ] );
+			scope.resourceTracker.untrack( geometry );
 
 		} );
 
