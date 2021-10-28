@@ -5,7 +5,10 @@ import {
 	Raycaster,
 	Frustum,
 	Matrix4,
-	Sphere
+	Sphere,
+	MeshBasicMaterial,
+	Mesh,
+	BoxGeometry
 } from 'three';
 
 class Tile {
@@ -24,12 +27,13 @@ class Tile {
 
 	}
 
-	getCenterPosition( offset = new Vector2() ) {
+	getCenterPosition( offset = new Vector3() ) {
 
 		const x = this.tileMatrix.minX + this.col * this.tileMatrix.tileSpanX + this.tileMatrix.tileSpanX / 2 - offset.x;
 		const y = this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY - this.tileMatrix.tileSpanY / 2 - offset.y;
+		const z = - offset.z;
 
-		return new Vector2( x, y );
+		return new Vector3( x, y, z );
 
 	}
 
@@ -195,8 +199,8 @@ class BaseTileScheme {
 		tilePosition.x = position.x + transform.x;
 		tilePosition.y = - position.z + transform.y;
 
-		const angle = controls.getPolarAngle();
-		var multiplier = 1;
+		// const angle = controls.getPolarAngle();
+		// var multiplier = 1;
 
 		// if ( angle > Math.PI / 4 ) {
 
@@ -204,23 +208,25 @@ class BaseTileScheme {
 
 		// }
 
-		const tileMatrix = this.getTileMatrix( dist * resFactor );
+		var tileMatrix = this.getTileMatrix( dist * resFactor );
+		tileMatrix = this.tileMatrixSet[ tileMatrix.level - 1 ];
 
 		const centerTile = tileMatrix.getTileAt( tilePosition );
 
 		position.set( position.x + transform.x, - position.z + transform.y, position.y + transform.z );
 
-		const tiles = this.growRegion( centerTile, camera, transform, position );
+		const distThreshold = centerTile.tileMatrix.tileSpanX * 10;
+		const tiles = this.growRegion( centerTile, camera, transform, position, distThreshold );
 
 		return tiles;
 
 	}
 
-	growRegion( centerTile, camera, transform, cameraCenter ) {
+	growRegion( centerTile, camera, transform, cameraCenter, distThreshold ) {
 
 		let visited = new Set( centerTile.getId() );
 		let queue = [ centerTile ];
-		let tilesInView = [ centerTile ];
+		let tilesInView = { [ centerTile.getId() ]: centerTile };
 
 		let frustum = new Frustum();
 		let projScreenMatrix = new Matrix4();
@@ -229,14 +235,12 @@ class BaseTileScheme {
 
 		let counter = 0;
 
-		const distThreshold = centerTile.tileMatrix.tileSpanX * 15;
-
 		while ( queue.length != 0 ) {
 
 			const tile = queue.pop();
 			var neighbours = tile.getNeighbours();
 
-			for ( const n of neighbours ) {
+			for ( var n of neighbours ) {
 
 				// Continue if tile already visited
 				if ( visited.has( n.getId() ) ) {
@@ -252,7 +256,19 @@ class BaseTileScheme {
 				if ( dist < distThreshold && n.inFrustum( frustum, transform ) ) {
 
 					queue.push( n );
-					tilesInView.push( n );
+					tilesInView[ n.getId() ] = n;
+
+				} else if ( n.inFrustum( frustum, transform ) && dist >= distThreshold && dist < distThreshold * 3 ) {
+
+					if ( n.tileMatrix.level == centerTile.tileMatrix.level ) {
+
+						const lowerTileLevel = this.tileMatrixSet[ n.tileMatrix.level - 2 ];
+						n = new Tile( lowerTileLevel, Math.floor( n.col / 4 ), Math.floor( n.row / 4 ) );
+
+					}
+					queue.push( n );
+					tilesInView[ n.getId() ] = n;
+					visited.add( n.getId() );
 
 				}
 
@@ -269,7 +285,7 @@ class BaseTileScheme {
 
 		}
 
-		return ( tilesInView );
+		return ( { "level": centerTile.tileMatrix.level, "tiles": tilesInView } );
 
 	}
 
