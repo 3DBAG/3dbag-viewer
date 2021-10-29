@@ -51,43 +51,7 @@ export class TilesRenderer {
 		this.tilesInView = inView.tiles;
 		const level = inView.level;
 
-		for ( let i = 0; i < this.toBeDeleted.length; i ++ ) {
-
-			const entry = this.toBeDeleted[ i ];
-			const time = new Date().getTime();
-			const timeLapsed = time - entry.time;
-			if ( timeLapsed >= 5000 ) {
-
-				entry.ids.forEach( tid => {
-
-					const mesh = this.activeTiles[ tid ];
-
-					if ( mesh ) {
-
-						if ( mesh.renderOrder == 1 || mesh.renderOrder == 2 ) {
-
-							console.log( "ja" );
-							if ( mesh.material.map )
-								mesh.material.map.dispose();
-							// mesh.geometry.dispose();
-							mesh.material.dispose();
-
-							this.group.remove( mesh );
-							delete this.activeTiles[ tid ];
-
-						}
-
-					}
-
-				}, this );
-
-			} else {
-
-				break;
-
-			}
-
-		}
+		this.deleteObsoleteTiles();
 
 		// check if we just changed tileLevel
 		if ( Object.keys( this.tilesInView ).length && level != this.tileLevel ) {
@@ -140,27 +104,60 @@ export class TilesRenderer {
 
 			const time = new Date().getTime();
 			var dict = { "time": time, "ids": [] };
-			// this.toBeDeleted.push( dict );
 
 			for ( const [ tid, mesh ] of Object.entries( this.activeTiles ) ) {
 
 				if ( ! Object.keys( this.tilesInView ).includes( tid ) ) {
 
-					mesh.renderOrder -= 2;
-					// dict[ "ids" ].push( tid );
-
-					// setTimeout( function () {
-
-					if ( mesh.material.map )
-						mesh.material.map.dispose();
-					mesh.material.dispose();
-
-					this.group.remove( mesh );
-					delete this.activeTiles[ tid ];
-
-					// }, 3000, this );
+					if ( mesh.renderOrder > 3 )
+						mesh.renderOrder -= 2;
+					dict[ "ids" ].push( tid );
 
 				}
+
+			}
+
+			if ( dict.ids.length > 0 )
+				this.toBeDeleted.push( dict );
+
+		}
+
+	}
+
+	deleteObsoleteTiles() {
+
+		for ( let i = 0; i < this.toBeDeleted.length; i ++ ) {
+
+			const entry = this.toBeDeleted[ i ];
+			const time = new Date().getTime();
+			const timeLapsed = time - entry.time;
+			if ( timeLapsed >= 5000 ) {
+
+				entry.ids.forEach( tid => {
+
+					const mesh = this.activeTiles[ tid ];
+
+					if ( mesh ) {
+
+						if ( mesh.renderOrder == 1 || mesh.renderOrder == 2 ) {
+
+							if ( mesh.material.map )
+								mesh.material.map.dispose();
+							// mesh.geometry.dispose();
+							mesh.material.dispose();
+
+							this.group.remove( mesh );
+							delete this.activeTiles[ tid ];
+
+						}
+
+					}
+
+				}, this );
+
+			} else {
+
+				break;
 
 			}
 
@@ -255,17 +252,6 @@ export class TilesRenderer {
 
 			scope.downloadQueue.delete( tileId );
 
-			// Place tiles of new/current tile level with loaded texture completely on top
-			if ( tile.tileMatrix.level == scope.tileLevel ) {
-
-				mesh.renderOrder = 4;
-
-			} else {
-
-				mesh.renderOrder = 3;
-
-			}
-
 			const tex = new Texture();
 			var image = new Image();
 			image.src = 'data:image/png;base64,' + arrayBuffer2Base64( buffer );
@@ -280,6 +266,13 @@ export class TilesRenderer {
 				var material = new MeshBasicMaterial( { map: scope.track( tex ) } );
 				material.depthWrite = false;
 				mesh.material = material;
+
+				// Place tiles of new/current tile level with loaded texture completely on top
+				if ( tile.tileMatrix.level == scope.tileLevel )
+					mesh.renderOrder = 4;
+				else
+					mesh.renderOrder = 3;
+
 				scope.onLoadTile();
 
 			};
@@ -288,6 +281,11 @@ export class TilesRenderer {
 
 			// we end up here if abort() is called on the Abortcontroller attached to this tile
 			scope.downloadQueue.delete( tileId );
+			const mesh = scope.activeTiles[ tileId ];
+			if ( mesh.material.map )
+				mesh.material.map.dispose();
+			mesh.material.dispose();
+			scope.group.remove( mesh );
 			delete scope.activeTiles[ tileId ];
 			// scope.resourceTracker.untrack( geometry );
 
