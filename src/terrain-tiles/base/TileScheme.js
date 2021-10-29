@@ -189,31 +189,18 @@ class BaseTileScheme {
 		}
 
 		var raycastY = 0 - ( controls.getPolarAngle() / ( Math.PI / 2 ) * 0.25 );
-
 		const raycaster = new Raycaster();
 		raycaster.setFromCamera( { x: 0, y: raycastY }, camera );
 
-		let position = new Vector3();
-		raycaster.ray.intersectPlane( new Plane( new Vector3( 0, 1, 0 ), 0 ), position );
-
-		const dist = camera.position.distanceTo( position );
-
-		const tilePosition = position.clone();
-
-		tilePosition.x = position.x + transform.x;
-		tilePosition.y = - position.z + transform.y;
-
-		// const angle = controls.getPolarAngle();
-		// var multiplier = 1;
-
-		// if ( angle > Math.PI / 4 ) {
-
-		// 	multiplier = ( Math.PI - angle ) / Math.PI;
-
-		// }
-
+		const dist = camera.position.distanceTo( controls.target );
 		var tileMatrix = this.getTileMatrix( dist * resFactor );
 		tileMatrix = this.tileMatrixSet[ tileMatrix.level - 1 ];
+
+		var position = new Vector3();
+		raycaster.ray.intersectPlane( new Plane( new Vector3( 0, 1, 0 ), 0 ), position );
+		const tilePosition = position.clone();
+		tilePosition.x = position.x + transform.x;
+		tilePosition.y = - position.z + transform.y;
 
 		const centerTile = tileMatrix.getTileAt( tilePosition );
 
