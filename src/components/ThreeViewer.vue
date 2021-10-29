@@ -167,6 +167,8 @@ export default {
 		this.box = null;
 
 		this.tiles = null;
+		this.tilesTime = 0;
+		this.terrainTilesTime = 0;
 
 		this.needsRerender = 0;
 
@@ -201,7 +203,7 @@ export default {
 		this.fog = null;
 		this.enableFog = false;
 		this.fogDensity = 0.0004;
-		this.fogColor = '#eeeeee';
+		this.fogColor = '#ffffff';
 
 		this.errorTarget = 0;
 		this.errorThreshold = 60;
@@ -1044,10 +1046,16 @@ export default {
 				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
 
 				const camdist = this.camera.position.distanceToSquared( this.controls.target );
+				const time = new Date().getTime();
 
 				if ( camdist < 1750 * 1750 ) {
 
-					this.tiles.update();
+					if ( time - this.tilesTime > 200 ) {
+
+						this.tilesTime = time;
+						this.tiles.update();
+
+					}
 
 					if ( ! this.show3DTiles ) {
 
@@ -1069,8 +1077,9 @@ export default {
 
 				if ( this.sceneTransform ) {
 
-					if ( this.showTerrain ) {
+					if ( this.showTerrain && time - this.terrainTilesTime > 500 ) {
 
+						this.terrainTilesTime = time;
 						this.terrainTiles.update( this.sceneTransform, this.camera, this.controls );
 
 					}
