@@ -230,17 +230,17 @@ export class TilesRenderer {
 		}
 
 		var mesh = new Mesh( this.geometries[ tile.tileMatrix.level ], this.tempMaterial );
-		mesh.name = tile.getId();
+		mesh.name = tile.id;
 		mesh.level = this.tileLevel;
 		// The temporary (white) tiles on the bottom
 		mesh.renderOrder = 0;
 		this.group.add( mesh );
-		this.activeTiles[ tile.getId() ] = mesh;
+		this.activeTiles[ tile.id ] = mesh;
 
 		const requestURL = this.getRequestURL( tile );
 
 		const scope = this;
-		const tileId = tile.getId();
+		const tileId = tile.id;
 		var controller = new AbortController();
 		var signal = controller.signal;
 		this.downloadQueue.set( tileId, controller );

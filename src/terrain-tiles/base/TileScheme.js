@@ -18,12 +18,7 @@ class Tile {
 		this.tileMatrix = tileMatrix;
 		this.col = col;
 		this.row = row;
-
-	}
-
-	getId() {
-
-		return `${this.tileMatrix.level}-${this.row}-${this.col}`;
+		this.id = `${this.tileMatrix.level}-${this.row}-${this.col}`;
 
 	}
 
@@ -224,9 +219,9 @@ class BaseTileScheme {
 
 	growRegion( centerTile, camera, transform, cameraCenter, distThreshold ) {
 
-		let visited = new Set( centerTile.getId() );
+		let visited = new Set( centerTile.id );
 		let queue = [ centerTile ];
-		let tilesInView = { [ centerTile.getId() ]: centerTile };
+		let tilesInView = { [ centerTile.id ]: centerTile };
 
 		let frustum = new Frustum();
 		let projScreenMatrix = new Matrix4();
@@ -243,20 +238,20 @@ class BaseTileScheme {
 			for ( var n of neighbours ) {
 
 				// Continue if tile already visited
-				if ( visited.has( n.getId() ) ) {
+				if ( visited.has( n.id ) ) {
 
 					continue;
 
 				}
 
-				visited.add( n.getId() );
+				visited.add( n.id );
 
 				const dist = cameraCenter.distanceTo( n.getCenterPosition() );
 
 				if ( dist < distThreshold ) {
 
 					queue.push( n );
-					tilesInView[ n.getId() ] = n;
+					tilesInView[ n.id ] = n;
 
 				} else if ( n.inFrustum( frustum, transform ) && dist < distThreshold * 3 ) {
 
@@ -267,8 +262,8 @@ class BaseTileScheme {
 
 					}
 					queue.push( n );
-					tilesInView[ n.getId() ] = n;
-					visited.add( n.getId() );
+					tilesInView[ n.id ] = n;
+					visited.add( n.id );
 
 				}
 
