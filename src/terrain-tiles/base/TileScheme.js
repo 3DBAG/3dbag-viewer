@@ -110,7 +110,6 @@ class Tile {
 
 		const width = parseInt( this.tileMatrix.matrixWidth );
 		const height = parseInt( this.tileMatrix.matrixHeight );
-		console.log( this.col, this.row, width, height );
 		return this.col >= 0 && this.col < width && this.row >= 0 && this.row < height;
 
 	}
