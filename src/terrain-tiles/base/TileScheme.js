@@ -180,7 +180,7 @@ class BaseTileScheme {
 
 		if ( this.tileMatrixSet.length == 0 ) {
 
-			return [];
+			return { "level": undefined, "tiles": [] };
 
 		}
 
@@ -253,14 +253,14 @@ class BaseTileScheme {
 
 				const dist = cameraCenter.distanceTo( n.getCenterPosition() );
 
-				if ( dist < distThreshold && n.inFrustum( frustum, transform ) ) {
+				if ( dist < distThreshold ) {
 
 					queue.push( n );
 					tilesInView[ n.getId() ] = n;
 
-				} else if ( n.inFrustum( frustum, transform ) && dist >= distThreshold && dist < distThreshold * 3 ) {
+				} else if ( n.inFrustum( frustum, transform ) && dist < distThreshold * 3 ) {
 
-					if ( n.tileMatrix.level == centerTile.tileMatrix.level ) {
+					if ( n.tileMatrix.level == centerTile.tileMatrix.level && n.tileMatrix.level >= 2 ) {
 
 						const lowerTileLevel = this.tileMatrixSet[ n.tileMatrix.level - 2 ];
 						n = new Tile( lowerTileLevel, Math.floor( n.col / 4 ), Math.floor( n.row / 4 ) );
@@ -276,9 +276,9 @@ class BaseTileScheme {
 
 			// prevent infinite loop
 			counter ++;
-			if ( counter == 300 ) {
+			if ( counter == 500 ) {
 
-				console.log( "Too many tiles in view! Skipping at 300..." );
+				console.log( "Too many tiles in view! Skipping at 500..." );
 				break;
 
 			}
