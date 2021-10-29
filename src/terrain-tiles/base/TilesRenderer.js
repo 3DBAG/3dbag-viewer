@@ -88,7 +88,7 @@ export class TilesRenderer {
 
 				this.createTile( tile, sceneCenter );
 
-			} else if ( this.activeTiles[ tid ].renderOrder == 1 || this.activeTiles[ tid ].renderOrder == 2 ) {
+			} else if ( this.activeTiles[ tid ].renderOrder == 1 || this.activeTiles[ tid ].renderOrder == 2 ) { // In this case it was marked for removal, undo that
 
 				this.activeTiles[ tid ].renderOrder += 2;
 
@@ -100,7 +100,7 @@ export class TilesRenderer {
 
 			this.cleanTileLevels();
 
-		} else {
+		} else { // Aggregate all tiles that need to be deleted later (after loading new tiles) by deleteObsoleteTiles()
 
 			const time = new Date().getTime();
 			var dict = { "time": time, "ids": [] };
@@ -143,7 +143,6 @@ export class TilesRenderer {
 
 							if ( mesh.material.map )
 								mesh.material.map.dispose();
-							// mesh.geometry.dispose();
 							mesh.material.dispose();
 
 							this.group.remove( mesh );
@@ -263,7 +262,7 @@ export class TilesRenderer {
 				material.depthWrite = false;
 				mesh.material = material;
 
-				// Place tiles of new/current tile level with loaded texture completely on top
+				// Place tiles of new/current tile level with loaded texture completely on top. Higher resolution above lower res tiles
 				if ( tile.tileMatrix.level == scope.tileLevel )
 					mesh.renderOrder = 4;
 				else
@@ -283,7 +282,6 @@ export class TilesRenderer {
 			mesh.material.dispose();
 			scope.group.remove( mesh );
 			delete scope.activeTiles[ tile.id ];
-			// scope.resourceTracker.untrack( geometry );
 
 		} );
 
