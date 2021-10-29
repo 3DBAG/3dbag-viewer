@@ -194,7 +194,6 @@ class BaseTileScheme {
 
 		const dist = camera.position.distanceTo( controls.target );
 		var tileMatrix = this.getTileMatrix( dist * resFactor );
-		tileMatrix = this.tileMatrixSet[ tileMatrix.level - 1 ];
 
 		var position = new Vector3();
 		raycaster.ray.intersectPlane( new Plane( new Vector3( 0, 1, 0 ), 0 ), position );
