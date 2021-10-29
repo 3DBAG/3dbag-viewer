@@ -223,11 +223,8 @@ export class TilesRenderer {
 
 	createTile( tile, transform ) {
 
-		if ( ! ( tile.tileMatrix.level in this.geometries ) ) {
-
+		if ( ! ( tile.tileMatrix.level in this.geometries ) )
 			this.geometries[ tile.tileMatrix.level ] = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
-
-		}
 
 		var mesh = new Mesh( this.geometries[ tile.tileMatrix.level ], this.tempMaterial );
 		mesh.name = tile.id;
@@ -240,17 +237,16 @@ export class TilesRenderer {
 		const requestURL = this.getRequestURL( tile );
 
 		const scope = this;
-		const tileId = tile.id;
 		var controller = new AbortController();
 		var signal = controller.signal;
-		this.downloadQueue.set( tileId, controller );
+		this.downloadQueue.set( tile.id, controller );
 		fetch( requestURL, { signal } ).then( function ( res ) {
 
 			return res.arrayBuffer();
 
 		} ).then( function ( buffer ) {
 
-			scope.downloadQueue.delete( tileId );
+			scope.downloadQueue.delete( tile.id );
 
 			const tex = new Texture();
 			var image = new Image();
@@ -280,13 +276,13 @@ export class TilesRenderer {
 		} ).catch( function ( e ) {
 
 			// we end up here if abort() is called on the Abortcontroller attached to this tile
-			scope.downloadQueue.delete( tileId );
-			const mesh = scope.activeTiles[ tileId ];
+			scope.downloadQueue.delete( tile.id );
+			const mesh = scope.activeTiles[ tile.id ];
 			if ( mesh.material.map )
 				mesh.material.map.dispose();
 			mesh.material.dispose();
 			scope.group.remove( mesh );
-			delete scope.activeTiles[ tileId ];
+			delete scope.activeTiles[ tile.id ];
 			// scope.resourceTracker.untrack( geometry );
 
 		} );
