@@ -106,6 +106,15 @@ class Tile {
 
 	}
 
+	withinMatrix() {
+
+		const width = parseInt( this.tileMatrix.matrixWidth );
+		const height = parseInt( this.tileMatrix.matrixHeight );
+		console.log( this.col, this.row, width, height );
+		return this.col >= 0 && this.col < width && this.row >= 0 && this.row < height;
+
+	}
+
 }
 
 class TileMatrix {
@@ -221,7 +230,9 @@ class BaseTileScheme {
 
 		let visited = new Set( centerTile.id );
 		let queue = [ centerTile ];
-		let tilesInView = { [ centerTile.id ]: centerTile };
+		let tilesInView = {};
+		if ( centerTile.withinMatrix )
+			tilesInView[ centerTile.id ] = centerTile;
 
 		let frustum = new Frustum();
 		let projScreenMatrix = new Matrix4();
@@ -251,9 +262,10 @@ class BaseTileScheme {
 				if ( dist < distThreshold ) {
 
 					queue.push( n );
-					tilesInView[ n.id ] = n;
+					if ( n.withinMatrix() )
+						tilesInView[ n.id ] = n;
 
-				} else if ( n.inFrustum( frustum, transform ) && dist < distThreshold * 3 ) {
+				} else if ( dist < distThreshold * 3 ) {
 
 					if ( n.tileMatrix.level == centerTile.tileMatrix.level && n.tileMatrix.level >= 2 ) {
 
@@ -262,8 +274,9 @@ class BaseTileScheme {
 
 					}
 					queue.push( n );
-					tilesInView[ n.id ] = n;
 					visited.add( n.id );
+					if ( n.withinMatrix() )
+						tilesInView[ n.id ] = n;
 
 				}
 
@@ -271,9 +284,9 @@ class BaseTileScheme {
 
 			// prevent infinite loop
 			counter ++;
-			if ( counter == 500 ) {
+			if ( counter == 1000 ) {
 
-				console.log( "Too many tiles in view! Skipping at 500..." );
+				console.log( "Too many tiles in view! Skipping at 1000..." );
 				break;
 
 			}
