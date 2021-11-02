@@ -94,6 +94,27 @@ export default {
 			this.setCameraPosFromRoute( to.query );
 
 		},
+		enableAttributeColoring: function ( enabled ) {
+
+			this.material.uniforms.enableAttributeColoring.value = enabled;
+			this.highlightMaterial.uniforms.enableAttributeColoring.value = enabled;
+
+			if ( enabled ) {
+
+				this.updateShader();
+
+			}
+
+		}
+	},
+	data: function () {
+
+		return {
+
+			enableAttributeColoring: false
+
+		};
+
 	},
 	beforeCreate() {
 
@@ -159,9 +180,8 @@ export default {
 
 		this.selectedObject = null;
 
-		this.enableAttributeColoring = true;
-		this.colorAttrMinVal = 0.0;
-		this.colorAttrMaxVal = 1.0;
+		this.colorAttrMinVal = Number.MAX_VALUE;
+		this.colorAttrMaxVal = - Number.MAX_VALUE;
 		this.colorAttrName = "h_maaiveld";
 
 		this.sceneTransform = null;
@@ -255,6 +275,23 @@ export default {
 					`
 				);
 			return newShader;
+
+		},
+		updateShader() {
+
+			this.tiles.activeTiles.forEach( obj => {
+
+				obj.cached.scene.traverse( c => {
+
+					if ( c.material && this.enableAttributeColoring )
+						this.setTileAttributes( obj.cached.scene, c );
+
+				} );
+
+			} );
+
+			this.material.uniforms.valMin.value = this.colorAttrMinVal;
+			this.material.uniforms.valMax.value = this.colorAttrMaxVal;
 
 		},
 		initTweakPane() {
@@ -357,17 +394,7 @@ export default {
 				title: 'AttributeColoring',
 
 			} );
-			fac.addInput( this, "enableAttributeColoring" ).on( 'change', ( val ) => {
-
-				this.material.uniforms.enableAttributeColoring.value = val;
-				this.highlightMaterial.uniforms.enableAttributeColoring.value = val;
-				if ( val ) {
-
-					this.reinitTiles();
-
-				}
-
-			} );
+			fac.addInput( this, "enableAttributeColoring" );
 			fac.addInput( this, "colorAttrMinVal" ).on( 'change', ( val ) => {
 
 				this.material.uniforms.valMin.value = parseFloat( val );
@@ -536,7 +563,12 @@ export default {
 			for ( let i = 0; i < batch_ids.count; i ++ ) {
 
 				const bid = batch_ids.getX( i );
-				new_attr_buffer[ i ] = JSON.parse( attrs[ bid ] )[ this.colorAttrName ];
+				const attrValue = JSON.parse( attrs[ bid ] )[ this.colorAttrName ];
+				new_attr_buffer[ i ] = attrValue;
+				if ( attrValue > this.colorAttrMaxVal )
+					this.colorAttrMaxVal = attrValue;
+				else if ( attrValue < this.colorAttrMinVal )
+					this.colorAttrMinVal = attrValue;
 
 			}
 			c.geometry.setAttribute( "attrValue", new Float32BufferAttribute( new_attr_buffer, 1 ) );
