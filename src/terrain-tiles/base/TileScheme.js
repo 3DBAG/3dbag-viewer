@@ -8,7 +8,7 @@ import {
 	Sphere,
 	MeshBasicMaterial,
 	Mesh,
-	BoxGeometry
+	PlaneBufferGeometry
 } from 'three';
 
 class Tile {
@@ -176,6 +176,21 @@ class BaseTileScheme {
 		}
 
 		return this.tileMatrixSet[ this.tileMatrixSet.length - 1 ];
+
+	}
+
+	createBackgroundPlane() {
+
+		const tileSpanX = this.tileMatrixSet[ 0 ].tileSpanX;
+		const tileSpanY = this.tileMatrixSet[ 0 ].tileSpanY;
+
+		const geometry = new PlaneBufferGeometry( tileSpanX, tileSpanY );
+		const material = new MeshBasicMaterial( { color: 0xffffff } );
+		material.depthWrite = false;
+		const plane = new Mesh( geometry, material );
+		plane.position.setComponent( 2, - 1 );
+		plane.name = "backgroundPlane";
+		return plane;
 
 	}
 

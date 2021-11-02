@@ -117,10 +117,6 @@ export default {
 				};
 
 			}
-		},
-		animationStarted: {
-			type: Boolean,
-			default: false
 		}
 	},
 	watch: {
@@ -149,6 +145,15 @@ export default {
 				this.controls.enabled = true;
 
 		}
+	},
+	data: function () {
+
+		return {
+
+			animationStarted: false
+
+		};
+
 	},
 	beforeCreate() {
 
@@ -203,7 +208,7 @@ export default {
 		this.fog = null;
 		this.enableFog = false;
 		this.fogDensity = 0.0004;
-		this.fogColor = '#ffffff';
+		this.fogColor = '#daf1ff';
 
 		this.errorTarget = 0;
 		this.errorThreshold = 60;

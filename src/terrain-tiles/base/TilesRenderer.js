@@ -31,20 +31,26 @@ export class TilesRenderer {
 		this.tilesInView = null;
 
 		this.group = new Group();
+		this.backgroundPlane = undefined;
 		this.resourceTracker = new ResourceTracker();
 		this.track = this.resourceTracker.track.bind( this.resourceTracker );
 		this.needsTileLevelClean = false;
 
 		this.onLoadTile = null;
 
-		this.tempMaterial = new MeshBasicMaterial( { color: 0xFFFFFF } );
-		this.tempMaterial.depthWrite = false;
 		this.geometries = {};
 		this.toBeDeleted = [];
 
 	}
 
 	update( sceneCenter, camera, controls ) {
+
+		if ( ! this.backgroundPlane && this.tileScheme.tileMatrixSet.length ) {
+
+			this.backgroundPlane = this.tileScheme.createBackgroundPlane();
+			this.group.add( this.backgroundPlane );
+
+		}
 
 		// Get indices of all tiles that are in view
 		const inView = this.tileScheme.getTilesInView( camera, controls, this.resFactor, sceneCenter );
@@ -199,7 +205,7 @@ export class TilesRenderer {
 
 		this.group.children.forEach( obj => {
 
-			if ( obj.level != this.tileLevel ) {
+			if ( obj.level != this.tileLevel && obj.name != "backgroundPlane" ) {
 
 				this.group.remove( obj );
 				this.resourceTracker.untrack( obj );
@@ -225,11 +231,12 @@ export class TilesRenderer {
 		if ( ! ( tile.tileMatrix.level in this.geometries ) )
 			this.geometries[ tile.tileMatrix.level ] = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
 
-		var mesh = new Mesh( this.geometries[ tile.tileMatrix.level ], this.tempMaterial );
+		var material = new MeshBasicMaterial();
+		material.depthWrite = false;
+		var mesh = new Mesh( this.geometries[ tile.tileMatrix.level ], material );
 		mesh.name = tile.id;
 		mesh.level = this.tileLevel;
-		// The temporary (white) tiles on the bottom
-		mesh.renderOrder = 0;
+		mesh.visible = false;
 		this.group.add( mesh );
 		this.activeTiles[ tile.id ] = mesh;
 
@@ -258,9 +265,8 @@ export class TilesRenderer {
 				tex.generateMipmaps = false;
 				tex.needsUpdate = true;
 				tex.format = RGBFormat;
-				var material = new MeshBasicMaterial( { map: scope.track( tex ) } );
-				material.depthWrite = false;
-				mesh.material = material;
+				material.map = scope.track( tex );
+				mesh.visible = true;
 
 				// Place tiles of new/current tile level with loaded texture completely on top. Higher resolution above lower res tiles
 				if ( tile.tileMatrix.level == scope.tileLevel )
