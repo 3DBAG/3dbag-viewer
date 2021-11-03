@@ -269,6 +269,11 @@ export const colormaps = {
 		new Color( 1, 1, 1 ),
 		new Color( 0.5, 0, 1 ),
 		new Color( 1, 0, 0.5 )
+	],
+
+	"bool": [
+		new Color( 0, 0, 1 ),
+		new Color( 0, 1, 0 ),
 	]
 
 };

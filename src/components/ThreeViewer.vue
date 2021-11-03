@@ -182,7 +182,7 @@ export default {
 
 		this.colorAttrMinVal = Number.MAX_VALUE;
 		this.colorAttrMaxVal = - Number.MAX_VALUE;
-		this.colorAttrName = "dak_type";
+		this.colorAttrName = "h_maaiveld";
 		this.colorAttrType = null;
 		this.colorAttrValues = {};
 		this.colorAttrValuesKeys = []; // since this.colorAttrValues is unordered
@@ -210,6 +210,10 @@ export default {
 				colormap = colormaps[ "default" ];
 			else if ( this.colorAttrType == "string" )
 				colormap = colormaps[ "discrete" ];
+			else if ( this.colorAttrType == "boolean" )
+				colormap = colormaps[ "bool" ];
+			else if ( this.colorAttrType == "object" ) // only works with an array
+				colormap = colormaps[ "discrete" ];
 
 			const cm_data = new Uint8Array( 3 * colormap.length );
 			colormap.forEach( ( col, i ) => {
@@ -235,6 +239,10 @@ export default {
 			var attrTypeInt = 0;
 			if ( this.colorAttrType == "string" )
 				attrTypeInt = 1;
+			else if ( this.colorAttrType == "boolean" )
+				attrTypeInt = 2;
+			else if ( this.colorAttrType == "object" )
+				attrTypeInt = 3;
 			newShader.uniforms = {
 				valMin: { value: this.colorAttrMinVal },
 				valMax: { value: this.colorAttrMaxVal },
@@ -275,7 +283,7 @@ export default {
 							float texCoord = (attrValue - valMin)/(valMax - valMin);
 							texCoord = clamp(texCoord, 0.0, 1.0);
 							diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
-						} else if ( attributeType == 1 ) {
+						} else {
 							float texCoord = attrValue / valMax;
 							texCoord = clamp(texCoord, 0.0, 1.0);
 							diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
@@ -305,6 +313,9 @@ export default {
 		},
 		updateShader() {
 
+			this.colorAttrMinVal = Number.MAX_VALUE;
+			this.colorAttrMaxVal = - Number.MAX_VALUE;
+
 			this.tiles.activeTiles.forEach( obj => {
 
 				obj.cached.scene.traverse( c => {
@@ -318,13 +329,14 @@ export default {
 
 			if ( this.colorAttrType == "number" ) {
 
+				const dataTexture = this.createDataTexture();
 				this.material.uniforms.attributeType.value = 0;
-				this.material.uniforms.colormap.value = this.createDataTexture();
+				this.material.uniforms.colormap.value = dataTexture;
 				this.material.uniforms.valMin.value = this.colorAttrMinVal;
 				this.material.uniforms.valMax.value = this.colorAttrMaxVal;
 
 				this.highlightMaterial.uniforms.attributeType.value = 0;
-				this.highlightMaterial.uniforms.colormap.value = this.createDataTexture();
+				this.highlightMaterial.uniforms.colormap.value = dataTexture;
 				this.highlightMaterial.uniforms.valMin.value = this.colorAttrMinVal;
 				this.highlightMaterial.uniforms.valMax.value = this.colorAttrMaxVal;
 
@@ -337,6 +349,28 @@ export default {
 
 				this.highlightMaterial.uniforms.colormap.value = dataTexture;
 				this.highlightMaterial.uniforms.attributeType.value = 1;
+				this.highlightMaterial.uniforms.valMax.value = dataTexture.image.width - 1;
+
+			} else if ( this.colorAttrType == "boolean" ) {
+
+				const dataTexture = this.createDataTexture();
+				this.material.uniforms.colormap.value = dataTexture;
+				this.material.uniforms.attributeType.value = 2;
+				this.material.uniforms.valMax.value = 1;
+
+				this.highlightMaterial.uniforms.colormap.value = dataTexture;
+				this.highlightMaterial.uniforms.attributeType.value = 2;
+				this.highlightMaterial.uniforms.valMax.value = 1;
+
+			} else if ( this.colorAttrType == "object" ) {
+
+				const dataTexture = this.createDataTexture();
+				this.material.uniforms.colormap.value = dataTexture;
+				this.material.uniforms.attributeType.value = 3;
+				this.material.uniforms.valMax.value = dataTexture.image.width - 1;
+
+				this.highlightMaterial.uniforms.colormap.value = dataTexture;
+				this.highlightMaterial.uniforms.attributeType.value = 3;
 				this.highlightMaterial.uniforms.valMax.value = dataTexture.image.width - 1;
 
 			}
@@ -455,7 +489,7 @@ export default {
 				this.highlightMaterial.uniforms.valMax.value = parseFloat( val );
 
 			} );
-			fac.addInput( this, "colorAttrName", { options: { rmse: "dak_type", m2pc_error_max: "_m2pc_error_max", t_run: "_t_run" } } ).on( 'change', ( val ) => {
+			fac.addInput( this, "colorAttrName", { options: { rmse: "h_maaiveld", m2pc_error_max: "_m2pc_error_max", t_run: "_t_run" } } ).on( 'change', ( val ) => {
 
 				this.reinitTiles();
 
@@ -609,7 +643,6 @@ export default {
 			const attrs = s.batchTable.getData( 'attributes' );
 			const new_attr_buffer = new Float32Array( batch_ids.count );
 			this.colorAttrType = typeof JSON.parse( attrs[ 0 ] )[ this.colorAttrName ];
-			console.log( this.colorAttrType );
 
 			for ( let i = 0; i < batch_ids.count; i ++ ) {
 
@@ -625,7 +658,10 @@ export default {
 
 					new_attr_buffer[ i ] = attrValue;
 
-				} else if ( this.colorAttrType == "string" ) {
+				} else {
+
+					if ( this.colorAttrType == "object" )
+						attrValue = attrValue.toString();
 
 					if ( this.colorAttrValues[ attrValue ] )
 						this.colorAttrValues[ attrValue ] += 1;
@@ -635,8 +671,11 @@ export default {
 						this.colorAttrValuesKeys.push( attrValue );
 
 					}
-					this.colorAttrValues[ attrValue ] = this.colorAttrValues[ attrValue ] ? this.colorAttrValues[ attrValue ] + 1 : 1;
-					new_attr_buffer[ i ] = this.colorAttrValuesKeys.indexOf( attrValue );
+
+					if ( this.colorAttrType == "string" || this.colorAttrType == "object" )
+						new_attr_buffer[ i ] = this.colorAttrValuesKeys.indexOf( attrValue );
+					else // boolean
+						new_attr_buffer[ i ] = attrValue ? 1 : 0;
 
 				}
 
