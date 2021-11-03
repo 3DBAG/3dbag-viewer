@@ -173,7 +173,9 @@
       class="alert alert-warning"
       role="alert"
     >
-      <b>WARNING: due to an error the <code>pand</code> table for v21.09.8 is currently empty!</b> We'll try to fix this as soon as possible.
+      <b>We fixed the <code>pand</code> table for v21.09.8, and now it contains data.</b>
+      Additionally, we removed the tables with triangulated surfaces, <code>*_tri</code>,
+      to reduce the size of backup. If you really need those tables, let us know.
     </div>
     <div class="table-wrapper">
       <table>
@@ -203,7 +205,7 @@
                 icon="help-circle"
               /></a>
             </td>
-            <td>>70GB</td>
+            <td>35AGB</td>
             <td>{{ $root.$data[ "latest" ] }}</td>
           </tr>
         </tbody>
