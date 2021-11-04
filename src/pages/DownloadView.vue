@@ -173,9 +173,7 @@
       class="alert alert-warning"
       role="alert"
     >
-      <b>We fixed the <code>pand</code> table for v21.09.8 (it was broken at release), and now it contains data.</b>
-      Additionally, we removed the tables with triangulated surfaces, <code>*_tri</code>,
-      to reduce the size of backup. If you really need those tables, let us know.
+      <b>We fixed the <code>pand</code> table for v21.09.8 (it was broken at release), and now it contains the appropriate data.</b>
     </div>
     <div class="table-wrapper">
       <table>
