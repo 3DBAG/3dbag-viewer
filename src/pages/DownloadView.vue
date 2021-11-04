@@ -173,7 +173,7 @@
       class="alert alert-warning"
       role="alert"
     >
-      <b>We fixed the <code>pand</code> table for v21.09.8, and now it contains data.</b>
+      <b>We fixed the <code>pand</code> table for v21.09.8 (it was broken at release), and now it contains data.</b>
       Additionally, we removed the tables with triangulated surfaces, <code>*_tri</code>,
       to reduce the size of backup. If you really need those tables, let us know.
     </div>
@@ -205,7 +205,7 @@
                 icon="help-circle"
               /></a>
             </td>
-            <td>35AGB</td>
+            <td>35GB</td>
             <td>{{ $root.$data[ "latest" ] }}</td>
           </tr>
         </tbody>
