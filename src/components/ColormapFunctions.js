@@ -164,6 +164,7 @@ function getMinMax( attrName, tiles ) {
 	tiles.activeTiles.forEach( obj => {
 
 		const s = obj.cached.scene;
+		var bid_attrs = {};
 
 		s.traverse( c => {
 
@@ -177,7 +178,17 @@ function getMinMax( attrName, tiles ) {
 				for ( let i = 0; i < batch_ids.count; i ++ ) {
 
 					const bid = batch_ids.getX( i );
-					const attrValue = JSON.parse( attrs[ bid ] )[ attrName ];
+					var attrValue = null;
+					if ( ! ( String( bid ) in bid_attrs ) ) {
+
+						attrValue = JSON.parse( attrs[ bid ] )[ attrName ];
+						bid_attrs[ String( bid ) ] = attrValue;
+
+					} else {
+
+						attrValue = bid_attrs[ String( bid ) ];
+
+					}
 
 					if ( attrType == "number" ) {
 
@@ -306,11 +317,22 @@ function setTileAttributes( s, c, colorAttrSettings ) {
 	const attrs = s.batchTable.getData( 'attributes' );
 	const new_attr_buffer = new Float32Array( batch_ids.count );
 	colorAttrSettings[ 'attrType' ] = typeof JSON.parse( attrs[ 0 ] )[ colorAttrSettings[ 'attrName' ] ];
+	var bid_attrs = {};
 
 	for ( let i = 0; i < batch_ids.count; i ++ ) {
 
 		const bid = batch_ids.getX( i );
-		const attrValue = JSON.parse( attrs[ bid ] )[ colorAttrSettings[ 'attrName' ] ];
+		var attrValue = null;
+		if ( ! ( String( bid ) in bid_attrs ) ) {
+
+			attrValue = JSON.parse( attrs[ bid ] )[ colorAttrSettings[ 'attrName' ] ];
+			bid_attrs[ String( bid ) ] = attrValue;
+
+		} else {
+
+			attrValue = bid_attrs[ String( bid ) ];
+
+		}
 
 		if ( colorAttrSettings[ 'attrType' ] == "number" ) {
 
