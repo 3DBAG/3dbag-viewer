@@ -43,7 +43,7 @@ import {
 } from '../terrain-tiles';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import markerSprite from '@/assets/locationmarker.png';
-import { colormaps } from '@/assets/colormaps.js';
+import * as ColormapFunctions from '@/components/ColormapFunctions.js';
 
 const Tweakpane = require( 'tweakpane' );
 const TWEEN = require( '@tweenjs/tween.js' );
@@ -110,7 +110,7 @@ export default {
 
 			if ( enabled ) {
 
-				this.updateShader();
+				ColormapFunctions.updateShader( this.colorAttrSettings, this.tiles, this.material, this.highlightMaterial );
 
 			}
 
@@ -180,12 +180,7 @@ export default {
 
 		this.selectedObject = null;
 
-		this.colorAttrMinVal = Number.MAX_VALUE;
-		this.colorAttrMaxVal = - Number.MAX_VALUE;
-		this.colorAttrName = "h_maaiveld";
-		this.colorAttrType = null;
-		this.colorAttrValues = {};
-		this.colorAttrValuesKeys = []; // since this.colorAttrValues is unordered
+		this.colorAttrSettings = { "minVal": Number.MAX_VALUE, "maxVal": - Number.MAX_VALUE, "minValCustom": null, "maxValCustom": null, "attrName": null, "attrType": null, "cmName": null, "attrValues": {}, attrKeys: [], "enable": this.enableAttributeColoring };
 
 		this.sceneTransform = null;
 
@@ -203,179 +198,7 @@ export default {
 
 	},
 	methods: {
-		createDataTexture() {
 
-			var colormap = colormaps[ "default" ];
-			if ( this.colorAttrType == "number" )
-				colormap = colormaps[ "default" ];
-			else if ( this.colorAttrType == "string" )
-				colormap = colormaps[ "discrete" ];
-			else if ( this.colorAttrType == "boolean" )
-				colormap = colormaps[ "bool" ];
-			else if ( this.colorAttrType == "object" ) // only works with an array
-				colormap = colormaps[ "discrete" ];
-
-			const cm_data = new Uint8Array( 3 * colormap.length );
-			colormap.forEach( ( col, i ) => {
-
-				var r = Math.floor( col.r * 255 );
-				var g = Math.floor( col.g * 255 );
-				var b = Math.floor( col.b * 255 );
-				var stride = i * 3;
-				cm_data[ stride ] = r;
-				cm_data[ stride + 1 ] = g;
-				cm_data[ stride + 2 ] = b;
-
-			} );
-			const cm = new DataTexture( cm_data, colormap.length, 1, RGBFormat );
-			return cm;
-
-		},
-		// Adjusts the three.js standard shader to include batchid highlight
-		batchIdHighlightShaderMixin( shader ) {
-
-			const cm = this.createDataTexture();
-			const newShader = { ...shader };
-			var attrTypeInt = 0;
-			if ( this.colorAttrType == "string" )
-				attrTypeInt = 1;
-			else if ( this.colorAttrType == "boolean" )
-				attrTypeInt = 2;
-			else if ( this.colorAttrType == "object" )
-				attrTypeInt = 3;
-			newShader.uniforms = {
-				valMin: { value: this.colorAttrMinVal },
-				valMax: { value: this.colorAttrMaxVal },
-				enableAttributeColoring: { value: this.enableAttributeColoring },
-				attributeType: { value: attrTypeInt },
-				colormap: { type: "t", value: cm },
-				highlightedBatchId: { value: - 1 },
-				highlightColor: { value: new Color( 0xFFC107 ).convertSRGBToLinear() },
-				...UniformsUtils.clone( shader.uniforms ),
-			};
-			newShader.extensions = {
-				derivatives: true,
-			};
-			newShader.lights = true;
-			newShader.fog = true;
-			newShader.vertexShader =
-				`
-					attribute float _batchid;
-					attribute float attrValue;
-					uniform float valMin;
-					uniform float valMax;
-					uniform float opacity;
-					uniform vec3 diffuse;
-					uniform int enableAttributeColoring;
-					uniform int attributeType;
-					uniform float highlightedBatchId;
-					uniform vec3 highlightColor;
-					uniform sampler2D colormap;
-					varying vec4 diffuseColor_;
-				` +
-				newShader.vertexShader.replace(
-					/#include <uv_vertex>/,
-					`
-					#include <uv_vertex>
-					vec3 diffuse_;
-					if ( enableAttributeColoring != 0 ) {
-						if ( attributeType == 0 ) {
-							float texCoord = (attrValue - valMin)/(valMax - valMin);
-							texCoord = clamp(texCoord, 0.0, 1.0);
-							diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
-						} else {
-							float texCoord = attrValue / valMax;
-							texCoord = clamp(texCoord, 0.0, 1.0);
-							diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
-						}
-					} else {
-						diffuse_ = diffuse;
-					}
-					diffuseColor_ =
-						_batchid == highlightedBatchId ?
-						vec4( highlightColor, opacity ) :
-						vec4( diffuse_, opacity );
-					`
-				);
-			newShader.fragmentShader =
-				`
-					varying vec4 diffuseColor_;
-					
-				` +
-				newShader.fragmentShader.replace(
-					/vec4 diffuseColor = vec4\( diffuse, opacity \);/,
-					`
-					vec4 diffuseColor = diffuseColor_;
-					`
-				);
-			return newShader;
-
-		},
-		updateShader() {
-
-			this.colorAttrMinVal = Number.MAX_VALUE;
-			this.colorAttrMaxVal = - Number.MAX_VALUE;
-
-			this.tiles.activeTiles.forEach( obj => {
-
-				obj.cached.scene.traverse( c => {
-
-					if ( c.material && this.enableAttributeColoring )
-						this.setTileAttributes( obj.cached.scene, c );
-
-				} );
-
-			} );
-
-			if ( this.colorAttrType == "number" ) {
-
-				const dataTexture = this.createDataTexture();
-				this.material.uniforms.attributeType.value = 0;
-				this.material.uniforms.colormap.value = dataTexture;
-				this.material.uniforms.valMin.value = this.colorAttrMinVal;
-				this.material.uniforms.valMax.value = this.colorAttrMaxVal;
-
-				this.highlightMaterial.uniforms.attributeType.value = 0;
-				this.highlightMaterial.uniforms.colormap.value = dataTexture;
-				this.highlightMaterial.uniforms.valMin.value = this.colorAttrMinVal;
-				this.highlightMaterial.uniforms.valMax.value = this.colorAttrMaxVal;
-
-			} else if ( this.colorAttrType == "string" ) {
-
-				const dataTexture = this.createDataTexture();
-				this.material.uniforms.colormap.value = dataTexture;
-				this.material.uniforms.attributeType.value = 1;
-				this.material.uniforms.valMax.value = dataTexture.image.width - 1;
-
-				this.highlightMaterial.uniforms.colormap.value = dataTexture;
-				this.highlightMaterial.uniforms.attributeType.value = 1;
-				this.highlightMaterial.uniforms.valMax.value = dataTexture.image.width - 1;
-
-			} else if ( this.colorAttrType == "boolean" ) {
-
-				const dataTexture = this.createDataTexture();
-				this.material.uniforms.colormap.value = dataTexture;
-				this.material.uniforms.attributeType.value = 2;
-				this.material.uniforms.valMax.value = 1;
-
-				this.highlightMaterial.uniforms.colormap.value = dataTexture;
-				this.highlightMaterial.uniforms.attributeType.value = 2;
-				this.highlightMaterial.uniforms.valMax.value = 1;
-
-			} else if ( this.colorAttrType == "object" ) {
-
-				const dataTexture = this.createDataTexture();
-				this.material.uniforms.colormap.value = dataTexture;
-				this.material.uniforms.attributeType.value = 3;
-				this.material.uniforms.valMax.value = dataTexture.image.width - 1;
-
-				this.highlightMaterial.uniforms.colormap.value = dataTexture;
-				this.highlightMaterial.uniforms.attributeType.value = 3;
-				this.highlightMaterial.uniforms.valMax.value = dataTexture.image.width - 1;
-
-			}
-
-		},
 		initTweakPane() {
 
 			var el = document.getElementById( "debug-panel" );
@@ -477,23 +300,6 @@ export default {
 
 			} );
 			fac.addInput( this, "enableAttributeColoring" );
-			fac.addInput( this, "colorAttrMinVal" ).on( 'change', ( val ) => {
-
-				this.material.uniforms.valMin.value = parseFloat( val );
-				this.highlightMaterial.uniforms.valMin.value = parseFloat( val );
-
-			} );
-			fac.addInput( this, "colorAttrMaxVal" ).on( 'change', ( val ) => {
-
-				this.material.uniforms.valMax.value = parseFloat( val );
-				this.highlightMaterial.uniforms.valMax.value = parseFloat( val );
-
-			} );
-			fac.addInput( this, "colorAttrName", { options: { rmse: "h_maaiveld", m2pc_error_max: "_m2pc_error_max", t_run: "_t_run" } } ).on( 'change', ( val ) => {
-
-				this.reinitTiles();
-
-			} );
 
 			// stats
 			const f7 = this.pane.addFolder( {
@@ -522,6 +328,18 @@ export default {
 				} );
 
 			this.pane.on( "change", ( val ) => this.needsRerender = 1 );
+
+		},
+		getColorpickerData() {
+
+			const attributes = ColormapFunctions.getAvailableAttributes( this.tiles );
+			this.$root.$emit( 'colorpickerData', [ this.colorAttrSettings, attributes ] );
+
+		},
+		getMinMax( attrName ) {
+
+			const values = ColormapFunctions.getMinMax( attrName, this.tiles );
+			this.$root.$emit( 'minMaxData', values );
 
 		},
 		setCameraPosFromRoute( q ) {
@@ -635,52 +453,6 @@ export default {
 			this.scene.add( sprite );
 
 			this.needsRerender = 1;
-
-		},
-		setTileAttributes( s, c ) {
-
-			const batch_ids = c.geometry.getAttribute( '_batchid' );
-			const attrs = s.batchTable.getData( 'attributes' );
-			const new_attr_buffer = new Float32Array( batch_ids.count );
-			this.colorAttrType = typeof JSON.parse( attrs[ 0 ] )[ this.colorAttrName ];
-
-			for ( let i = 0; i < batch_ids.count; i ++ ) {
-
-				const bid = batch_ids.getX( i );
-				const attrValue = JSON.parse( attrs[ bid ] )[ this.colorAttrName ];
-
-				if ( this.colorAttrType == "number" ) {
-
-					if ( attrValue > this.colorAttrMaxVal )
-						this.colorAttrMaxVal = attrValue;
-					else if ( attrValue < this.colorAttrMinVal )
-						this.colorAttrMinVal = attrValue;
-
-					new_attr_buffer[ i ] = attrValue;
-
-				} else {
-
-					if ( this.colorAttrType == "object" )
-						attrValue = attrValue.toString();
-
-					if ( this.colorAttrValues[ attrValue ] )
-						this.colorAttrValues[ attrValue ] += 1;
-					else {
-
-						this.colorAttrValues[ attrValue ] = 1;
-						this.colorAttrValuesKeys.push( attrValue );
-
-					}
-
-					if ( this.colorAttrType == "string" || this.colorAttrType == "object" )
-						new_attr_buffer[ i ] = this.colorAttrValuesKeys.indexOf( attrValue );
-					else // boolean
-						new_attr_buffer[ i ] = attrValue ? 1 : 0;
-
-				}
-
-			}
-			c.geometry.setAttribute( "attrValue", new Float32BufferAttribute( new_attr_buffer, 1 ) );
 
 		},
 		pointCameraToNorth() {
@@ -817,7 +589,7 @@ export default {
 
 						if ( this.enableAttributeColoring ) {
 
-							this.setTileAttributes( s, c );
+							ColormapFunctions.setTileAttributes( s, c, this.colorAttrSettings );
 
 						}
 
@@ -867,10 +639,10 @@ export default {
 			this.scene.background = new Color( "#000000" );
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
 
-			this.material = new ShaderMaterial( this.batchIdHighlightShaderMixin( ShaderLib.lambert ) );
+			this.material = new ShaderMaterial( ColormapFunctions.batchIdHighlightShaderMixin( ShaderLib.lambert, this.colorAttrSettings ) );
 			this.material.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
 
-			this.highlightMaterial = new ShaderMaterial( this.batchIdHighlightShaderMixin( ShaderLib.lambert ) );
+			this.highlightMaterial = new ShaderMaterial( ColormapFunctions.batchIdHighlightShaderMixin( ShaderLib.lambert, this.colorAttrSettings ) );
 			this.highlightMaterial.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
 
 			let canvas = document.getElementById( "canvas" );

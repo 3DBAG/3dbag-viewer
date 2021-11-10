@@ -22,6 +22,12 @@
         :rotation="camRotationZ"
         @orient-north="orientNorth"
       />
+      <ColormapPicker
+        ref="ColormapPicker"
+        @get-colorpicker-data="getColorpickerData"
+		@color-by-attribute="colorByAttribute"
+		@get-min-max="getMinMax"
+      />
       <transition name="fade">
         <div
           v-if="showLocationBox"
@@ -78,6 +84,7 @@ import DropDownSelector from '@/components/DropDownSelector.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
 import Compass from '@/components/Compass.vue';
+import ColormapPicker from '@/components/ColormapPicker.vue';
 
 export default {
 
@@ -88,7 +95,8 @@ export default {
 		DropDownSelector,
 		SearchBar,
 		ThreeViewer,
-		Compass
+		Compass,
+		ColormapPicker
 	},
 
 	data() {
@@ -330,6 +338,24 @@ export default {
 		orientNorth: function ( value ) {
 
 			this.$refs.threeviewer.pointCameraToNorth();
+
+		},
+
+		getColorpickerData: function ( value ) {
+
+			this.$refs.threeviewer.getColorpickerData();
+
+		},
+
+		colorByAttribute: function ( params ) {
+
+			this.$refs.threeviewer.colorByAttribute( params );
+
+		},
+
+		getMinMax: function ( attrName ) {
+
+			this.$refs.threeviewer.getMinMax( attrName );
 
 		},
 
