@@ -27,7 +27,7 @@
         @get-colorpicker-data="getColorpickerData"
         @color-by-attribute="colorByAttribute"
         @get-min-max="getMinMax"
-		@toggle-coloring="toggleColoring"
+        @toggle-coloring="toggleColoring"
       />
       <transition name="fade">
         <div

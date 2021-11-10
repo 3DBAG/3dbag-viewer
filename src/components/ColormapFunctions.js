@@ -74,15 +74,17 @@ function batchIdHighlightShaderMixin( shader, colorAttrSettings ) {
 			`
 			#include <uv_vertex>
 			vec3 diffuse_;
+			float opacity_ = opacity;
 			if ( enableAttributeColoring != 0 ) {
-				if ( attributeType == 0 ) {
+				if ( attributeType == 0 && attrValue >= valMin && attrValue <= valMax ) {
 					float texCoord = (attrValue - valMin)/(valMax - valMin);
-					texCoord = clamp(texCoord, 0.0, 1.0);
+					diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
+				} else if ( attributeType != 0 && attrValue >= 0.0 ) {
+					float texCoord = attrValue / valMax;
 					diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
 				} else {
-					float texCoord = attrValue / valMax;
-					texCoord = clamp(texCoord, 0.0, 1.0);
-					diffuse_ = texture2D( colormap, vec2(texCoord,0) ).xyz;
+					diffuse_ = diffuse;
+					opacity_ = 0.0;
 				}
 			} else {
 				diffuse_ = diffuse;
@@ -90,7 +92,7 @@ function batchIdHighlightShaderMixin( shader, colorAttrSettings ) {
 			diffuseColor_ =
 				_batchid == highlightedBatchId ?
 				vec4( highlightColor, opacity ) :
-				vec4( diffuse_, opacity );
+				vec4( diffuse_, opacity_ );
 			`
 		);
 	newShader.fragmentShader =
@@ -110,6 +112,17 @@ function batchIdHighlightShaderMixin( shader, colorAttrSettings ) {
 
 function colorByAttribute( colorAttrSettings, tiles, material, highlightMaterial ) {
 
+	if ( colorAttrSettings[ "transparent" ] ) {
+
+		material.transparent = true;
+		highlightMaterial.transparent = true;
+
+	} else {
+
+		material.transparent = false;
+		highlightMaterial.transparent = false;
+
+	}
 	material.uniforms.enableAttributeColoring.value = true;
 	highlightMaterial.uniforms.enableAttributeColoring.value = true;
 
@@ -225,14 +238,33 @@ function updateShader( colorAttrSettings, tiles, material, highlightMaterial ) {
 	if ( colorAttrSettings[ 'attrType' ] == "number" ) {
 
 		material.uniforms.attributeType.value = 0;
-		material.uniforms.colormap.value = dataTexture;
-		material.uniforms.valMin.value = colorAttrSettings[ 'minVal' ];
-		material.uniforms.valMax.value = colorAttrSettings[ 'maxVal' ];
-
 		highlightMaterial.uniforms.attributeType.value = 0;
+		material.uniforms.colormap.value = dataTexture;
 		highlightMaterial.uniforms.colormap.value = dataTexture;
-		highlightMaterial.uniforms.valMin.value = colorAttrSettings[ 'minVal' ];
-		highlightMaterial.uniforms.valMax.value = colorAttrSettings[ 'maxVal' ];
+
+		if ( colorAttrSettings[ 'minValSelected' ] ) {
+
+			material.uniforms.valMin.value = colorAttrSettings[ 'minValSelected' ];
+			highlightMaterial.uniforms.valMin.value = colorAttrSettings[ 'minValSelected' ];
+
+		} else {
+
+			material.uniforms.valMin.value = colorAttrSettings[ 'minVal' ];
+			highlightMaterial.uniforms.valMin.value = colorAttrSettings[ 'minVal' ];
+
+		}
+
+		if ( colorAttrSettings[ 'maxValSelected' ] ) {
+
+			material.uniforms.valMax.value = colorAttrSettings[ 'maxValSelected' ];
+			highlightMaterial.uniforms.valMax.value = colorAttrSettings[ 'maxValSelected' ];
+
+		} else {
+
+			material.uniforms.valMax.value = colorAttrSettings[ 'maxVal' ];
+			highlightMaterial.uniforms.valMax.value = colorAttrSettings[ 'maxVal' ];
+
+		}
 
 	} else if ( colorAttrSettings[ 'attrType' ] == "string" ) {
 
@@ -303,10 +335,18 @@ function setTileAttributes( s, c, colorAttrSettings ) {
 
 			}
 
-			if ( colorAttrSettings[ 'attrType' ] == "string" || colorAttrSettings[ 'attrType' ] == "object" )
-				new_attr_buffer[ i ] = colorAttrSettings[ 'attrKeys' ].indexOf( attrValue );
-			else // boolean
-				new_attr_buffer[ i ] = attrValue ? 1 : 0;
+			if ( ! colorAttrSettings[ 'exclude' ].includes( attrValue ) ) {
+
+				if ( colorAttrSettings[ 'attrType' ] == "string" || colorAttrSettings[ 'attrType' ] == "object" )
+					new_attr_buffer[ i ] = colorAttrSettings[ 'attrKeys' ].indexOf( attrValue );
+				else // boolean
+					new_attr_buffer[ i ] = attrValue ? 1 : 0;
+
+			} else {
+
+				new_attr_buffer[ i ] = - 1;
+
+			}
 
 		}
 
