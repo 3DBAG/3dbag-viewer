@@ -22,8 +22,6 @@ function createDataTexture( cmName, n ) {
 
 	}
 
-	console.log( cm_data );
-
 	const cm = new DataTexture( cm_data, n, 1, RGBFormat );
 	return cm;
 
