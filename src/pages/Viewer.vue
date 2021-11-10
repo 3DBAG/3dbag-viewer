@@ -25,8 +25,9 @@
       <ColormapPicker
         ref="ColormapPicker"
         @get-colorpicker-data="getColorpickerData"
-		@color-by-attribute="colorByAttribute"
-		@get-min-max="getMinMax"
+        @color-by-attribute="colorByAttribute"
+        @get-min-max="getMinMax"
+		@toggle-coloring="toggleColoring"
       />
       <transition name="fade">
         <div
@@ -356,6 +357,12 @@ export default {
 		getMinMax: function ( attrName ) {
 
 			this.$refs.threeviewer.getMinMax( attrName );
+
+		},
+
+		toggleColoring: function () {
+
+			this.$refs.threeviewer.toggleColoring();
 
 		},
 

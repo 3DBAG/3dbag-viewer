@@ -180,7 +180,7 @@ export default {
 
 		this.selectedObject = null;
 
-		this.colorAttrSettings = { "minVal": Number.MAX_VALUE, "maxVal": - Number.MAX_VALUE, "minValCustom": null, "maxValCustom": null, "attrName": null, "attrType": null, "cmName": null, "attrValues": {}, attrKeys: [], "enable": this.enableAttributeColoring };
+		this.colorAttrSettings = { "minVal": Number.MAX_VALUE, "maxVal": - Number.MAX_VALUE, "minValSelected": null, "maxValSelected": null, "attrName": null, "attrType": null, "cmName": null, "attrValues": {}, attrKeys: [], "enable": this.enableAttributeColoring };
 
 		this.sceneTransform = null;
 
@@ -332,14 +332,39 @@ export default {
 		},
 		getColorpickerData() {
 
-			const attributes = ColormapFunctions.getAvailableAttributes( this.tiles );
-			this.$root.$emit( 'colorpickerData', [ this.colorAttrSettings, attributes ] );
+			var attributes = null;
+			const startTime = new Date().getTime();
+			var interval = setInterval( function () {
+
+				if ( attributes || new Date().getTime() - startTime > 60000 ) {
+
+					clearInterval( interval );
+					this.$root.$emit( 'colorpickerData', [ this.colorAttrSettings, attributes ] );
+					return;
+
+				}
+				attributes = ColormapFunctions.getAvailableAttributes( this.tiles );
+
+			}.bind( this ), 200 );
+
 
 		},
 		getMinMax( attrName ) {
 
 			const values = ColormapFunctions.getMinMax( attrName, this.tiles );
 			this.$root.$emit( 'minMaxData', values );
+
+		},
+		colorByAttribute( params ) {
+
+			ColormapFunctions.colorByAttribute( params, this.tiles, this.material, this.highlightMaterial );
+			this.needsRerender += 1;
+
+		},
+		toggleColoring() {
+
+			ColormapFunctions.toggleColoring( this.material, this.highlightMaterial );
+			this.needsRerender += 1;
 
 		},
 		setCameraPosFromRoute( q ) {

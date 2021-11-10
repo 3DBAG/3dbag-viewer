@@ -108,19 +108,26 @@ function batchIdHighlightShaderMixin( shader, colorAttrSettings ) {
 
 }
 
-function colorByAttribute( params ) {
+function colorByAttribute( colorAttrSettings, tiles, material, highlightMaterial ) {
 
-	console.log( params );
-	colorAttrSettings[ 'attrName' ] = params[ 'attrName' ];
-	colorAttrSettings[ 'cmName' ] = params[ 'cmName' ];
-	colorAttrSettings[ 'minVal' ] = params[ 'minVal' ];
-	colorAttrSettings[ 'maxVal' ] = params[ 'maxVal' ];
-	// set params
-	this.enableAttributeColoring = true;
+	material.uniforms.enableAttributeColoring.value = true;
+	highlightMaterial.uniforms.enableAttributeColoring.value = true;
+
+	updateShader( colorAttrSettings, tiles, material, highlightMaterial );
+
+}
+
+function toggleColoring( material, highlightMaterial ) {
+
+	material.uniforms.enableAttributeColoring.value = ! material.uniforms.enableAttributeColoring.value;
+	highlightMaterial.uniforms.enableAttributeColoring.value = ! highlightMaterial.uniforms.enableAttributeColoring.value;
 
 }
 
 function getAvailableAttributes( tiles ) {
+
+	if ( ! tiles )
+		return null;
 
 	var tile = tiles.activeTiles.values().next().value;
 	var attributes = JSON.parse( tile.cached.scene.batchTable.getData( 'attributes' )[ 0 ] );
@@ -191,7 +198,7 @@ function getMinMax( attrName, tiles ) {
 
 	} );
 
-	return { "minVal": minVal, "maxVal": maxVal };
+	return { "attrName": attrName, "minVal": minVal, "maxVal": maxVal, "values": attrValues, "keys": attrKeys };
 
 }
 
@@ -308,4 +315,4 @@ function setTileAttributes( s, c, colorAttrSettings ) {
 
 }
 
-export { createDataTexture, batchIdHighlightShaderMixin, colorByAttribute, getAvailableAttributes, getMinMax, updateShader, setTileAttributes };
+export { createDataTexture, batchIdHighlightShaderMixin, colorByAttribute, getAvailableAttributes, getMinMax, updateShader, setTileAttributes, toggleColoring };
