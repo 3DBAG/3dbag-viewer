@@ -102,18 +102,6 @@ export default {
 
 			this.setCameraPosFromRoute( to.query );
 
-		},
-		enableAttributeColoring: function ( enabled ) {
-
-			this.material.uniforms.enableAttributeColoring.value = enabled;
-			this.highlightMaterial.uniforms.enableAttributeColoring.value = enabled;
-
-			if ( enabled ) {
-
-				ColormapFunctions.updateShader( this.colorAttrSettings, this.tiles, this.material, this.highlightMaterial );
-
-			}
-
 		}
 	},
 	beforeCreate() {
@@ -358,12 +346,15 @@ export default {
 		colorByAttribute( params ) {
 
 			ColormapFunctions.colorByAttribute( params, this.tiles, this.material, this.highlightMaterial );
+			this.enableAttributeColoring = true;
+			this.colorAttrSettings = params;
 			this.needsRerender += 1;
 
 		},
 		toggleColoring() {
 
 			ColormapFunctions.toggleColoring( this.material, this.highlightMaterial );
+			this.enableAttributeColoring = ! this.enableAttributeColoring;
 			this.needsRerender += 1;
 
 		},
