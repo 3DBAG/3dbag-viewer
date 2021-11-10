@@ -16,11 +16,13 @@ function createDataTexture( cmName, n ) {
 
 		const rgb = evaluate_cmap( i / n, cmName, false );
 		const stride = i * 3;
-		cm_data[ stride ] = Math.floor( rgb[ 0 ] * 255 );
-		cm_data[ stride + 1 ] = Math.floor( rgb[ 1 ] * 255 );
-		cm_data[ stride + 2 ] = Math.floor( rgb[ 2 ] * 255 );
+		cm_data[ stride ] = rgb[ 0 ];
+		cm_data[ stride + 1 ] = rgb[ 1 ];
+		cm_data[ stride + 2 ] = rgb[ 2 ];
 
 	}
+
+	console.log( cm_data );
 
 	const cm = new DataTexture( cm_data, n, 1, RGBFormat );
 	return cm;
@@ -132,6 +134,7 @@ function colorByAttribute( colorAttrSettings, tiles, material, highlightMaterial
 
 function toggleColoring( material, highlightMaterial ) {
 
+	createDataTexture( "viridis", 100 );
 	material.uniforms.enableAttributeColoring.value = ! material.uniforms.enableAttributeColoring.value;
 	highlightMaterial.uniforms.enableAttributeColoring.value = ! highlightMaterial.uniforms.enableAttributeColoring.value;
 
