@@ -188,7 +188,7 @@ class BaseTileScheme {
 		const material = new MeshBasicMaterial( { color: 0xffffff } );
 		material.depthWrite = false;
 		const plane = new Mesh( geometry, material );
-		plane.position.setComponent( 2, - 1 );
+		plane.position.setComponent( 2, - 2 );
 		plane.name = "backgroundPlane";
 		return plane;
 
