@@ -88,7 +88,15 @@ export class TilesRenderer {
 
 		}
 
-		for ( const [ tid, tile ] of Object.entries( this.tilesInView ) ) {
+		var tidsSorted = Object.keys( this.tilesInView ).sort( function ( a, b ) {
+
+			return b.split( '-' )[ 0 ] - a.split( '-' )[ 0 ];
+
+		} );
+
+		for ( const tid of tidsSorted ) {
+
+			const tile = this.tilesInView[ tid ];
 
 			if ( ! Object.keys( this.activeTiles ).includes( tid ) ) {
 
@@ -200,6 +208,8 @@ export class TilesRenderer {
 	}
 
 	cleanTileLevels() {
+
+		console.log( "ja" );
 
 		this.needsTileLevelClean = false;
 
