@@ -206,8 +206,8 @@ export default {
 		this.show3DTiles = true;
 
 		this.fog = null;
-		this.enableFog = false;
-		this.fogDensity = 0.0004;
+		this.enableFog = true;
+		this.fogDensity = 0.0001;
 		this.fogColor = '#daf1ff';
 
 		this.errorTarget = 0;
@@ -629,6 +629,7 @@ export default {
 			this.scene = new Scene();
 			this.scene.background = new Color( this.fogColor );
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
+			this.scene.fog = this.fog;
 
 			this.material = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
 			this.material.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
