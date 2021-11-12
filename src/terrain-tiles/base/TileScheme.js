@@ -4,7 +4,10 @@ import {
 	Raycaster,
 	Frustum,
 	Matrix4,
-	Sphere
+	Sphere,
+	MeshBasicMaterial,
+	Mesh,
+	PlaneBufferGeometry
 } from 'three';
 
 class Tile {
@@ -14,12 +17,7 @@ class Tile {
 		this.tileMatrix = tileMatrix;
 		this.col = col;
 		this.row = row;
-
-	}
-
-	getId() {
-
-		return `${this.tileMatrix.level}-${this.row}-${this.col}`;
+		this.id = `${this.tileMatrix.level}-${this.row}-${this.col}`;
 
 	}
 
@@ -60,15 +58,22 @@ class Tile {
 		// Calculate tile bounds and center
 		var upperLeft = new Vector3();
 		upperLeft.x = this.tileMatrix.minX + this.col * this.tileMatrix.tileSpanX - transform.x;
-		upperLeft.y = 0;
-		upperLeft.z = - ( this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY - transform.y );
+		upperLeft.y = this.tileMatrix.maxY - this.row * this.tileMatrix.tileSpanY - transform.y;
+		upperLeft.z = 0;
 
-		var upperRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, 0, upperLeft.z );
-		var lowerLeft = new Vector3( upperLeft.x, 0, upperLeft.z + this.tileMatrix.tileSpanY );
-		var lowerRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, 0, upperLeft.z + this.tileMatrix.tileSpanY );
-		var centre = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX / 2, 0, upperLeft.z + this.tileMatrix.tileSpanY / 2 );
+		var upperRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, upperLeft.y, 0 );
+		var lowerLeft = new Vector3( upperLeft.x, upperLeft.y - this.tileMatrix.tileSpanY, 0 );
+		var lowerRight = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX, upperLeft.y - this.tileMatrix.tileSpanY, 0 );
+		var centre = new Vector3( upperLeft.x + this.tileMatrix.tileSpanX / 2, upperLeft.y + this.tileMatrix.tileSpanY / 2, 0 );
 
 		return [ centre, lowerLeft, upperRight, upperLeft, lowerRight ];
+
+	}
+
+	getWkt() {
+
+		var points = this.getExtentPoints( new Vector2( 0, 0 ) );
+		return `POLYGON ( ( ${points[ 1 ].x} ${points[ 1 ].y}, ${points[ 3 ].x} ${points[ 3 ].y}, ${points[ 2 ].x} ${points[ 2 ].y}, ${points[ 4 ].x} ${points[ 4 ].y}, ${points[ 1 ].x} ${points[ 1 ].y} ) ) \n`;
 
 	}
 
@@ -97,6 +102,14 @@ class Tile {
 		const sphere = this.getBoundingSphere( transform );
 
 		return frustum.intersectsSphere( sphere );
+
+	}
+
+	withinMatrix() {
+
+		const width = parseInt( this.tileMatrix.matrixWidth );
+		const height = parseInt( this.tileMatrix.matrixHeight );
+		return this.col >= 0 && this.col < width && this.row >= 0 && this.row < height;
 
 	}
 
@@ -165,40 +178,60 @@ class BaseTileScheme {
 
 	}
 
-	getTilesInView( camera, resFactor, transform ) {
+	createBackgroundPlane() {
+
+		const tileSpanX = this.tileMatrixSet[ 0 ].tileSpanX;
+		const tileSpanY = this.tileMatrixSet[ 0 ].tileSpanY;
+
+		const geometry = new PlaneBufferGeometry( tileSpanX, tileSpanY );
+		const material = new MeshBasicMaterial( { color: 0xffffff } );
+		material.depthWrite = false;
+		const plane = new Mesh( geometry, material );
+		plane.position.setComponent( 2, - 2 );
+		plane.name = "backgroundPlane";
+		return plane;
+
+	}
+
+	getTilesInView( camera, controls, resFactor, transform ) {
 
 		if ( this.tileMatrixSet.length == 0 ) {
 
-			return [];
+			return { "level": undefined, "tiles": [] };
 
 		}
 
+		var raycastY = 0 - ( controls.getPolarAngle() / ( Math.PI / 2 ) * 0.25 );
 		const raycaster = new Raycaster();
-		raycaster.setFromCamera( { x: 0, y: 0 }, camera );
+		raycaster.setFromCamera( { x: 0, y: raycastY }, camera );
 
-		let position = new Vector3();
+		const dist = camera.position.distanceTo( controls.target );
+		var tileMatrix = this.getTileMatrix( dist * resFactor );
+
+		var position = new Vector3();
 		raycaster.ray.intersectPlane( new Plane( new Vector3( 0, 1, 0 ), 0 ), position );
+		const tilePosition = position.clone();
+		tilePosition.x = position.x + transform.x;
+		tilePosition.y = - position.z + transform.y;
 
-		const dist = camera.position.distanceTo( position );
+		const centerTile = tileMatrix.getTileAt( tilePosition );
 
-		position.x = position.x + transform.x;
-		position.y = - position.z + transform.y;
+		position.set( position.x + transform.x, - position.z + transform.y, position.y + transform.z );
 
-		const tileMatrix = this.getTileMatrix( dist * resFactor );
-
-		const centerTile = tileMatrix.getTileAt( position );
-
-		const tiles = this.growRegion( centerTile, camera, transform );
+		const distThreshold = centerTile.tileMatrix.tileSpanX * 10;
+		const tiles = this.growRegion( centerTile, camera, transform, position, distThreshold );
 
 		return tiles;
 
 	}
 
-	growRegion( centerTile, camera, transform ) {
+	growRegion( centerTile, camera, transform, cameraCenter, distThreshold ) {
 
-		let visited = new Set( centerTile.getId() );
+		let visited = new Set( centerTile.id );
 		let queue = [ centerTile ];
-		let tilesInView = [ centerTile ];
+		let tilesInView = {};
+		if ( centerTile.withinMatrix )
+			tilesInView[ centerTile.id ] = centerTile;
 
 		let frustum = new Frustum();
 		let projScreenMatrix = new Matrix4();
@@ -212,21 +245,37 @@ class BaseTileScheme {
 			const tile = queue.pop();
 			var neighbours = tile.getNeighbours();
 
-			for ( const n of neighbours ) {
+			for ( var n of neighbours ) {
 
 				// Continue if tile already visited
-				if ( visited.has( n.getId() ) ) {
+				if ( visited.has( n.id ) ) {
 
 					continue;
 
 				}
 
-				visited.add( n.getId() );
+				visited.add( n.id );
 
-				if ( n.inFrustum( frustum, transform ) ) {
+				const dist = cameraCenter.distanceTo( n.getCenterPosition() );
+
+				if ( dist < distThreshold ) {
 
 					queue.push( n );
-					tilesInView.push( n );
+					if ( n.withinMatrix() )
+						tilesInView[ n.id ] = n;
+
+				} else if ( dist < distThreshold * 3 ) {
+
+					if ( n.tileMatrix.level == centerTile.tileMatrix.level && n.tileMatrix.level >= 2 ) {
+
+						const lowerTileLevel = this.tileMatrixSet[ n.tileMatrix.level - 2 ];
+						n = new Tile( lowerTileLevel, Math.floor( n.col / 4 ), Math.floor( n.row / 4 ) );
+
+					}
+					queue.push( n );
+					visited.add( n.id );
+					if ( n.withinMatrix() )
+						tilesInView[ n.id ] = n;
 
 				}
 
@@ -243,7 +292,7 @@ class BaseTileScheme {
 
 		}
 
-		return ( tilesInView );
+		return ( { "level": centerTile.tileMatrix.level, "tiles": tilesInView } );
 
 	}
 

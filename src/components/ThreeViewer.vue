@@ -80,7 +80,8 @@ export default {
 
 		return {
 
-			enableAttributeColoring: false
+			enableAttributeColoring: false,
+			animationStarted: false
 
 		};
 
@@ -102,6 +103,14 @@ export default {
 
 			this.setCameraPosFromRoute( to.query );
 
+		},
+		animationStarted: function ( val ) {
+
+			if ( val )
+				this.controls.enabled = false;
+			else
+				this.controls.enabled = true;
+
 		}
 	},
 	beforeCreate() {
@@ -121,6 +130,8 @@ export default {
 		this.box = null;
 
 		this.tiles = null;
+		this.tilesTime = 0;
+		this.terrainTilesTime = 0;
 
 		this.needsRerender = 0;
 
@@ -153,9 +164,9 @@ export default {
 		this.show3DTiles = true;
 
 		this.fog = null;
-		this.enableFog = false;
-		this.fogDensity = 0.0004;
-		this.fogColor = '#eeeeee';
+		this.enableFog = true;
+		this.fogDensity = 0.0001;
+		this.fogColor = '#daf1ff';
 
 		this.errorTarget = 0;
 		this.errorThreshold = 60;
@@ -493,6 +504,7 @@ export default {
 			}
 
 			requestAnimationFrame( animate );
+			this.animationStarted = true;
 
 			new TWEEN.Tween( oldPos )
 				.to( newPos, duration )
@@ -504,6 +516,11 @@ export default {
 					this.camera.lookAt( this.controls.target );
 
 					this.needsRerender = 1;
+
+				} )
+				.onComplete( () => {
+
+					this.animationStarted = false;
 
 				} )
 				.start();
@@ -652,8 +669,9 @@ export default {
 		initScene() {
 
 			this.scene = new Scene();
-			this.scene.background = new Color( "#000000" );
+			this.scene.background = new Color( this.fogColor );
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
+			this.scene.fog = this.fog;
 
 			this.material = new ShaderMaterial( ColormapFunctions.batchIdHighlightShaderMixin( ShaderLib.lambert, this.colorAttrSettings ) );
 			this.material.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
@@ -697,7 +715,10 @@ export default {
 			this.controls.dampingFactor = 0.15;
 			this.controls.minDistance = 20;
 			this.controls.maxDistance = 150000;
-			this.controls.maxPolarAngle = 0.8;
+			this.closeMaxAngle = Math.PI / 2 - 0.0025;
+			this.farMaxAngle = 1.2;
+			this.angleDistThreshold = 750;
+			this.setControlsPolarAngle();
 			this.controls.mouseButtons = {
 				LEFT: MOUSE.PAN,
 				MIDDLE: MOUSE.DOLLY,
@@ -709,6 +730,7 @@ export default {
 			};
 			this.controls.addEventListener( "change", () => this.needsRerender = 1 );
 			this.controls.addEventListener( "change", () => this.$emit( 'cam-rotation-z', this.camera.rotation.z ) );
+			this.controls.addEventListener( "change", () => this.setControlsPolarAngle() );
 			this.controls.addEventListener( "end", this.setRouteFromCameraPos );
 
 			this.renderer.domElement.addEventListener( 'pointermove', this.onPointerMove, false );
@@ -753,6 +775,46 @@ export default {
 			this.renderScene();
 
 			window.addEventListener( 'resize', this.onWindowResize, false );
+
+		},
+		setControlsPolarAngle() {
+
+			const dist = this.controls.getDistance();
+
+			if ( ! this.animationStarted && this.controls.maxPolarAngle > this.farMaxAngle && dist > this.angleDistThreshold ) {
+
+				function animate( time ) {
+
+					requestAnimationFrame( animate );
+					TWEEN.update( time );
+
+				}
+				requestAnimationFrame( animate );
+				this.animationStarted = true;
+				var angle = { x: this.controls.maxPolarAngle };
+
+				new TWEEN.Tween( angle )
+					.to( { x: this.farMaxAngle }, 500 )
+					.easing( TWEEN.Easing.Quadratic.Out )
+					.onUpdate( () => {
+
+						this.controls.maxPolarAngle = angle.x;
+
+						this.needsRerender = 1;
+
+					} )
+					.onComplete( () => {
+
+						this.animationStarted = false;
+
+					} )
+					.start();
+
+			} else if ( dist <= this.angleDistThreshold ) {
+
+				this.controls.maxPolarAngle = this.closeMaxAngle;
+
+			}
 
 		},
 		onWindowResize() {
@@ -1032,10 +1094,16 @@ export default {
 				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
 
 				const camdist = this.camera.position.distanceToSquared( this.controls.target );
+				const time = new Date().getTime();
 
 				if ( camdist < 1750 * 1750 ) {
 
-					this.tiles.update();
+					if ( time - this.tilesTime > 200 ) {
+
+						this.tilesTime = time;
+						this.tiles.update();
+
+					}
 
 					if ( ! this.show3DTiles ) {
 
@@ -1057,9 +1125,10 @@ export default {
 
 				if ( this.sceneTransform ) {
 
-					if ( this.showTerrain ) {
+					if ( this.showTerrain && time - this.terrainTilesTime > 500 ) {
 
-						this.terrainTiles.update( this.sceneTransform, this.camera );
+						this.terrainTilesTime = time;
+						this.terrainTiles.update( this.sceneTransform, this.camera, this.controls );
 
 					}
 

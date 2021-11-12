@@ -13,3 +13,4 @@ rsync -rzhP --delete --exclude=".*" . godzilla:/var/www/3dbag-viewer-dev
 ssh godzilla "chgrp staff3d -R /var/www/3dbag-viewer-dev"
 
 cd -
+
