@@ -39,7 +39,6 @@ import {
 	WMTSTilesRenderer
 } from '../terrain-tiles';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-// import TWEEN from '@tweenjs/tween.js';
 import markerSprite from '@/assets/locationmarker.png';
 
 const Tweakpane = require( 'tweakpane' );
@@ -214,7 +213,7 @@ export default {
 		this.errorThreshold = 60;
 
 		this.castOnHover = false;
-		this.overrideCast = true; // Defines if we should override the original TilesRenderer raycasting
+		this.overrideCast = false; // Defines if we should override the original TilesRenderer raycasting
 
 		this.showTerrain = true;
 		this.pane = null;
@@ -379,6 +378,7 @@ export default {
 				return;
 
 			}
+
 			let tileset_offset_x = this.tiles.root.cached.transform.elements[ 12 ];
 			let tileset_offset_y = this.tiles.root.cached.transform.elements[ 13 ];
 			let local_x = rd_x - tileset_offset_x;
@@ -483,17 +483,20 @@ export default {
 			const oldPos = { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z };
 			const newPos = { x: x, y: this.camera.position.y, z: z };
 
+			const duration = 1000 * ( Math.abs( this.camera.rotation.z ) / 3.14 );
+
 			function animate( time ) {
 
 				requestAnimationFrame( animate );
 				TWEEN.update( time );
 
 			}
+
 			requestAnimationFrame( animate );
 			this.animationStarted = true;
 
 			new TWEEN.Tween( oldPos )
-				.to( newPos, 500 )
+				.to( newPos, duration )
 				.easing( TWEEN.Easing.Quadratic.Out )
 				.onUpdate( () => {
 
@@ -521,6 +524,8 @@ export default {
 			}
 
 			this.tiles = new TilesRenderer( this.tilesUrl );
+			this.tiles.displayBoxBounds = true;
+			this.tiles.colorMode = 7;
 			this.tiles.lruCache.minSize = this.lruCacheMinSize;
 			this.tiles.lruCache.maxSize = this.lruCacheMaxSize;
 
@@ -547,14 +552,36 @@ export default {
 
 					} else {
 
-						// default viewport
+						// viewport randomly selected from landmarks
+						const landmarks = this.$root.$data[ 'landmarkLocations' ];
+						const keys = Object.keys( landmarks );
+						const landmark = landmarks[ keys[ keys.length * Math.random() << 0 ] ];
+
+						this.$parent.$data[ 'locationBoxText' ] = landmark.name;
+						this.$parent.$data[ 'showLocationBox' ] = true;
+
 						this.setCameraPosFromRoute( {
-							rdx: "85181.55571255696",
-							rdy: "446859.38171179296",
-							ox: "-223.36609616703936",
-							oy: "281.19798302772574",
-							oz: "-184.218705413541"
+							rdx: landmark.rdx,
+							rdy: landmark.rdy,
+							ox: landmark.ox,
+							oy: landmark.oy,
+							oz: landmark.oz
 						} );
+
+						var start = new Date().getTime();
+						var interval = setInterval( function () {
+
+							var timeLapsed = new Date().getTime() - start;
+							var stop = ( this.tiles.stats.downloading <= 2 && timeLapsed >= 10000 ) || timeLapsed > 25000;
+
+							if ( stop ) {
+
+								this.$parent.$data[ 'showLocationBox' ] = false;
+								clearInterval( interval );
+
+							}
+
+						}.bind( this ), 2000 );
 
 					}
 
@@ -569,7 +596,6 @@ export default {
 
 			this.tiles.onLoadModel = ( s ) => {
 
-				const offset_z = this.tiles.root.cached.transform.elements[ 14 ];
 				s.traverse( c => {
 
 					if ( c.material ) {
@@ -580,7 +606,6 @@ export default {
 						if ( c.geometry ) {
 
 							c.geometry.computeBoundingBox();
-							c.position.y = offset_z;
 
 						}
 
@@ -627,7 +652,7 @@ export default {
 		initScene() {
 
 			this.scene = new Scene();
-			this.scene.background = new Color( this.fogColor );
+			this.scene.background = new Color( "#000000" );
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
 			this.scene.fog = this.fog;
 
@@ -1095,7 +1120,6 @@ export default {
 				// this.renderer.autoClear is set to false, so we need to clear manually. Because don't want to clear when second scene is rendered.
 				this.renderer.clear();
 				this.renderer.render( this.scene, this.camera );
-
 
 			}
 

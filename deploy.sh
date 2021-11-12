@@ -9,11 +9,7 @@ npm run build
 # navigate into the build output directory
 cd dist
 
-git init
-git add -A
-git commit -m 'deploy'
-
-# if you are deploying to https://<USERNAME>.github.io/<REPO>
-git push -f git@github.com:tudelft3d/3dbag-viewer.git main:gh-pages
+rsync -rzhP --delete --exclude=".*" . godzilla:/var/www/3dbag-viewer
+ssh godzilla "chgrp staff3d -R /var/www/3dbag-viewer"
 
 cd -
