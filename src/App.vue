@@ -30,6 +30,20 @@
             class="logo-text"
             style="color: #333"
           >tudelft3d</a>
+          <span
+            class="logo-text"
+            style="color:#ccc; font-weight:300; margin:0 0.3em"
+          > + </span>
+          <img
+            src="@/assets/logo-3dgi.svg"
+            width="28"
+            height="28"
+          >
+          <a
+            href="https://3dgi.xyz"
+            class="logo-text"
+            style="color: #333"
+          >3DGI</a>
         </div>
         <a
           role="button"
@@ -141,12 +155,17 @@
                 property="dct:title"
                 rel="cc:attributionURL"
                 href="https://3dbag.nl"
-              >3D BAG</a> by
+              >3D BAG</a> by the
               <a
                 rel="cc:attributionURL dct:creator"
                 property="cc:attributionName"
                 href="https://3d.bk.tudelft.nl/"
-              >3D geoinformation research group</a> is licensed under
+              >3D geoinformation research group</a> and
+              <a
+                rel="cc:attributionURL dct:creator"
+                property="cc:attributionName"
+                href="https://3dgi.xyz/"
+              >3DGI</a> is licensed under
               <a
                 href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1"
                 target="_blank"
