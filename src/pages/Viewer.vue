@@ -22,17 +22,17 @@
         :rotation="camRotationZ"
         @orient-north="orientNorth"
       />
-      <transition name="fade">
-        <div
-          v-if="showLocationBox"
-          id="locationbox"
-          class="box"
-          @click="toggleLocationBox"
-        >
-          {{ locationBoxText }}
-        </div>
-      </transition>
     </section>
+    <transition name="fade">
+      <div
+        v-if="showLocationBox"
+        id="locationbox"
+        class="box"
+        @click="toggleLocationBox"
+      >
+        {{ locationBoxText }}
+      </div>
+    </transition>
     <BuildingInformation
       :building="pickedBuilding"
       :show="showBuildingInfo"
@@ -413,14 +413,19 @@ export default {
 
 }
 #locationbox {
-	position: absolute;
-	margin: 0px;
-	top: 2.75rem;
-	width: 100%;
+	text-align: center;
+	position: relative;
+	bottom: 2rem;
 	padding: 0.5rem;
-	background: rgba(255,255,255,0.6);
-	border: 1px solid rgba(0,0,0,0.3);
+	background: rgba(255,255,255,0.8);
+	border: 0;
 	transition: opacity 0.3s;
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	width: fit-content;
 }
 #attribution {
 	position: absolute;
