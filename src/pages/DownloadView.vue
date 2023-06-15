@@ -95,7 +95,7 @@
                 download
               > {{ getFileName( format ) }} </a>
             </td>
-            <td>{{ $root.$data[ "latest" ] }}</td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
       </table>
@@ -112,6 +112,54 @@
         {{ $t("download.picktile2false") }}
       </p>
     </button>
+
+
+    <h1
+      id="metadata"
+      class="title is-3"
+    >
+      Metadata
+    </h1>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              JSON <a @click="showMetadataJSON=true"><b-icon
+                size="is-small"
+                icon="magnify"
+              /></a>
+            </td>
+            <td><a :href="metadata_url">{{ metadata_url }}</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <b-modal
+      v-model="showMetadataJSON"
+      has-modal-card
+      width="90%"
+    >
+      <div
+        class="modal-card"
+        style="width: auto"
+      >
+        <section class="modal-card-body image">
+          <vue-json-pretty
+            :data="metadata_json"
+            :show-length="true"
+          />
+        </section>
+      </div>
+    </b-modal>
 
     <h1
       id="webservices"
@@ -162,53 +210,47 @@
     </div>
 
     <h1
-      id="metadata"
+      id="downloads-gpkg-dump"
       class="title is-3"
     >
-      Metadata
+      GPKG data dump
     </h1>
 
+    <p>{{ $t("download.psqlpar") }}</p>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Type</th>
-            <th>URL</th>
+            <th>{{ $t("download.file") }}</th>
+            <th>{{ $t("download.format") }}</th>
+            <th>{{ $t("download.size") }}</th>
+            <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>
-              JSON <a @click="showMetadataJSON=true"><b-icon
+              <a
+                :href="PostgresFileURL"
+                download
+              > {{ PostgresFileURL.split('/').pop() }} </a>
+            </td>
+            <td>
+              GPKG
+              <a
+                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/gpkg'"
+                target="_blank"
+              ><b-icon
                 size="is-small"
-                icon="magnify"
+                icon="help-circle"
               /></a>
             </td>
-            <td><a :href="metadata_url">{{ metadata_url }}</a></td>
+            <td>xx GB</td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-
-
-
-    <b-modal
-      v-model="showMetadataJSON"
-      has-modal-card
-      width="90%"
-    >
-      <div
-        class="modal-card"
-        style="width: auto"
-      >
-        <section class="modal-card-body image">
-          <vue-json-pretty
-            :data="metadata_json"
-            :show-length="true"
-          />
-        </section>
-      </div>
-    </b-modal>
 
 
     <h1 class="title is-3">
