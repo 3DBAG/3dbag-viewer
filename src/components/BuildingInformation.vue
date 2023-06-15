@@ -26,47 +26,49 @@
         custom
         aria-role="listitem"
       >
-        <table
-          class="table is-fullwidth is-striped has-text-left"
-          style="margin-bottom: 0.75rem"
-        >
-          <thead>
-            <tr>
-              <th>{{ $t("attribute") }}</th>
-              <th>{{ $t("value") }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{{ $t("tilenumber") }}</td>
-              <td>
-                <span>
-                  <router-link
-                    :to="{ path: 'download', query: { tid: building.tileID } }"
-                    class="tag is-primary"
-                    @click="showAbout=true"
-                  >
-                    <b-icon
-                      class="mr-1"
-                      size="is-small"
-                      icon="download"
-                    />
-                    {{ building.tileID }}
-                  </router-link>
-                </span>
-              </td>
-            </tr>
-            <tr
-              v-for="name in attr_names"
-              :key="name"
-            >
-              <td>{{ name }}</td>
-              <td>
-                <code style="color:inherit">{{ building.attributes[name] }}</code>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-container" style="max-height:350px; overflow:scroll;">
+          <table
+            class="table is-fullwidth is-striped has-text-left"
+            style="margin-bottom: 0.75rem"
+          >
+            <thead>
+              <tr>
+                <th>{{ $t("attribute") }}</th>
+                <th>{{ $t("value") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{ $t("tilenumber") }}</td>
+                <td>
+                  <span>
+                    <router-link
+                      :to="{ path: 'download', query: { tid: building.tileID } }"
+                      class="tag is-primary"
+                      @click="showAbout=true"
+                    >
+                      <b-icon
+                        class="mr-1"
+                        size="is-small"
+                        icon="download"
+                      />
+                      {{ building.tileID }}
+                    </router-link>
+                  </span>
+                </td>
+              </tr>
+              <tr
+                v-for="name in attr_names"
+                :key="name"
+              >
+                <td>{{ name }}</td>
+                <td>
+                  <code style="color:inherit">{{ building.attributes[name] }}</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <p class="mb-2">
           {{ $t("BuildingInfo.attr1") }} <a :href="'https://docs.3dbag.nl/'+$route.params.locale+'/schema/attributes/' ">{{ $t("documentation") }}</a>.
         </p>
@@ -125,7 +127,7 @@ export default {
 	data: function () {
 
 		return {
-			attr_names: [ 'identificatie', 'oorspronkelijkbouwjaar', 'b3_h_maaiveld', 'b3_dak_typhttps://data.3dbag.nl/postgres/metadata.jsone', 'b3_pw_datum', 'b3_pw_bron', 'b3_kas_warenhuis', 'b3_reconstructie_onvolledig', 'b3_h_dak_min', 'b3_h_dak_50p', 'b3_h_dak_70p', 'b3_h_dak_max', 'b3_val3dity_lod12', 'b3_val3dity_lod13', 'b3_val3dity_lod22', 'b3_rmse_lod12', 'b3_rmse_lod13', 'b3_rmse_lod22', 'b3_mutatie_ahn3_ahn4', 'b3_nodata_fractie_ahn3', 'b3_nodata_fractie_ahn4', 'b3_nodata_radius_ahn3', 'b3_nodata_radius_ahn4', 'b3_pw_selectie_reden', 'b3_puntdichtheid_ahn3', 'b3_puntdichtheid_ahn4', 'b3_volume_lod12', 'b3_volume_lod13', 'b3_volume_lod22' ],
+			attr_names: [ 'identificatie', 'oorspronkelijkbouwjaar', 'b3_h_maaiveld', 'b3_dak_type', 'b3_pw_datum', 'b3_pw_bron', 'b3_kas_warenhuis', 'b3_reconstructie_onvolledig', 'b3_h_dak_min', 'b3_h_dak_50p', 'b3_h_dak_70p', 'b3_h_dak_max', 'b3_val3dity_lod12', 'b3_val3dity_lod13', 'b3_val3dity_lod22', 'b3_rmse_lod12', 'b3_rmse_lod13', 'b3_rmse_lod22', 'b3_mutatie_ahn3_ahn4', 'b3_nodata_fractie_ahn3', 'b3_nodata_fractie_ahn4', 'b3_nodata_radius_ahn3', 'b3_nodata_radius_ahn4', 'b3_pw_selectie_reden', 'b3_puntdichtheid_ahn3', 'b3_puntdichtheid_ahn4', 'b3_volume_lod12', 'b3_volume_lod13', 'b3_volume_lod22' ],
 			showAttributes: false
 		};
 
