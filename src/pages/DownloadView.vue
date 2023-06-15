@@ -121,6 +121,8 @@
       Metadata
     </h1>
 
+    <p>{{ $t("download.metadatapar") }}</p>
+
     <div class="table-wrapper">
       <table>
         <thead>
@@ -216,7 +218,7 @@
       GPKG data dump
     </h1>
 
-    <p>{{ $t("download.psqlpar") }}</p>
+    <p>{{ $t("download.gpgkdumppar") }}</p>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -589,4 +591,13 @@ export default {
   max-width: 500px;
   box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%)
 }
+
+.vjs-value-string {
+  color: #2c3e50;
+}
+.vjs-key {
+  color: #4f7de6;
+  font-weight: bold;
+}
+
 </style>
