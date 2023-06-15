@@ -26,7 +26,10 @@
         custom
         aria-role="listitem"
       >
-        <div class="table-container" style="max-height:350px; overflow:scroll;">
+        <div
+          class="table-container"
+          style="max-height:350px; overflow:scroll;"
+        >
           <table
             class="table is-fullwidth is-striped has-text-left"
             style="margin-bottom: 0.75rem"
