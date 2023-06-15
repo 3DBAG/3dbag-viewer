@@ -127,23 +127,32 @@
       <table>
         <thead>
           <tr>
-            <th>Type</th>
-            <th>URL</th>
+            <th>{{ $t("download.format") }}</th>
+            <th>{{ $t("download.file") }}</th>
+            <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>
-              JSON <a @click="showMetadataJSON=true"><b-icon
-                size="is-small"
-                icon="magnify"
-              /></a>
+              JSON
             </td>
-            <td><a :href="metadata_url">{{ metadata_url }}</a></td>
+            <td>
+              <a
+                :href="metadata_url"
+                download
+              > metadata.json </a>
+            </td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
       </table>
     </div>
+    <b-button
+      label="Preview"
+      icon-left="magnify"
+      @click="showMetadataJSON=true"
+    />
 
     <b-modal
       v-model="showMetadataJSON"
