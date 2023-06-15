@@ -162,47 +162,53 @@
     </div>
 
     <h1
-      id="downloads-postgres"
+      id="metadata"
       class="title is-3"
     >
-      PostgreSQL data dump
+      Metadata
     </h1>
 
-    <p>{{ $t("download.psqlpar") }}</p>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>{{ $t("download.file") }}</th>
-            <th>{{ $t("download.format") }}</th>
-            <th>{{ $t("download.size") }}</th>
-            <th>{{ $t("download.version") }}</th>
+            <th>Type</th>
+            <th>URL</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>
-              <a
-                :href="PostgresFileURL"
-                download
-              > {{ PostgresFileURL.split('/').pop() }} </a>
-            </td>
-            <td>
-              PostgreSQL
-              <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/postgresql'"
-                target="_blank"
-              ><b-icon
+              JSON <a @click="showMetadataJSON=true"><b-icon
                 size="is-small"
-                icon="help-circle"
+                icon="magnify"
               /></a>
             </td>
-            <td>>70GB</td>
-            <td>{{ $root.$data[ "latest" ] }}</td>
+            <td><a :href="metadata_url">{{ metadata_url }}</a></td>
           </tr>
         </tbody>
       </table>
     </div>
+
+
+
+    <b-modal
+      v-model="showMetadataJSON"
+      has-modal-card
+      width="90%"
+    >
+      <div
+        class="modal-card"
+        style="width: auto"
+      >
+        <section class="modal-card-body image">
+          <vue-json-pretty
+            :data="metadata_json"
+            :show-length="true"
+          />
+        </section>
+      </div>
+    </b-modal>
 
 
     <h1 class="title is-3">
@@ -216,12 +222,19 @@
         property="dct:title"
         rel="cc:attributionURL"
         href="https://3dbag.nl"
-      >3D BAG</a> by
+      >3D BAG</a> by the
       <a
         rel="cc:attributionURL dct:creator"
         property="cc:attributionName"
         href="https://3d.bk.tudelft.nl/"
-      >3D geoinformation research group</a> is licensed under
+      >3D geoinformation research group</a>
+      and
+      <a
+        rel="cc:attributionURL dct:creator"
+        property="cc:attributionName"
+        href="https://3dgi.xyz/"
+      >3DGI</a>
+      is licensed under
       <a
         href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1"
         target="_blank"
@@ -259,6 +272,9 @@ import { register as olproj4register } from 'ol/proj/proj4';
 import { get as olproj4get } from 'ol/proj';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 
+import VueJsonPretty from 'vue-json-pretty';
+import 'vue-json-pretty/lib/styles.css';
+
 function formatBytes( bytes, decimals ) {
 
 	if ( bytes == 0 ) return '0 Bytes';
@@ -274,17 +290,24 @@ export default {
 
 	name: 'DownloadView',
 
+	components: {
+		VueJsonPretty
+	},
+
 	data() {
 
 		return {
 			mapVisible: false,
+			showMetadataJSON: false,
 			map: null,
 			tileFormats: [ "CityJSON", "OBJ", "GPKG" ],
 
 			selectedTile: null,
-			PostgresFileURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "PostgreSQL" ],
-			WFSURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "WFS" ],
-			WMSURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "WMS" ],
+			PostgresFileURL: this.$root.$data[ "version_data" ][ "PostgreSQL" ],
+			WFSURL: this.$root.$data[ "version_data" ][ "WFS" ],
+			WMSURL: this.$root.$data[ "version_data" ][ "WMS" ],
+			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
+			metadata_json: Object(),
 			activeTileData: {
 				CityJSON: Object(),
 				OBJ: Object(),
@@ -327,6 +350,16 @@ export default {
 
 		}
 
+		console.log( this.metadata_url );
+
+		fetch( this.metadata_url )
+			.then( res => res.json() )
+			.then( ( out ) => {
+
+				this.metadata_json = out;
+
+			} ).catch( err => console.error( err ) );
+
 	},
 
 	methods: {
@@ -363,8 +396,7 @@ export default {
 
 		setFormatData( format ) {
 
-			const latest = this.$root.$data[ "latest" ];
-			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "versions" ][ latest ][ format ].replace( "{TID}", this.selectedTile );
+			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replace( "{TID}", this.selectedTile );
 			const format_lower = format.toLowerCase();
 			this.activeTileData[ format ][ "docsURL" ] = 'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/' + format_lower;
 

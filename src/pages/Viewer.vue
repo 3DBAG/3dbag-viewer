@@ -96,7 +96,7 @@ export default {
 		return {
 
 			customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
-			BAG3DVersion: this.$root.$data[ 'BAG3D' ][ 'versions' ][ this.$root.$data[ 'BAG3D' ][ "latest" ] ],
+			BAG3DVersionData: this.$root.$data[ 'version_data' ],
 
 			camOffset: {
 				x: 400,
@@ -175,7 +175,7 @@ export default {
 
 			}
 
-			return this.BAG3DVersion[ '3DTilesets' ][ this.tileset ];
+			return this.BAG3DVersionData[ '3DTilesets' ][ this.tileset ];
 
 		},
 

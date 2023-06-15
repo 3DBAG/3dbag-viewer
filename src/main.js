@@ -16,7 +16,7 @@ Vue.use( Buefy );
 Vue.config.productionTip = false;
 
 new Vue( {
-	data: { BAG3D: BAG3D, landmarkLocations: landmarkLocations },
+	data: { version_data: BAG3D[ "versions" ][ BAG3D[ "latest" ] ], version_number: BAG3D[ "latest" ], landmarkLocations: landmarkLocations },
 	render: h => h( App ),
 	router,
 	i18n,
