@@ -64,10 +64,12 @@
                 v-for="name in attr_names"
                 :key="name"
               >
-                <td> <a
+                <td>
+                  <a
                     target="_blank"
                     :href="'https://docs.3dbag.nl/' + $route.params.locale + '/schema/attributes/#'+name"
-                  >{{ name }}</a></td>
+                  >{{ name }}</a>
+                </td>
                 <td>
                   <code style="color:inherit">{{ building.attributes[name] }}</code>
                 </td>

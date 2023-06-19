@@ -242,9 +242,9 @@
           <tr>
             <td>
               <a
-                :href="PostgresFileURL"
+                :href="GPGKDumpFileURL"
                 download
-              > {{ PostgresFileURL.split('/').pop() }} </a>
+              > {{ GPGKDumpFileURL.split('/').pop() }} </a>
             </td>
             <td>
               GPKG
@@ -256,7 +256,7 @@
                 icon="help-circle"
               /></a>
             </td>
-            <td>xx GB</td>
+            <td>{{ GPGKDumpFilesize }}</td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
@@ -356,7 +356,8 @@ export default {
 			tileFormats: [ "CityJSON", "OBJ", "GPKG" ],
 
 			selectedTile: null,
-			PostgresFileURL: this.$root.$data[ "version_data" ][ "PostgreSQL" ],
+			GPGKDumpFileURL: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "url" ],
+			GPGKDumpFilesize: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "filesize" ],
 			WFSURL: this.$root.$data[ "version_data" ][ "WFS" ],
 			WMSURL: this.$root.$data[ "version_data" ][ "WMS" ],
 			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
@@ -449,7 +450,7 @@ export default {
 
 		setFormatData( format ) {
 
-			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replace( "{TID}", this.selectedTile );
+			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replace( "{TID_X}", this.selectedTile ).replace( "{TID_Y}", this.selectedTile ).replace( "{TID_Z}", this.selectedTile );
 			const format_lower = format.toLowerCase();
 			this.activeTileData[ format ][ "docsURL" ] = 'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/' + format_lower;
 

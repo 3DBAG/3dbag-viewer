@@ -1,14 +1,17 @@
 {
-  "latest": "v2023.06.16",
+  "latest": "v2023.06.20",
   "versions": {
-    "v2023.06.16" : {
-      "PostgreSQL" : "https://data.3dbag.nl/postgres/3dbag_v210908_fd2cee53.zip",
+    "v2023.06.20" : {
+      "GPKG_DUMP" : {
+        "url":"https://data.3dbag.nl/gpkg_dump/3dbag_v210908_fd2cee53.zip",
+        "filesize": "20 GB"
+      },
 
-      "OBJ" : "https://data.3dbag.nl/obj/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.zip",
+      "OBJ" : "https://data.3dbag.nl/obj/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.zip",
 
-      "CityJSON" : "https://data.3dbag.nl/cityjson/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.json",
+      "CityJSON" : "https://data.3dbag.nl/cityjson/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.json",
       
-      "GPKG" : "https://data.3dbag.nl/gpkg/v210908_fd2cee53/3dbag_v210908_fd2cee53_{TID}.gpkg",
+      "GPKG" : "https://data.3dbag.nl/gpkg/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.gpkg",
 
       "WFS" : "https://data.3dbag.nl/api/BAG3D_v2/wfs",
 
