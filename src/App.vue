@@ -70,7 +70,7 @@
               :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#21098-beta'"
             >{{ $root.$data['version_number'] }}
             </a>
-            <span class="tag is-danger">beta</span>
+            <span class="tag is-danger">{{ $root.$data['version_data']['release-type'] }}</span>
           </div>
         </div>
         <div class="navbar-end">
