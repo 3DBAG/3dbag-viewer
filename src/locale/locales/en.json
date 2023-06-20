@@ -15,6 +15,13 @@
     "copyright": "Copyright",
     "feedback": "Give feedback"
   },
+  "about": {
+    "title": "About 3DBAG and the AHN4 update"
+  },
+  "serviceNotice" : {
+    "title": "Status AHN4 update",
+    "body" : "For news about the upcoming AHN4 update follow us on"
+  },
   "viewer": {
     "feedback": "Give feedback",
     "issue": "Report a problem with this building",

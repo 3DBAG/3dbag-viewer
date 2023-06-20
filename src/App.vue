@@ -122,7 +122,6 @@
         </header>
         <section class="modal-card-body">
           <div class="content">
-            <p>This is a beta release of the renewed version of the 3D BAG service.</p>
             <p>
               Read about <a
                 href="https://docs.3dbag.nl/en/"
@@ -210,6 +209,25 @@ export default {
 
 		}
 	},
+
+	mounted() {
+
+		this.serviceNotice();
+
+	},
+
+	methods: {
+		serviceNotice() {
+
+			this.$buefy.toast.open( {
+				indefinite: true,
+				message: this.$t( "serviceNotice.body" ) + " <a class='has-text-weight-semibold has-text-dark' href='https://twitter.com/3D_BAG/status/1671265536142102528'>twitter</a>",
+				position: 'is-bottom',
+				type: 'is-warning'
+			} );
+
+		},
+	}
 
 };
 </script>
