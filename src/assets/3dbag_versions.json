@@ -20,9 +20,9 @@
       "WMS" : "https://data.3dbag.nl/api/BAG3D/wms",
 
       "3DTilesets" : {
-        "lod22": "https://3dbag.nl/download/3dtiles/v20230622/lod22/tileset.json",
-				"lod13": "https://3dbag.nl/download/3dtiles/v20230622/lod13/tileset.json",
-				"lod12": "https://3dbag.nl/download/3dtiles/v20230622/lod12/tileset.json"
+        "lod22": "https://3dbag.nl/download/3dtiles/v202306xx/lod22/tileset.json",
+				"lod13": "https://3dbag.nl/download/3dtiles/v202306xx/lod13/tileset.json",
+				"lod12": "https://3dbag.nl/download/3dtiles/v202306xx/lod12/tileset.json"
       },
 
       "metadata": "https://data.3dbag.nl/metadata/v20230622/metadata.json"
