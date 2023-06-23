@@ -6,7 +6,7 @@
 
       "GPKG_DUMP" : {
         "url":"https://data.3dbag.nl/gpkg/v20230622/nl_3dbag.gpkg.zip",
-        "filesize": "18 GB"
+        "filesize": "18 GB (108 GB uncompressed)"
       },
 
       "OBJ" : "https://data.3dbag.nl/obj/v20230622/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.zip",
