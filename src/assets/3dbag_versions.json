@@ -2,7 +2,7 @@
   "latest": "v2023.06.22",
   "versions": {
     "v2023.06.22" : {
-      "release-type" : "alpha",
+      "release-type" : "beta",
 
       "GPKG_DUMP" : {
         "url":"https://data.3dbag.nl/gpkg/v20230622/nl_3dbag.gpkg.zip",
