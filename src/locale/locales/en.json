@@ -35,7 +35,7 @@
     "staticunpicked": "per tile",
     "staticpar": "To keep filesizes manageable the 3D BAG dataset is subdived in tiles. For each tile we offer the data in a number of different file formats. Use the button below to select the tile of interest to see the download options.",
     "picktile": "Pick a tile",
-    "metadatapar": "This JSON file contains metadata about the 3DBAG dataset including detailed information about the software used to generate 3D BAG and the source datasets.",
+    "metadatapar": "This JSON file contains metadata about the 3DBAG dataset including detailed information about the software used to generate 3D BAG and the source datasets. The schema of the metadata file loosely follows the ISO 19115 metadata standard. However, it has been converted to JSON and adapted to better fit our needs. Under `identificationInfo` we report the current version number, contact information and license of the 3D BAG. Under `dataQualityInfo.lineage` we report the versions of the source datasets and the versions of the processing software that were used for the current release.",
     "gpgkdumppar": "The GPKG file below contains the 3D BAG data for the whole of the Netherlands. Beware, this is a very large file to download. The file is compressed as Seek-Optimized ZIP, see the documentation on how to access it without decompressing it first.",
     "selectedtiletrue": "You have selected tile number",
     "selectedtiletrue2": "",
