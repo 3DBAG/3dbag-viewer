@@ -450,7 +450,8 @@ export default {
 
 		setFormatData( format ) {
 
-			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replace( "{TID_X}", this.selectedTile ).replace( "{TID_Y}", this.selectedTile ).replace( "{TID_Z}", this.selectedTile );
+			let tilecoords = this.selectedTile.split( "/" );
+			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replace( "{TID_X}", tilecoords[ 0 ] ).replace( "{TID_Y}", tilecoords[ 1 ] ).replace( "{TID_Z}", tilecoords[ 2 ] );
 			const format_lower = format.toLowerCase();
 			this.activeTileData[ format ][ "docsURL" ] = 'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/' + format_lower;
 
@@ -513,7 +514,7 @@ export default {
 
 						return (
 							that.WFSURL + '?' +
-              'version=1.1.0&request=GetFeature&typename=BAG3d_v2:bag_tiles_3k&' +
+              'version=1.1.0&request=GetFeature&typename=BAG3d:export_index&' +
               'outputFormat=application/json&srsname=EPSG:28992&' +
               'bbox=' +
               extent.join( ',' ) +
@@ -551,7 +552,7 @@ export default {
 					that.map.addInteraction( select );
 					select.on( 'select', function ( e ) {
 
-						that.setActiveTile( e.selected[ 0 ].get( 'tile_id' ) );
+						that.setActiveTile( e.selected[ 0 ].get( 'id' ) );
 
 					} );
 

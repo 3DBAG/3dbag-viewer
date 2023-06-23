@@ -898,6 +898,8 @@ export default {
 				const batchTable = object.parent.batchTable;
 				const keys = batchTable.getKeys();
 
+				console.log( keys );
+
 				if ( keys.includes( "attributes" ) ) {
 
 					const attributes = JSON.parse( batchTable.getData( "attributes" )[ batch_id ] );
