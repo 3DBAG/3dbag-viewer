@@ -37,7 +37,7 @@
     "staticpar": "Om bestandsgrootten beheersbaar te houden is de 3D BAG data opgedeeld in tegels. Voor iedere tegel bieden we de data aan in verschillende bestandsformaten. Klik op de onderstaande knop om de gewilde tegel te kiezen en de downloadopties te zien.",
     "picktile": "Kies een tegel",
     "metadatapar": "Dit JSON bestand bevat metadata over de 3DBAG dataset inclusief gedtailleerde informatie over de gebruikte software voor het genereren van de 3DBAG en de bron data.",
-    "gpgkdumppar": "Het onderstaande GPKG-bestand bevat de 3D BAG data voor geheel Nederland. Let op: het is een erg groot bestand.",
+    "gpgkdumppar": "Het onderstaande GPKG-bestand bevat de 3D BAG data voor geheel Nederland. Let op: het is een erg groot bestand. Het bestand is gecomprimeerd als Seek-Optimized ZIP, zie de documentatie over hoe je het bestand kunt openen zonder het eerst uit te pakken.",
     "selectedtiletrue": "Je hebt tegelnummer ",
     "selectedtiletrue2": " geselecteerd",
     "selectedtilefalse": "Selecteer een tegel op de kaart",
