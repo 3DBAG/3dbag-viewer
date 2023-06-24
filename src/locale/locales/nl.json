@@ -30,7 +30,8 @@
     "empty": "Geen resultaten gevonden"
     },
   "download": {
-    "webservicespar": "Deze laten je de gehele dataset verkennen in andere software (bijvoorbeeld QGIS) zonder iets van tevoren hoeven te downloaden.",
+    "webservicespar": "Deze laten je de gehele dataset verkennen in andere software (bijvoorbeeld QGIS) zonder iets van tevoren hoeven te downloaden. Let op: alleen de 2D-projectie van de modellen wordt bediend via WMS/WFS.",
+    "webservicespar_layers": "Beschikbare lagen",
     "statictitle": "Downloads",
     "staticpicked": "voor tegelnummer ",
     "staticunpicked": "per tegel",

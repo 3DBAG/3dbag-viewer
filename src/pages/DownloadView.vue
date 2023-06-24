@@ -183,6 +183,17 @@
       {{ $t("download.webservicespar") }}
     </p>
 
+    <p>
+      {{ $t("download.webservicespar_layers") }}:
+    </p>
+    <ul>
+      <li>lod12</li>
+      <li>lod13</li>
+      <li>lod22</li>
+      <li>tiles</li>
+    </ul>
+
+
     <div class="table-wrapper">
       <table>
         <thead>

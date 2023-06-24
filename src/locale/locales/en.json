@@ -29,7 +29,8 @@
     "empty": "No results found"
     },
   "download": {
-    "webservicespar": "These allow you to explore the entire dataset in another software (eg. QGIS) without having to download anything beforehand.",
+    "webservicespar": "These allow you to explore the entire dataset in another software (eg. QGIS) without having to download anything beforehand. Note that only the 2D projection of the models is served via WMS/WFS.",
+    "webservicespar_layers": "Available layers",
     "statictitle": "Downloads",
     "staticpicked": "for tile number ",
     "staticunpicked": "per tile",
