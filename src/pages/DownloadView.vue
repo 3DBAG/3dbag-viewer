@@ -450,8 +450,8 @@ export default {
 
 		setFormatData( format ) {
 
-			let tilecoords = this.selectedTile.split( "/" );
-			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replace( "{TID_X}", tilecoords[ 0 ] ).replace( "{TID_Y}", tilecoords[ 1 ] ).replace( "{TID_Z}", tilecoords[ 2 ] );
+			let tilecoords = this.selectedTile.split( "-" );
+			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replaceAll( "{TID_X}", tilecoords[ 0 ] ).replaceAll( "{TID_Y}", tilecoords[ 1 ] ).replaceAll( "{TID_Z}", tilecoords[ 2 ] );
 			const format_lower = format.toLowerCase();
 			this.activeTileData[ format ][ "docsURL" ] = 'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/' + format_lower;
 

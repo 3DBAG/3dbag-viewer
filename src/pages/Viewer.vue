@@ -115,7 +115,7 @@ export default {
 					name: "BRT Achtergrondkaart (Grijs)",
 					icon: "map"
 				},
-				luchtfoto2020wmts: {
+				luchtfotoWMTS: {
 					name: "Luchtfoto 2020",
 					icon: "map"
 				}
@@ -241,13 +241,13 @@ export default {
 					}
 				},
 
-				luchtfoto2020wmts: {
+				luchtfotoWMTS: {
 					type: "wmts",
 					attribution: "PDOK",
 					attributionURL: "https://www.pdok.nl/",
 					options: {
 						url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0?',
-						layer: '2020_ortho25',
+						layer: 'Actueel_ortho25',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
 						service: "WMTS",
