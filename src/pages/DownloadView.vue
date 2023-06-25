@@ -525,7 +525,7 @@ export default {
 
 						return (
 							that.WFSURL + '?' +
-              'version=1.1.0&request=GetFeature&typename=BAG3d:export_index&' +
+              'version=1.1.0&request=GetFeature&typename=tiles&' +
               'outputFormat=application/json&srsname=EPSG:28992&' +
               'bbox=' +
               extent.join( ',' ) +
@@ -563,7 +563,10 @@ export default {
 					that.map.addInteraction( select );
 					select.on( 'select', function ( e ) {
 
-						that.setActiveTile( e.selected[ 0 ].get( 'id' ) );
+						let tile_id = e.selected[ 0 ].get( 'tile_id' );
+						tile_id = tile_id.replaceAll( '/', '-' );
+						console.log( tile_id );
+						that.setActiveTile( tile_id );
 
 					} );
 

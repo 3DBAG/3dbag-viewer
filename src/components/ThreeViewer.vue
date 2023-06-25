@@ -32,7 +32,8 @@ import {
 	TorusBufferGeometry
 } from 'three';
 import {
-	TilesRenderer
+	TilesRenderer,
+	DebugTilesRenderer
 } from '3d-tiles-renderer';
 import {
 	WMSTilesRenderer,
@@ -498,7 +499,7 @@ export default {
 
 			}
 
-			this.tiles = new TilesRenderer( this.tilesUrl );
+			this.tiles = new DebugTilesRenderer( this.tilesUrl );
 			this.tiles.displayBoxBounds = true;
 			this.tiles.colorMode = 7;
 			this.tiles.lruCache.minSize = this.lruCacheMinSize;
@@ -897,8 +898,6 @@ export default {
 
 				const batchTable = object.parent.batchTable;
 				const keys = batchTable.getKeys();
-
-				console.log( keys );
 
 				if ( keys.includes( "attributes" ) ) {
 
