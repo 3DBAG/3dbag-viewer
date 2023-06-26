@@ -31,7 +31,7 @@
   "download": {
     "webservicespar": "These allow you to explore the entire dataset in another software (eg. QGIS) without having to download anything beforehand. Note that only the 2D projection of the models is served via WMS/WFS.",
     "webservicespar_layers": "Available layers",
-    "webservices_warning": "The previous endpoint, https://data.3dbag.nl/api/BAG3D_v2, is going to be deprecated after the next release!",
+    "webservices_warning": "The old API endpoint (https://data.3dbag.nl/api/BAG3D_v2) will be deprecated after the next release!",
     "statictitle": "Downloads",
     "staticpicked": "for tile number ",
     "staticunpicked": "per tile",

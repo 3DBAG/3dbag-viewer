@@ -185,19 +185,11 @@
       {{ $t("download.webservicespar") }}
     </p>
 
-    <p>
-      {{ $t("download.webservicespar_layers") }}:
-    </p>
-    <ul>
-      <li>lod12</li>
-      <li>lod13</li>
-      <li>lod22</li>
-      <li>tiles</li>
-    </ul>
-
-    <p>
-      <b>{{ $t("download.webservices_warning") }}</b>
-    </p>
+    <b-message
+      type="is-warning"
+    >
+      {{ $t("download.webservices_warning") }}
+    </b-message>
 
     <div class="table-wrapper">
       <table>
@@ -378,7 +370,7 @@ export default {
 			selectedTile: null,
 			GPGKDumpFileURL: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "url" ],
 			GPGKDumpFilesize: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "filesize" ],
-      GPGKDumpFileSHA256: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "sha256" ],
+			GPGKDumpFileSHA256: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "sha256" ],
 			WFSURL: this.$root.$data[ "version_data" ][ "WFS" ],
 			WMSURL: this.$root.$data[ "version_data" ][ "WMS" ],
 			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
@@ -469,9 +461,11 @@ export default {
 
 		},
 
-    setFormatHash( format, sha256 ) {
-      this.activeTileData[ format ][ "sha256" ] = sha256;
-    },
+		setFormatHash( format, sha256 ) {
+
+			this.activeTileData[ format ][ "sha256" ] = sha256;
+
+		},
 
 		setFormatData( format ) {
 
@@ -582,12 +576,12 @@ export default {
 						console.log( tile_id );
 						that.setActiveTile( tile_id );
 
-            let cityjson_sha256 = e.selected[ 0 ].get( 'cj_sha256' );
-            that.setFormatHash( "CityJSON", cityjson_sha256 );
-            let obj_sha256 = e.selected[ 0 ].get( 'obj_sha256' );
-            that.setFormatHash( "OBJ", obj_sha256 );
-            let gpkg_sha256 = e.selected[ 0 ].get( 'gpkg_sha256' );
-            that.setFormatHash( "GPKG", gpkg_sha256 );
+						let cityjson_sha256 = e.selected[ 0 ].get( 'cj_sha256' );
+						that.setFormatHash( "CityJSON", cityjson_sha256 );
+						let obj_sha256 = e.selected[ 0 ].get( 'obj_sha256' );
+						that.setFormatHash( "OBJ", obj_sha256 );
+						let gpkg_sha256 = e.selected[ 0 ].get( 'gpkg_sha256' );
+						that.setFormatHash( "GPKG", gpkg_sha256 );
 
 					} );
 

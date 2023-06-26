@@ -94,101 +94,16 @@
           >
             {{ $t("nav.docs") }}
           </a>
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">
-              {{ $t("nav.more") }}
-            </a>
-
-            <div class="navbar-dropdown is-right">
-              <a
-                class="navbar-item"
-                @click="showAbout=true"
-              >
-                {{ $t("nav.about") }}
-              </a>
-              <hr class="navbar-divider">
-              <a
-                class="navbar-item"
-                :href="currentLocale == 'en' ? 'https://forms.gle/NZg83heXM75pAmfVA' : 'https://forms.gle/N1FPRp3RG45EaBjUA'"
-              >
-                {{ $t("nav.feedback") }}
-              </a>
-            </div>
-          </div>
+          <a
+            class="navbar-item"
+            :href="currentLocale == 'en' ? 'https://forms.gle/NZg83heXM75pAmfVA' : 'https://forms.gle/N1FPRp3RG45EaBjUA'"
+          >
+            {{ $t("nav.feedback") }}
+          </a>
           <LocaleSwitcher />
         </div>
       </div>
     </nav>
-    <b-modal
-      v-model="showAbout"
-      has-modal-card
-    >
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">
-            About 3D BAG
-          </p>
-          <button
-            class="delete"
-            aria-label="close"
-            @click="showAbout = false"
-          />
-        </header>
-        <section class="modal-card-body">
-          <div class="content">
-            <p>This is a beta release of the renewed version of the 3D BAG service.</p>
-            <p>
-              Read about <a
-                href="https://docs.3dbag.nl/en/"
-                target="_blank"
-              >who we are and why we created the 3D BAG</a>.
-            </p>
-
-            <h2 class="title is-4">
-              Copyright and licensing
-            </h2>
-            <p
-              xmlns:cc="http://creativecommons.org/ns#"
-              xmlns:dct="http://purl.org/dc/terms/"
-            >
-              <a
-                property="dct:title"
-                rel="cc:attributionURL"
-                href="https://3dbag.nl"
-              >3D BAG</a> by the
-              <a
-                rel="cc:attributionURL dct:creator"
-                property="cc:attributionName"
-                href="https://3d.bk.tudelft.nl/"
-              >3D geoinformation research group</a> and
-              <a
-                rel="cc:attributionURL dct:creator"
-                property="cc:attributionName"
-                href="https://3dgi.xyz/"
-              >3DGI</a> is licensed under
-              <a
-                href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1"
-                target="_blank"
-                rel="license noopener noreferrer"
-                style="display:inline-block;"
-              >CC BY 4.0<img
-                style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
-                src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"
-              ><img
-                style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
-                src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"
-              ></a>
-            </p>
-            <p>
-              Read the <a
-                href="https://docs.3dbag.nl/en/copyright"
-                target="_blank"
-              >terms of use for the 3D BAG</a>.
-            </p>
-          </div>
-        </section>
-      </div>
-    </b-modal>
     <router-view
       @show-about="showAbout=true"
     />
