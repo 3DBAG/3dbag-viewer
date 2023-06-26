@@ -244,6 +244,7 @@
         <thead>
           <tr>
             <th>{{ $t("download.file") }}</th>
+            <th>SHA-256</th>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.size") }}</th>
             <th>{{ $t("download.version") }}</th>
@@ -256,6 +257,9 @@
                 :href="GPGKDumpFileURL"
                 download
               > {{ GPGKDumpFileURL.split('/').pop() }} </a>
+            </td>
+            <td>
+              {{ GPGKDumpFileSHA256 }}
             </td>
             <td>
               GPKG
@@ -369,6 +373,7 @@ export default {
 			selectedTile: null,
 			GPGKDumpFileURL: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "url" ],
 			GPGKDumpFilesize: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "filesize" ],
+      GPGKDumpFileSHA256: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "sha256" ],
 			WFSURL: this.$root.$data[ "version_data" ][ "WFS" ],
 			WMSURL: this.$root.$data[ "version_data" ][ "WMS" ],
 			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
