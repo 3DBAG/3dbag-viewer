@@ -71,6 +71,7 @@
             <th>{{ $t("tilenumber") }}</th>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.file") }}</th>
+            <th>SHA-256</th>
             <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
@@ -95,6 +96,7 @@
                 download
               > {{ getFileName( format ) }} </a>
             </td>
+            <td>{{ activeTileData[format]['sha256'] }}</td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
@@ -464,6 +466,10 @@ export default {
 
 		},
 
+    setFormatHash( format, sha256 ) {
+      this.activeTileData[ format ][ "sha256" ] = sha256;
+    },
+
 		setFormatData( format ) {
 
 			let tilecoords = this.selectedTile.split( "-" );
@@ -572,6 +578,13 @@ export default {
 						tile_id = tile_id.replaceAll( '/', '-' );
 						console.log( tile_id );
 						that.setActiveTile( tile_id );
+
+            let cityjson_sha256 = e.selected[ 0 ].get( 'cj_sha256' );
+            that.setFormatHash( "CityJSON", cityjson_sha256 );
+            let obj_sha256 = e.selected[ 0 ].get( 'obj_sha256' );
+            that.setFormatHash( "OBJ", obj_sha256 );
+            let gpkg_sha256 = e.selected[ 0 ].get( 'gpkg_sha256' );
+            that.setFormatHash( "GPKG", gpkg_sha256 );
 
 					} );
 
