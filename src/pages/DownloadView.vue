@@ -115,65 +115,6 @@
       </p>
     </button>
 
-
-    <h1
-      id="metadata"
-      class="title is-3"
-    >
-      Metadata
-    </h1>
-
-    <p>{{ $t("download.metadatapar") }}</p>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>{{ $t("download.format") }}</th>
-            <th>{{ $t("download.file") }}</th>
-            <th>{{ $t("download.version") }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              JSON
-            </td>
-            <td>
-              <a
-                :href="metadata_url"
-                download
-              > metadata.json </a>
-            </td>
-            <td>{{ $root.$data[ "version_number" ] }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <b-button
-      label="Preview"
-      icon-left="magnify"
-      @click="showMetadataJSON=true"
-    />
-
-    <b-modal
-      v-model="showMetadataJSON"
-      has-modal-card
-      width="90%"
-    >
-      <div
-        class="modal-card"
-        style="width: auto"
-      >
-        <section class="modal-card-body image">
-          <vue-json-pretty
-            :data="metadata_json"
-            :show-length="true"
-          />
-        </section>
-      </div>
-    </b-modal>
-
     <h1
       id="webservices"
       class="title is-3"
@@ -274,6 +215,65 @@
         </tbody>
       </table>
     </div>
+
+
+    <h1
+      id="metadata"
+      class="title is-3"
+    >
+      Metadata
+    </h1>
+
+    <p>{{ $t("download.metadatapar") }}</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ $t("download.format") }}</th>
+            <th>{{ $t("download.file") }}</th>
+            <th>{{ $t("download.version") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              JSON
+            </td>
+            <td>
+              <a
+                :href="metadata_url"
+                download
+              > metadata.json </a>
+            </td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <b-button
+      label="Preview Metadata"
+      icon-left="magnify"
+      @click="showMetadataJSON=true"
+    />
+
+    <b-modal
+      v-model="showMetadataJSON"
+      has-modal-card
+      width="90%"
+    >
+      <div
+        class="modal-card"
+        style="width: auto"
+      >
+        <section class="modal-card-body image">
+          <vue-json-pretty
+            :data="metadata_json"
+            :show-length="true"
+          />
+        </section>
+      </div>
+    </b-modal>
 
 
     <h1 class="title is-3">
