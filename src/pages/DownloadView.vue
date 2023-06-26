@@ -195,6 +195,9 @@
       <li>tiles</li>
     </ul>
 
+    <p>
+      <b>{{ $t("download.webservices_warning") }}</b>
+    </p>
 
     <div class="table-wrapper">
       <table>
