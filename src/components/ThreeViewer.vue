@@ -32,8 +32,7 @@ import {
 	TorusBufferGeometry
 } from 'three';
 import {
-	TilesRenderer,
-	DebugTilesRenderer
+	TilesRenderer
 } from '3d-tiles-renderer';
 import {
 	WMSTilesRenderer,
@@ -499,7 +498,7 @@ export default {
 
 			}
 
-			this.tiles = new DebugTilesRenderer( this.tilesUrl );
+			this.tiles = new TilesRenderer( this.tilesUrl );
 			this.tiles.displayBoxBounds = true;
 			this.tiles.colorMode = 7;
 			this.tiles.lruCache.minSize = this.lruCacheMinSize;
@@ -565,6 +564,7 @@ export default {
 
 				const transform = this.tiles.root.cached.transform;
 				this.sceneTransform = new Vector3( transform.elements[ 12 ], transform.elements[ 13 ], transform.elements[ 14 ] );
+				this.reinitBasemap();
 
 				this.needsRerender = 2;
 
