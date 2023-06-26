@@ -116,7 +116,7 @@ export default {
 					icon: "map"
 				},
 				luchtfotoWMTS: {
-					name: "Luchtfoto 2020",
+					name: "Luchtfoto Actueel",
 					icon: "map"
 				}
 			},
