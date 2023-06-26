@@ -53,6 +53,7 @@
     "version": "Versie",
     "picktile2true": "Kies een andere tegel",
     "picktile2false": "Kies een tegel",
-    "restored": "in PostgreSQL"
+    "restored": "in PostgreSQL",
+    "sha256inwfs": "Zie tiles laag in WFS"
   }
 }

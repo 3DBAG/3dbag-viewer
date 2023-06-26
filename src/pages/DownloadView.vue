@@ -96,7 +96,7 @@
                 download
               > {{ getFileName( format ) }} </a>
             </td>
-            <td>{{ activeTileData[format]['sha256'] }}</td>
+            <td>{{ activeTileData[format]['sha256'] ? activeTileData[format]['sha256'] : $t("download.sha256inwfs")}}</td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>

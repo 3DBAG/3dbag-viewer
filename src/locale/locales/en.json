@@ -52,6 +52,7 @@
     "version": "Version",
     "picktile2true": "Pick another tile",
     "picktile2false": "Pick a tile",
-    "restored": "in PostgreSQL"
+    "restored": "in PostgreSQL",
+    "sha256inwfs": "See tiles layer in WFS"
   }
 }
