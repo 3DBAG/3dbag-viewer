@@ -16,9 +16,9 @@
       
       "GPKG" : "https://data.3dbag.nl/gpkg/v20230622/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.gpkg",
 
-      "WFS" : "https://data.3dbag.nl/api/DEV_BAG3D/wfs",
+      "WFS" : "https://data.3dbag.nl/api/BAG3D/wfs",
 
-      "WMS" : "https://data.3dbag.nl/api/DEV_BAG3D/wms",
+      "WMS" : "https://data.3dbag.nl/api/BAG3D/wms",
 
       "3DTilesets" : {
         "lod22": "https://3dbag.nl/download/3dtiles/v202306xx/lod22/tileset.json",
