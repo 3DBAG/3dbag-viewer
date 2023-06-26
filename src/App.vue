@@ -67,7 +67,7 @@
           <div class="navbar-item tags has-addons">
             <a
               class="tag"
-              :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#21098-beta'"
+              :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#20230622-beta'"
             >{{ $root.$data['version_number'] }}
             </a>
             <span class="tag is-danger">{{ $root.$data['version_data']['release-type'] }}</span>
