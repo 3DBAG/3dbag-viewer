@@ -903,7 +903,7 @@ export default {
 
 					const attributes = JSON.parse( batchTable.getData( "attributes" )[ batch_id ] );
 					const tileID = info.id.replace( /^.*[\\\/]/, '' ).replace( '.b3dm', '' );
-					const pz = closestPoint.y;
+					const pz = closestPoint.y + this.sceneTransform.z;
 					this.$emit( 'object-picked', {
 						"batchID": batch_id,
 						tileID,
