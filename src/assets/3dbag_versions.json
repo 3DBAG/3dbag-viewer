@@ -5,7 +5,7 @@
       "release-type" : "beta",
 
       "GPKG_DUMP" : {
-        "url":"https://data.3dbag.nl/gpkg/v20230622/nl_3dbag.gpkg.zip",
+        "url":"https://data.3dbag.nl/gpkg/v20230622/3dbag_nl.gpkg.zip",
         "filesize": "18 GB (108 GB uncompressed)",
         "sha256": "36c693e06e1a967ad1535b03778fe42b3cb4b80bb92bb8e9ce9fd039912add12"
       },
