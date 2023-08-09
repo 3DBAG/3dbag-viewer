@@ -30,6 +30,20 @@
             class="logo-text"
             style="color: #333"
           >tudelft3d</a>
+          <span
+            class="logo-text"
+            style="color:#ccc; font-weight:300; margin:0 0.3em"
+          > + </span>
+          <img
+            src="@/assets/logo-3dgi.svg"
+            width="28"
+            height="28"
+          >
+          <a
+            href="https://3dgi.xyz"
+            class="logo-text"
+            style="color: #333"
+          >3DGI</a>
         </div>
         <a
           role="button"
@@ -53,10 +67,10 @@
           <div class="navbar-item tags has-addons">
             <a
               class="tag"
-              :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#21098-beta'"
-            >{{ $root.$data['latest'] }}
+              :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#20230809-beta'"
+            >{{ $root.$data['version_number'] }}
             </a>
-            <span class="tag is-danger">beta</span>
+            <span class="tag is-danger">{{ $root.$data['version_data']['release-type'] }}</span>
           </div>
         </div>
         <div class="navbar-end">
@@ -80,31 +94,17 @@
           >
             {{ $t("nav.docs") }}
           </a>
-          <div class="navbar-item has-dropdown is-hoverable">
-            <a class="navbar-link">
-              {{ $t("nav.more") }}
-            </a>
-
-            <div class="navbar-dropdown is-right">
-              <a
-                class="navbar-item"
-                @click="showAbout=true"
-              >
-                {{ $t("nav.about") }}
-              </a>
-              <hr class="navbar-divider">
-              <a
-                class="navbar-item"
-                :href="currentLocale == 'en' ? 'https://forms.gle/NZg83heXM75pAmfVA' : 'https://forms.gle/N1FPRp3RG45EaBjUA'"
-              >
-                {{ $t("nav.feedback") }}
-              </a>
-            </div>
-          </div>
+          <a
+            class="navbar-item"
+            :href="currentLocale == 'en' ? 'https://forms.gle/NZg83heXM75pAmfVA' : 'https://forms.gle/N1FPRp3RG45EaBjUA'"
+          >
+            {{ $t("nav.feedback") }}
+          </a>
           <LocaleSwitcher />
         </div>
       </div>
     </nav>
+<<<<<<< HEAD
     <b-modal
       v-model="showAbout"
       has-modal-card
@@ -169,6 +169,8 @@
         </section>
       </div>
     </b-modal>
+=======
+>>>>>>> @{-1}
     <router-view
       @show-about="showAbout=true"
     />

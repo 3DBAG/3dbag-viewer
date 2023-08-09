@@ -71,6 +71,7 @@
             <th>{{ $t("tilenumber") }}</th>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.file") }}</th>
+            <th>SHA-256</th>
             <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
@@ -95,7 +96,8 @@
                 download
               > {{ getFileName( format ) }} </a>
             </td>
-            <td>{{ $root.$data[ "latest" ] }}</td>
+            <td>{{ activeTileData[format]['sha256'] ? activeTileData[format]['sha256'] : $t("download.sha256inwfs") }}</td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
       </table>
@@ -123,6 +125,12 @@
     <p>
       {{ $t("download.webservicespar") }}
     </p>
+
+    <b-message
+      type="is-warning"
+    >
+      {{ $t("download.webservices_warning") }}
+    </b-message>
 
     <div class="table-wrapper">
       <table>
@@ -162,24 +170,19 @@
     </div>
 
     <h1
-      id="downloads-postgres"
+      id="downloads-gpkg-dump"
       class="title is-3"
     >
-      PostgreSQL data dump
+      GPKG data dump
     </h1>
 
-    <p>{{ $t("download.psqlpar") }}</p>
-    <div
-      class="alert alert-warning"
-      role="alert"
-    >
-      <b>We fixed the <code>pand</code> table for v21.09.8 (it was broken at release), and now it contains the appropriate data.</b>
-    </div>
+    <p>{{ $t("download.gpgkdumppar") }}</p>
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
             <th>{{ $t("download.file") }}</th>
+            <th>SHA-256</th>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.size") }}</th>
             <th>{{ $t("download.version") }}</th>
@@ -189,26 +192,88 @@
           <tr>
             <td>
               <a
-                :href="PostgresFileURL"
+                :href="GPGKDumpFileURL"
                 download
-              > {{ PostgresFileURL.split('/').pop() }} </a>
+              > {{ GPGKDumpFileURL.split('/').pop() }} </a>
             </td>
             <td>
-              PostgreSQL
+              {{ GPGKDumpFileSHA256 }}
+            </td>
+            <td>
+              GPKG
               <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/postgresql'"
+                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/gpkg'"
                 target="_blank"
               ><b-icon
                 size="is-small"
                 icon="help-circle"
               /></a>
             </td>
-            <td>35GB</td>
-            <td>{{ $root.$data[ "latest" ] }}</td>
+            <td>{{ GPGKDumpFilesize }}</td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
       </table>
     </div>
+
+
+    <h1
+      id="metadata"
+      class="title is-3"
+    >
+      Metadata
+    </h1>
+
+    <p>{{ $t("download.metadatapar") }}</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ $t("download.format") }}</th>
+            <th>{{ $t("download.file") }}</th>
+            <th>{{ $t("download.version") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              JSON
+            </td>
+            <td>
+              <a
+                :href="metadata_url"
+                download
+              > metadata.json </a>
+            </td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <b-button
+      label="Preview Metadata"
+      icon-left="magnify"
+      @click="showMetadataJSON=true"
+    />
+
+    <b-modal
+      v-model="showMetadataJSON"
+      has-modal-card
+      width="90%"
+    >
+      <div
+        class="modal-card"
+        style="width: auto"
+      >
+        <section class="modal-card-body image">
+          <vue-json-pretty
+            :data="metadata_json"
+            :show-length="true"
+          />
+        </section>
+      </div>
+    </b-modal>
 
 
     <h1 class="title is-3">
@@ -222,12 +287,19 @@
         property="dct:title"
         rel="cc:attributionURL"
         href="https://3dbag.nl"
-      >3D BAG</a> by
+      >3D BAG</a> by the
       <a
         rel="cc:attributionURL dct:creator"
         property="cc:attributionName"
         href="https://3d.bk.tudelft.nl/"
-      >3D geoinformation research group</a> is licensed under
+      >3D geoinformation research group</a>
+      and
+      <a
+        rel="cc:attributionURL dct:creator"
+        property="cc:attributionName"
+        href="https://3dgi.xyz/"
+      >3DGI</a>
+      is licensed under
       <a
         href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1"
         target="_blank"
@@ -265,6 +337,9 @@ import { register as olproj4register } from 'ol/proj/proj4';
 import { get as olproj4get } from 'ol/proj';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 
+import VueJsonPretty from 'vue-json-pretty';
+import 'vue-json-pretty/lib/styles.css';
+
 function formatBytes( bytes, decimals ) {
 
 	if ( bytes == 0 ) return '0 Bytes';
@@ -280,17 +355,26 @@ export default {
 
 	name: 'DownloadView',
 
+	components: {
+		VueJsonPretty
+	},
+
 	data() {
 
 		return {
 			mapVisible: false,
+			showMetadataJSON: false,
 			map: null,
 			tileFormats: [ "CityJSON", "OBJ", "GPKG" ],
 
 			selectedTile: null,
-			PostgresFileURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "PostgreSQL" ],
-			WFSURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "WFS" ],
-			WMSURL: this.$root.$data[ "versions" ][ this.$root.$data[ "latest" ] ][ "WMS" ],
+			GPGKDumpFileURL: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "url" ],
+			GPGKDumpFilesize: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "filesize" ],
+			GPGKDumpFileSHA256: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "sha256" ],
+			WFSURL: this.$root.$data[ "version_data" ][ "WFS" ],
+			WMSURL: this.$root.$data[ "version_data" ][ "WMS" ],
+			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
+			metadata_json: Object(),
 			activeTileData: {
 				CityJSON: Object(),
 				OBJ: Object(),
@@ -333,6 +417,16 @@ export default {
 
 		}
 
+		console.log( this.metadata_url );
+
+		fetch( this.metadata_url )
+			.then( res => res.json() )
+			.then( ( out ) => {
+
+				this.metadata_json = out;
+
+			} ).catch( err => console.error( err ) );
+
 	},
 
 	methods: {
@@ -367,10 +461,16 @@ export default {
 
 		},
 
+		setFormatHash( format, sha256 ) {
+
+			this.activeTileData[ format ][ "sha256" ] = sha256;
+
+		},
+
 		setFormatData( format ) {
 
-			const latest = this.$root.$data[ "latest" ];
-			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "versions" ][ latest ][ format ].replace( "{TID}", this.selectedTile );
+			let tilecoords = this.selectedTile.split( "-" );
+			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replaceAll( "{TID_X}", tilecoords[ 0 ] ).replaceAll( "{TID_Y}", tilecoords[ 1 ] ).replaceAll( "{TID_Z}", tilecoords[ 2 ] );
 			const format_lower = format.toLowerCase();
 			this.activeTileData[ format ][ "docsURL" ] = 'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/' + format_lower;
 
@@ -433,7 +533,7 @@ export default {
 
 						return (
 							that.WFSURL + '?' +
-              'version=1.1.0&request=GetFeature&typename=BAG3d_v2:bag_tiles_3k&' +
+              'version=1.1.0&request=GetFeature&typename=tiles&' +
               'outputFormat=application/json&srsname=EPSG:28992&' +
               'bbox=' +
               extent.join( ',' ) +
@@ -471,7 +571,17 @@ export default {
 					that.map.addInteraction( select );
 					select.on( 'select', function ( e ) {
 
-						that.setActiveTile( e.selected[ 0 ].get( 'tile_id' ) );
+						let tile_id = e.selected[ 0 ].get( 'tile_id' );
+						tile_id = tile_id.replaceAll( '/', '-' );
+						console.log( tile_id );
+						that.setActiveTile( tile_id );
+
+						let cityjson_sha256 = e.selected[ 0 ].get( 'cj_sha256' );
+						that.setFormatHash( "CityJSON", cityjson_sha256 );
+						let obj_sha256 = e.selected[ 0 ].get( 'obj_sha256' );
+						that.setFormatHash( "OBJ", obj_sha256 );
+						let gpkg_sha256 = e.selected[ 0 ].get( 'gpkg_sha256' );
+						that.setFormatHash( "GPKG", gpkg_sha256 );
 
 					} );
 
@@ -521,4 +631,13 @@ export default {
   max-width: 500px;
   box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%)
 }
+
+.vjs-value-string {
+  color: #2c3e50;
+}
+.vjs-key {
+  color: #4f7de6;
+  font-weight: bold;
+}
+
 </style>

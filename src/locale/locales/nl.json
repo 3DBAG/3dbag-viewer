@@ -37,13 +37,16 @@
     "empty": "Geen resultaten gevonden"
     },
   "download": {
-    "webservicespar": "Deze laten je de gehele dataset verkennen in andere software (bijvoorbeeld QGIS) zonder iets van tevoren hoeven te downloaden.",
+    "webservicespar": "Deze laten je de gehele dataset verkennen in andere software (bijvoorbeeld QGIS) zonder iets van tevoren hoeven te downloaden. Let op: alleen de 2D-projectie van de modellen wordt bediend via WMS/WFS.",
+    "webservicespar_layers": "Beschikbare lagen",
+    "webservices_warning": "Het oude API eindpunt (https://data.3dbag.nl/api/BAG3D_v2) wordt na de volgende release uitgefaseerd!",
     "statictitle": "Downloads",
     "staticpicked": "voor tegelnummer ",
     "staticunpicked": "per tegel",
     "staticpar": "Om bestandsgrootten beheersbaar te houden is de 3D BAG data opgedeeld in tegels. Voor iedere tegel bieden we de data aan in verschillende bestandsformaten. Klik op de onderstaande knop om de gewilde tegel te kiezen en de downloadopties te zien.",
     "picktile": "Kies een tegel",
-    "psqlpar": "Het onderstaande PostgreSQL-bestand bevat de ruwe 3D BAG data voor geheel Nederland, inclusief geometrie en attributen. Let op: het is een erg groot bestand.",
+    "metadatapar": "Dit JSON bestand bevat metadata over de 3DBAG dataset inclusief gedtailleerde informatie over de gebruikte software voor het genereren van de 3DBAG en de bron data. Het schema van het metadatabestand volgt losjes de ISO 19115 metadatastandaard. Het is echter omgezet naar JSON en aangepast om beter aan onze behoeften te voldoen. Onder `identificationInfo` rapporteren we het huidige versienummer, contactinformatie en de licentie van de 3D BAG. Onder `dataQualityInfo.lineage` rapporteren we de versies van de brondatasets en de versies van de verwerkingssoftware die zijn gebruikt voor de huidige release.",
+    "gpgkdumppar": "Het onderstaande GPKG-bestand bevat de 3D BAG data voor geheel Nederland. Let op: het is een erg groot bestand. Het bestand is gecomprimeerd als Seek-Optimized ZIP, zie de documentatie over hoe je het bestand kunt openen zonder het eerst uit te pakken.",
     "selectedtiletrue": "Je hebt tegelnummer ",
     "selectedtiletrue2": " geselecteerd",
     "selectedtilefalse": "Selecteer een tegel op de kaart",
@@ -57,6 +60,7 @@
     "version": "Versie",
     "picktile2true": "Kies een andere tegel",
     "picktile2false": "Kies een tegel",
-    "restored": "in PostgreSQL"
+    "restored": "in PostgreSQL",
+    "sha256inwfs": "Zie tiles laag in WFS"
   }
 }

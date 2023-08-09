@@ -23,6 +23,16 @@
         @orient-north="orientNorth"
       />
     </section>
+    <transition name="fade">
+      <div
+        v-if="showLocationBox"
+        id="locationbox"
+        class="box"
+        @click="toggleLocationBox"
+      >
+        {{ locationBoxText }}
+      </div>
+    </transition>
     <BuildingInformation
       :building="pickedBuilding"
       :show="showBuildingInfo"
@@ -55,7 +65,7 @@
             {{ basemapOptions.attribution }}
           </span> |
         </span>
-        <a :href="'https://docs.3dbag.nl/'+$route.params.locale+'/copyright' ">© 3D BAG by tudelft3d</a>
+        <a :href="'https://docs.3dbag.nl/'+$route.params.locale+'/copyright' ">© 3D BAG by tudelft3d and 3DGI</a>
       </p>
     </div>
     <div id="debug-panel" />
@@ -86,7 +96,7 @@ export default {
 		return {
 
 			customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
-			BAG3DVersion: this.$root.$data[ 'versions' ][ this.$root.$data[ "latest" ] ],
+			BAG3DVersionData: this.$root.$data[ 'version_data' ],
 
 			camOffset: {
 				x: 400,
@@ -105,11 +115,14 @@ export default {
 					name: "BRT Achtergrondkaart (Grijs)",
 					icon: "map"
 				},
-				luchtfoto2020wmts: {
-					name: "Luchtfoto 2020",
+				luchtfotoWMTS: {
+					name: "Luchtfoto Actueel",
 					icon: "map"
 				}
 			},
+
+			showLocationBox: false,
+			locationBoxText: "",
 
 			tileset: 'lod22',
 			lods: {
@@ -162,7 +175,7 @@ export default {
 
 			}
 
-			return this.BAG3DVersion[ '3DTilesets' ][ this.tileset ];
+			return this.BAG3DVersionData[ '3DTilesets' ][ this.tileset ];
 
 		},
 
@@ -228,13 +241,13 @@ export default {
 					}
 				},
 
-				luchtfoto2020wmts: {
+				luchtfotoWMTS: {
 					type: "wmts",
 					attribution: "PDOK",
 					attributionURL: "https://www.pdok.nl/",
 					options: {
 						url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0?',
-						layer: '2020_ortho25',
+						layer: 'Actueel_ortho25',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
 						service: "WMTS",
@@ -359,6 +372,12 @@ export default {
 
 			window.open( this.reportDataIssueUrl + `&entry.547110854=${ identificatie }`, '_blank' );
 
+		},
+
+		toggleLocationBox: function () {
+
+			this.showLocationBox = ! this.showLocationBox;
+
 		}
 
 	}
@@ -393,7 +412,21 @@ export default {
 	height: 100%;
 
 }
-
+#locationbox {
+	text-align: center;
+	position: relative;
+	bottom: 2rem;
+	padding: 0.5rem;
+	background: rgba(255,255,255,0.8);
+	border: 0;
+	transition: opacity 0.3s;
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	width: fit-content;
+}
 #attribution {
 	position: absolute;
 	padding: 0 0.1rem;

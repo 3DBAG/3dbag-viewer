@@ -1,6 +1,60 @@
 {
-  "latest": "v21.09.8",
+  "latest": "v2023.08.09",
   "versions": {
+    "v2023.08.09" : {
+      "release-type" : "beta",
+
+      "GPKG_DUMP" : {
+        "url":"https://data.3dbag.nl/gpkg/v20230809/3dbag_nl.gpkg.zip",
+        "filesize": "18.8 GB (108 GB uncompressed)",
+        "sha256": "47c84f7fe2f519ab3eaca21b8bfdacb9f359bf04d3d3bf9d33285f4c11d974c9"
+      },
+
+      "OBJ" : "https://data.3dbag.nl/obj/v20230809/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}-obj.zip",
+
+      "CityJSON" : "https://data.3dbag.nl/cityjson/v20230809/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.city.json",
+      
+      "GPKG" : "https://data.3dbag.nl/gpkg/v20230809/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.gpkg",
+
+      "WFS" : "https://data.3dbag.nl/api/BAG3D/wfs",
+
+      "WMS" : "https://data.3dbag.nl/api/BAG3D/wms",
+
+      "3DTilesets" : {
+        "lod22": "https://3dbag.nl/download/3dtiles/v202306xx/lod22/tileset.json",
+				"lod13": "https://3dbag.nl/download/3dtiles/v202306xx/lod13/tileset.json",
+				"lod12": "https://3dbag.nl/download/3dtiles/v202306xx/lod12/tileset.json"
+      },
+
+      "metadata": "https://data.3dbag.nl/metadata/v20230809/metadata.json"
+    },
+    "v2023.06.22" : {
+      "release-type" : "beta",
+
+      "GPKG_DUMP" : {
+        "url":"https://data.3dbag.nl/gpkg/v20230622/3dbag_nl.gpkg.zip",
+        "filesize": "18 GB (108 GB uncompressed)",
+        "sha256": "36c693e06e1a967ad1535b03778fe42b3cb4b80bb92bb8e9ce9fd039912add12"
+      },
+
+      "OBJ" : "https://data.3dbag.nl/obj/v20230622/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}-obj.zip",
+
+      "CityJSON" : "https://data.3dbag.nl/cityjson/v20230622/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.city.json",
+      
+      "GPKG" : "https://data.3dbag.nl/gpkg/v20230622/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.gpkg",
+
+      "WFS" : "https://data.3dbag.nl/api/BAG3D/wfs",
+
+      "WMS" : "https://data.3dbag.nl/api/BAG3D/wms",
+
+      "3DTilesets" : {
+        "lod22": "https://3dbag.nl/download/3dtiles/v202306xx/lod22/tileset.json",
+				"lod13": "https://3dbag.nl/download/3dtiles/v202306xx/lod13/tileset.json",
+				"lod12": "https://3dbag.nl/download/3dtiles/v202306xx/lod12/tileset.json"
+      },
+
+      "metadata": "https://data.3dbag.nl/metadata/v20230622/metadata.json"
+    },
     "v21.09.8" : {
       "PostgreSQL" : "https://data.3dbag.nl/postgres/3dbag_v210908_fd2cee53.zip",
 

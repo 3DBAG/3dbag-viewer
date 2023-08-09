@@ -36,13 +36,16 @@
     "empty": "No results found"
     },
   "download": {
-    "webservicespar": "These allow you to explore the entire dataset in another software (eg. QGIS) without having to download anything beforehand.",
+    "webservicespar": "These allow you to explore the entire dataset in another software (eg. QGIS) without having to download anything beforehand. Note that only the 2D projection of the models is served via WMS/WFS.",
+    "webservicespar_layers": "Available layers",
+    "webservices_warning": "The old API endpoint (https://data.3dbag.nl/api/BAG3D_v2) will be deprecated after the next release!",
     "statictitle": "Downloads",
     "staticpicked": "for tile number ",
     "staticunpicked": "per tile",
     "staticpar": "To keep filesizes manageable the 3D BAG dataset is subdived in tiles. For each tile we offer the data in a number of different file formats. Use the button below to select the tile of interest to see the download options.",
     "picktile": "Pick a tile",
-    "psqlpar": "The PostgreSQL file below contain the raw 3D BAG data for the whole of the Netherlands, including geometry and attributes. Beware, this is a very large file to download.",
+    "metadatapar": "This JSON file contains metadata about the 3DBAG dataset including detailed information about the software used to generate 3D BAG and the source datasets. The schema of the metadata file loosely follows the ISO 19115 metadata standard. However, it has been converted to JSON and adapted to better fit our needs. Under `identificationInfo` we report the current version number, contact information and license of the 3D BAG. Under `dataQualityInfo.lineage` we report the versions of the source datasets and the versions of the processing software that were used for the current release.",
+    "gpgkdumppar": "The GPKG file below contains the 3D BAG data for the whole of the Netherlands. Beware, this is a very large file to download. The file is compressed as Seek-Optimized ZIP, see the documentation on how to access it without decompressing it first.",
     "selectedtiletrue": "You have selected tile number",
     "selectedtiletrue2": "",
     "selectedtilefalse": "Select a tile from the map",
@@ -56,6 +59,7 @@
     "version": "Version",
     "picktile2true": "Pick another tile",
     "picktile2false": "Pick a tile",
-    "restored": "in PostgreSQL"
+    "restored": "in PostgreSQL",
+    "sha256inwfs": "See tiles layer in WFS"
   }
 }

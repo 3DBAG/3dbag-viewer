@@ -220,11 +220,7 @@ export class TilesRenderer {
 		} );
 
 		const scenePosition = tile.getCenterPosition( transform );
-
-		// mesh.position.x = scenePosition.x;
-		// mesh.position.y = scenePosition.y;
 		mesh.position.set( scenePosition.x, scenePosition.y, scenePosition.z );
-
 		mesh.updateMatrix();
 
 	}
