@@ -165,6 +165,18 @@
             </td>
             <td><a :href="WFSURL+'?request=getcapabilities'">{{ WFSURL+'?request=getcapabilities' }}</a></td>
           </tr>
+          <tr>
+            <td>
+              OGC API Features (experimental) <a
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#ogcapi'"
+                target="_blank"
+              ><b-icon
+                size="is-small"
+                icon="help-circle"
+              /></a>
+            </td>
+            <td><a :href="OGCAPIURL">{{ OGCAPIURL }}</a></td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -373,6 +385,7 @@ export default {
 			GPGKDumpFileSHA256: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "sha256" ],
 			WFSURL: this.$root.$data[ "version_data" ][ "WFS" ],
 			WMSURL: this.$root.$data[ "version_data" ][ "WMS" ],
+			OGCAPIURL: this.$root.$data[ "version_data" ][ "OGCAPI" ],
 			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
 			metadata_json: Object(),
 			activeTileData: {

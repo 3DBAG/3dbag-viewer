@@ -135,7 +135,7 @@ export default {
 	data: function () {
 
 		return {
-			attr_names: [ 'identificatie', 'status', 'oorspronkelijkbouwjaar', 'b3_h_maaiveld', 'b3_volume_lod12', 'b3_volume_lod13', 'b3_volume_lod22', 'b3_dak_type', 'b3_pw_datum', 'b3_pw_bron', 'b3_kas_warenhuis', 'b3_reconstructie_onvolledig', 'b3_val3dity_lod12', 'b3_val3dity_lod13', 'b3_val3dity_lod22', 'b3_rmse_lod12', 'b3_rmse_lod13', 'b3_rmse_lod22', 'b3_mutatie_ahn3_ahn4', 'b3_nodata_fractie_ahn3', 'b3_nodata_fractie_ahn4', 'b3_nodata_radius_ahn3', 'b3_nodata_radius_ahn4', 'b3_pw_selectie_reden', 'b3_puntdichtheid_ahn3', 'b3_puntdichtheid_ahn4' ],
+			attr_names: [ 'identificatie', 'status', 'oorspronkelijkbouwjaar', 'b3_h_maaiveld', 'b3_volume_lod12', 'b3_volume_lod13', 'b3_volume_lod22', 'b3_dak_type', 'b3_pw_datum', 'b3_pw_bron', 'b3_kas_warenhuis', 'b3_reconstructie_onvolledig', 'b3_val3dity_lod12', 'b3_val3dity_lod13', 'b3_val3dity_lod22', 'b3_rmse_lod12', 'b3_rmse_lod13', 'b3_rmse_lod22', 'b3_mutatie_ahn3_ahn4', 'b3_nodata_fractie_ahn3', 'b3_nodata_fractie_ahn4', 'b3_nodata_radius_ahn3', 'b3_nodata_radius_ahn4', 'b3_pw_selectie_reden', 'b3_puntdichtheid_ahn3', 'b3_puntdichtheid_ahn4', 'b3_opp_buitenmuur', 'b3_opp_dak_plat', 'b3_opp_dak_schuin', 'b3_opp_grond', 'b3_opp_scheidingsmuur' ],
 			showAttributes: false
 		};
 
