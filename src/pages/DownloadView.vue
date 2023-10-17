@@ -299,7 +299,7 @@
         property="dct:title"
         rel="cc:attributionURL"
         href="https://3dbag.nl"
-      >3D BAG</a> by the
+      >3DBAG</a> by the
       <a
         rel="cc:attributionURL dct:creator"
         property="cc:attributionName"
@@ -329,7 +329,7 @@
       Read the <a
         href="https://docs.3dbag.nl/en/copyright"
         target="_blank"
-      >terms of use for the 3D BAG</a>.
+      >terms of use for the 3DBAG</a>.
     </p>
   </section>
 </template>

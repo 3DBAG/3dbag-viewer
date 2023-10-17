@@ -14,7 +14,7 @@
             class="logo-text"
             style="margin-right:0.4em; color: #000"
           >
-            3D BAG
+            3DBAG
           </router-link>
           <span
             class="logo-text"
