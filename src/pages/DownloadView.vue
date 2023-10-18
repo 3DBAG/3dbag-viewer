@@ -197,7 +197,7 @@
             <th>SHA-256</th>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.size") }}</th>
-            <th>{{ $t("download.api") }}</th>
+            <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
         <tbody>
