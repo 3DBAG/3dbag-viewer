@@ -167,8 +167,8 @@
           </tr>
           <tr>
             <td>
-              OGC API Features (experimental) <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#ogcapi'"
+              3D API (experimental) <a
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#3dapi'"
                 target="_blank"
               ><b-icon
                 size="is-small"
