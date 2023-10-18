@@ -97,7 +97,7 @@
               > {{ getFileName( format ) }} </a>
             </td>
             <td>{{ activeTileData[format]['sha256'] ? activeTileData[format]['sha256'] : $t("download.sha256inwfs") }}</td>
-            <td>{{ $root.$data[ "version_number" ] }}</td>
+            <td>{{ $root.$data[ "api_number" ] }}</td>
           </tr>
         </tbody>
       </table>
@@ -144,7 +144,7 @@
           <tr>
             <td>
               WMS <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#wms'"
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#wms-2d'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -156,7 +156,7 @@
           <tr>
             <td>
               WFS <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#wfs'"
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#wfs-2d'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -168,7 +168,7 @@
           <tr>
             <td>
               3D API (experimental) <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#3dapi'"
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#3dbag-api-3d'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -197,7 +197,7 @@
             <th>SHA-256</th>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.size") }}</th>
-            <th>{{ $t("download.version") }}</th>
+            <th>{{ $t("download.api") }}</th>
           </tr>
         </thead>
         <tbody>
