@@ -546,7 +546,7 @@ export default {
 
 						return (
 							that.WFSURL + '?' +
-              'version=1.1.0&request=GetFeature&typename=tiles&' +
+              'version=1.1.0&request=GetFeature&typename=BAG3D:Tiles&' +
               'outputFormat=application/json&srsname=EPSG:28992&' +
               'bbox=' +
               extent.join( ',' ) +
