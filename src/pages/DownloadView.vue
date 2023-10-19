@@ -126,12 +126,6 @@
       {{ $t("download.webservicespar") }}
     </p>
 
-    <b-message
-      type="is-warning"
-    >
-      {{ $t("download.webservices_warning") }}
-    </b-message>
-
     <div class="table-wrapper">
       <table>
         <thead>
