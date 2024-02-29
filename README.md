@@ -3,6 +3,9 @@
 This is the repository for the components of the website and viewer of the 3DBAG. For general 3DBAG or data-related questions, issues see https://docs.3dbag.nl/en/contact/ . 
 
 ## Installation
+
+Requires Node 16.
+
 ```
 npm install
 ```
