@@ -13,7 +13,7 @@
     "@tweenjs/tween.js": "^18.6.4",
     "@vuedoc/md": "^3.0.0",
     "@vuedoc/parser": "^3.0.0",
-    "3d-tiles-renderer": "^0.3.3",
+    "3d-tiles-renderer": "0.3.3",
     "3d-tiles-tools": "^0.2.1",
     "buefy": "^0.9.3",
     "core-js": "^3.6.5",
