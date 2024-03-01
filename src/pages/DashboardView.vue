@@ -7,7 +7,7 @@
       <iframe
         class="wrapped-iframe"
         width="100%"
-        src="http://localhost:5000/dashboard"
+        src="https://dev.3dbag.nl/dashboard"
         allowfullscreen
       />
     </div>
@@ -16,10 +16,7 @@
 
 <script>
 export default {
-	// https://stackoverflow.com/a/52635578
-
 	name: "DashboardView",
-
 };
 </script>
 
