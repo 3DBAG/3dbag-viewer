@@ -282,6 +282,54 @@
     </b-modal>
 
 
+    <h1
+      id="downloads-versions-dump"
+      class="title is-3"
+    >
+      Other versions
+    </h1>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ $t("download.file") }}</th>
+            <th>SHA-256</th>
+            <th>{{ $t("download.format") }}</th>
+            <th>{{ $t("download.size") }}</th>
+            <th>Metadata</th>
+            <th>{{ $t("download.version") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="version in versions_available"
+            :key="version"
+          >
+            <td>
+              <a
+                :href="version_data_all[ version ].GPKG_DUMP.url"
+                download
+              > {{ version_data_all[ version ].GPKG_DUMP.url.split('/').pop() }} </a>
+            </td>
+            <td>
+              {{ version_data_all[ version ].GPKG_DUMP.sha256 }}
+            </td>
+            <td>GPKG</td>
+            <td>{{ version_data_all[ version ].GPKG_DUMP.filesize }}</td>
+            <td>
+              <a
+                :href="version_data_all[ version ].metadata"
+                download
+              > metadata.json </a>
+            </td>
+            <td>{{ version }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+
     <h1 class="title is-3">
       Terms of use
     </h1>
@@ -342,6 +390,8 @@ import { click as OLclick } from 'ol/events/condition';
 import { register as olproj4register } from 'ol/proj/proj4';
 import { get as olproj4get } from 'ol/proj';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
+// BAG3D is also imported in main.js
+import BAG3D from '@/assets/3dbag_versions.json';
 
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
@@ -387,6 +437,9 @@ export default {
 				OBJ: Object(),
 				GPKG: Object(),
 			},
+
+			versions_available: [ "v2023.10.08", "v2023.08.09", "v2023.06.22" ],
+			version_data_all: BAG3D.versions
 		};
 
 	},
