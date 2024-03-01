@@ -4,7 +4,7 @@ This is the repository for the components of the website and viewer of the 3DBAG
 
 ## Installation
 
-Requires Node 16.
+Requires Node version 16 (you can use [nvm](https://github.com/nvm-sh/nvm) to install)
 
 ```
 npm install
