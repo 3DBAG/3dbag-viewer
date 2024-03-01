@@ -3,6 +3,7 @@ import Router from 'vue-router';
 import ThreeViewer from '@/pages/Viewer';
 import Documentation from '@/pages/Documentation';
 import DownloadView from '@/pages/DownloadView';
+import DashboardView from '@/pages/DashboardView';
 import i18n from "@/locale/i18n";
 
 Vue.use( Router );
@@ -31,6 +32,11 @@ const router = new Router( {
 					path: 'download',
 					name: 'Download',
 					component: DownloadView
+				},
+				{
+					path: 'dashboard',
+					name: 'Dashboard',
+					component: DashboardView
 				},
 				{
 					path: 'docs',

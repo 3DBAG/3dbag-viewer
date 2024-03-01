@@ -88,6 +88,13 @@
           >
             {{ $t("nav.download") }}
           </router-link>
+          <router-link
+            to="/dashboard"
+            :class="{'is-active': currentRouteName=='Dashboard'}"
+            class="navbar-item"
+          >
+            {{ $t("nav.dashboard") }}
+          </router-link>
           <a
             :href="'https://docs.3dbag.nl/' + currentLocale"
             class="navbar-item docs-link"
