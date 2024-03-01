@@ -8,9 +8,9 @@
     "lint": "vue-cli-service lint",
     "docs": "npx vuedoc.md src/components/*.vue --output docs/"
   },
-  "engines" : {
-    "npm" : ">=8.0.0 <9.0.0",
-    "node" : ">=16.0.0 <17.0.0"
+  "engines": {
+    "npm": ">=8.0.0 <9.0.0",
+    "node": ">=16.0.0 <17.0.0"
   },
   "dependencies": {
     "@mdi/font": "^5.7.55",
