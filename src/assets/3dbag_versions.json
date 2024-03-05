@@ -3,7 +3,7 @@
   "versions": {
     "v2024.02.28" : {
       "release-type" : "beta",
-      "archive_public" : true,
+      "archive_public" : false,
 
       "GPKG_DUMP" : {
         "url":"https://data.3dbag.nl/v20240228/3dbag_nl.gpkg.zip",
@@ -43,6 +43,8 @@
         "sha256": "85d840a7dff29e0b04ccec0390278caeebb2bd5c7b8823a65fe6fe1200a57ce9"
       },
 
+      "TILE_INDEX" : "https://data.3dbag.nl/v20231008/tile_index.fgb",
+
       "OBJ" : "https://data.3dbag.nl/v20231008/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}-obj.zip",
 
       "CityJSON" : "https://data.3dbag.nl/v20231008/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.city.json",
@@ -65,7 +67,7 @@
     },
     "v2023.08.09" : {
       "release-type" : "beta",
-      "archive_public" : true,
+      "archive_public" : false,
 
       "GPKG_DUMP" : {
         "url":"https://data.3dbag.nl/v20230809/3dbag_nl.gpkg.zip",
@@ -93,13 +95,15 @@
     },
     "v2023.06.22" : {
       "release-type" : "beta",
-      "archive_public" : true,
+      "archive_public" : false,
 
       "GPKG_DUMP" : {
         "url":"https://data.3dbag.nl/v20230622/3dbag_nl.gpkg.zip",
         "filesize": "18 GB (108 GB uncompressed)",
         "sha256": "36c693e06e1a967ad1535b03778fe42b3cb4b80bb92bb8e9ce9fd039912add12"
       },
+
+      "TILE_INDEX" : "https://data.3dbag.nl/v20230622/tile_index.fgb",
 
       "OBJ" : "https://data.3dbag.nl/v20230622/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}-obj.zip",
 

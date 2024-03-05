@@ -97,14 +97,14 @@
               > {{ getFileName( format ) }} </a>
             </td>
             <td>{{ activeTileData[format]['sha256'] ? activeTileData[format]['sha256'] : $t("download.sha256inwfs") }}</td>
-            <td>{{ $root.$data[ "api_number" ] }}</td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <button
-      class="mx-1 button is-primary"
+      class="mx-1 mb-5 button is-primary"
       @click="showMap()"
     >
       <p v-if="selectedTile">
@@ -114,6 +114,42 @@
         {{ $t("download.picktile2false") }}
       </p>
     </button>
+
+    <p>
+      {{ $t("download.tile_index_par") }}
+    </p>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ $t("download.file") }}</th>
+            <th>{{ $t("download.format") }}</th>
+            <th>{{ $t("download.version") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <a
+                :href="TileIndexFileURL"
+                download
+              > {{ TileIndexFileURL }} </a>
+            </td>
+            <td>
+              FlatGeoBuf
+              <a
+                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/fgb'"
+                target="_blank"
+              ><b-icon
+                size="is-small"
+                icon="help-circle"
+              /></a>
+            </td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <h1
       id="webservices"
@@ -286,44 +322,44 @@
       id="downloads-versions-dump"
       class="title is-3"
     >
-      Other versions
+      {{ $t("download.archived_title") }}
     </h1>
 
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>{{ $t("download.file") }}</th>
-            <th>SHA-256</th>
-            <th>{{ $t("download.format") }}</th>
-            <th>{{ $t("download.size") }}</th>
-            <th>Metadata</th>
             <th>{{ $t("download.version") }}</th>
+            <th>Metadata</th>
+            <th>{{ $t("download.gpkg_dump") }}</th>
+            <th>{{ $t("download.tile_index") }}</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="version in versions_available"
+            v-for="(data, version) in versions_data_archived"
             :key="version"
           >
+            <td>{{ version }}</td>
             <td>
               <a
-                :href="version_data_all[ version ].GPKG_DUMP.url"
-                download
-              > {{ version_data_all[ version ].GPKG_DUMP.url.split('/').pop() }} </a>
-            </td>
-            <td>
-              {{ version_data_all[ version ].GPKG_DUMP.sha256 }}
-            </td>
-            <td>GPKG</td>
-            <td>{{ version_data_all[ version ].GPKG_DUMP.filesize }}</td>
-            <td>
-              <a
-                :href="version_data_all[ version ].metadata"
+                :href="data['metadata']"
                 download
               > metadata.json </a>
             </td>
-            <td>{{ version }}</td>
+            <td>
+              <a
+                :href="data['GPKG_DUMP']['url']"
+                download
+              > {{ data['GPKG_DUMP']['url'].split('/').pop() }}</a>
+              (SHA-256)
+            </td>
+            <td>
+              <a
+                :href="data['TILE_INDEX']"
+                download
+              > {{ data['TILE_INDEX'] }}</a>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -390,8 +426,6 @@ import { click as OLclick } from 'ol/events/condition';
 import { register as olproj4register } from 'ol/proj/proj4';
 import { get as olproj4get } from 'ol/proj';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
-// BAG3D is also imported in main.js
-import BAG3D from '@/assets/3dbag_versions.json';
 
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
@@ -424,6 +458,7 @@ export default {
 			tileFormats: [ "CityJSON", "OBJ", "GPKG" ],
 
 			selectedTile: null,
+			TileIndexFileURL: this.$root.$data[ "version_data" ][ "TILE_INDEX" ],
 			GPGKDumpFileURL: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "url" ],
 			GPGKDumpFilesize: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "filesize" ],
 			GPGKDumpFileSHA256: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "sha256" ],
@@ -431,15 +466,13 @@ export default {
 			WMSURL: this.$root.$data[ "version_data" ][ "WMS" ],
 			OGCAPIURL: this.$root.$data[ "version_data" ][ "OGCAPI" ],
 			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
+			versions_data_archived: this.$root.$data[ "versions_data_archived" ],
 			metadata_json: Object(),
 			activeTileData: {
 				CityJSON: Object(),
 				OBJ: Object(),
 				GPKG: Object(),
 			},
-
-			versions_available: [ "v2023.10.08", "v2023.08.09", "v2023.06.22" ],
-			version_data_all: BAG3D.versions
 		};
 
 	},
@@ -478,6 +511,7 @@ export default {
 		}
 
 		console.log( this.metadata_url );
+		console.log( this.versions_data_archived );
 
 		fetch( this.metadata_url )
 			.then( res => res.json() )

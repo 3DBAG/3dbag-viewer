@@ -16,7 +16,21 @@ Vue.use( Buefy );
 Vue.config.productionTip = false;
 
 new Vue( {
-	data: { version_data: BAG3D[ "versions" ][ BAG3D[ "latest" ] ], version_number: BAG3D[ "latest" ], landmarkLocations: landmarkLocations },
+	data: {
+		version_data: BAG3D[ "versions" ][ BAG3D[ "latest" ] ],
+		version_number: BAG3D[ "latest" ],
+		// versions_data_archived: Object.entries( BAG3D[ "versions" ] ).filter( x => x[ 0 ][ 'archive_public' ] ),
+		versions_data_archived: Object.entries( BAG3D[ "versions" ] ).reduce( ( acc, [ key, value ] ) => {
+
+			if ( value[ "archive_public" ] ) {
+
+				acc[ key ] = value;
+
+			}
+			return acc;
+
+		}, {} ),
+		landmarkLocations: landmarkLocations },
 	render: h => h( App ),
 	router,
 	i18n,

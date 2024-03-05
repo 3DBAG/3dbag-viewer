@@ -61,6 +61,10 @@
     "picktile2true": "Pick another tile",
     "picktile2false": "Pick a tile",
     "restored": "in PostgreSQL",
-    "sha256inwfs": "See tiles layer in WFS"
+    "sha256inwfs": "See tiles layer in WFS",
+    "gpkg_dump": "GPKG dump",
+    "tile_index": "Tile index",
+    "archived_title": "Archived versions",
+    "tile_index_par": "Alternatively you can access the complete tile index directly."
   }
 }
