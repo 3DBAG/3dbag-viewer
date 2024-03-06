@@ -352,7 +352,9 @@
                 :href="data['GPKG_DUMP']['url']"
                 download
               > {{ data['GPKG_DUMP']['url'].split('/').pop() }}</a>
-              (SHA-256)
+              (<a
+                :href="data['GPKG_DUMP']['url'] + '.sha256.txt'"
+              >SHA-256</a>)
             </td>
             <td>
               <a

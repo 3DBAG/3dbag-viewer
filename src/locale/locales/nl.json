@@ -62,10 +62,10 @@
     "picktile2true": "Kies een andere tegel",
     "picktile2false": "Kies een tegel",
     "restored": "in PostgreSQL",
-    "sha256inwfs": "Zie tiles laag in WFS",
+    "sha256inwfs": "Zie tegel index",
     "gpkg_dump": "GPKG dump",
     "tile_index": "Tegel index",
-    "archived_title": "Gearchiveerde versies",
+    "archived_title": "Vorige versies",
     "tile_index_par": "Of je kunt de complete tegel index opvragen."
   }
 }
