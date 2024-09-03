@@ -24,6 +24,12 @@
     "title": "Status AHN4 update",
     "body" : "Voor nieuws omtrent de aankomende AHN4 update volg ons op"
   },
+  "userMeeting" : {
+    "title": "Gebruikersbijeenkomst",
+    "body" : "We organiseren 3DBAG gebruikers en developers bijeenkomsten op 2 oktober",
+    "user" : "gebruikers",
+    "developer" : "ontwikkelaars"
+  },
   "viewer": {
     "feedback": "Geef feedback",
     "issue": "Rapporteer een probleem met dit gebouw",

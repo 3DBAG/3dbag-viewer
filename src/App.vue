@@ -154,7 +154,7 @@ export default {
 
 	mounted() {
 
-		// this.serviceNotice();
+		this.serviceNotice();
 
 	},
 
@@ -163,9 +163,11 @@ export default {
 
 			this.$buefy.toast.open( {
 				indefinite: true,
-				message: this.$t( "serviceNotice.body" ) + " <a class='has-text-weight-semibold has-text-dark' href='https://twitter.com/3D_BAG/status/1671265536142102528'>twitter</a>",
+				'pause-on-hover': true,
+				duration: 10000,
+				message: "U bent welkom op de 3DBAG <a class='has-text-weight-semibold has-text-light' href='https://www.geonovum.nl/over-geonovum/actueel/3dbag-gebruikersmidddag'>gebruikers-</a> en <a class='has-text-weight-semibold has-text-light' href='https://www.geonovum.nl/over-geonovum/agenda/3dbag-developers-startbijeenkomst'>developersbijeenkomst</a> op 2 oktober",
 				position: 'is-bottom',
-				type: 'is-warning'
+				type: 'is-primary'
 			} );
 
 		},
