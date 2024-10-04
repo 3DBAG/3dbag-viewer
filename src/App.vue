@@ -165,7 +165,7 @@ export default {
 				indefinite: true,
 				'pause-on-hover': true,
 				duration: 10000,
-				message: "U bent welkom op de 3DBAG <a class='has-text-weight-semibold has-text-light' href='https://www.geonovum.nl/over-geonovum/actueel/3dbag-gebruikersmidddag'>gebruikers-</a> en <a class='has-text-weight-semibold has-text-light' href='https://www.geonovum.nl/over-geonovum/agenda/3dbag-developers-startbijeenkomst'>developersbijeenkomst</a> op 2 oktober",
+				message: "U bent welkom op de 3DBAG <a class='has-text-weight-semibold has-text-light' href='https://www.geonovum.nl/over-geonovum/agenda/3dbag-developers-startbijeenkomst'>developersbijeenkomst</a> op 13 november",
 				position: 'is-bottom',
 				type: 'is-primary'
 			} );
