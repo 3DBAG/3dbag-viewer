@@ -52,3 +52,7 @@ If you are using VS Code for development, you can enable ESLint suggestions on t
 ],
 "vetur.validation.template": false
 ```
+
+## 3DBAG organisation
+
+This software is part of the 3DBAG project. For more information visit the [3DBAG organisation](https://github.com/3DBAG).
