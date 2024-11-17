@@ -154,7 +154,7 @@ export default {
 
 	mounted() {
 
-		this.serviceNotice();
+		// this.serviceNotice();
 
 	},
 
