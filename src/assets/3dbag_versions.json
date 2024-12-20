@@ -1,9 +1,41 @@
 {
-  "latest": "v2024.04.20",
+  "latest": "v2024.12.16",
   "versions": {
-    "v2024.04.20" : {
+    "v2024.12.16" : {
       "release-type" : "beta",
       "archive_public" : false,
+
+      "GPKG_DUMP" : {
+        "url":"https://data.3dbag.nl/v20241216/3dbag_nl.gpkg.zip",
+        "filesize": "20 GB (100+ GB uncompressed)",
+        "sha256": "43b1218b5dd2fa6071c1e962b7f9308968cdbd4f5afa417b87b5655f7c3ffeec"
+      },
+
+      "TILE_INDEX" : "https://data.3dbag.nl/v20241216/tile_index.fgb",
+
+      "OBJ" : "https://data.3dbag.nl/v20241216/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}-obj.zip",
+
+      "CityJSON" : "https://data.3dbag.nl/v20241216/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.city.json",
+
+      "GPKG" : "https://data.3dbag.nl/v20241216/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.gpkg",
+
+      "WFS" : "https://data.3dbag.nl/api/BAG3D/wfs",
+
+      "WMS" : "https://data.3dbag.nl/api/BAG3D/wms",
+
+      "OGCAPI" : "https://api.3dbag.nl/",
+
+      "3DTilesets" : {
+        "lod22": "https://data.3dbag.nl/v20241216/3dtiles/lod22/tileset.json",
+        "lod13": "https://data.3dbag.nl/v20241216/3dtiles/lod13/tileset.json",
+        "lod12": "https://data.3dbag.nl/v20241216/3dtiles/lod12/tileset.json"
+      },
+
+      "metadata": "https://data.3dbag.nl/v20241216/metadata.json"
+    },
+    "v2024.04.20" : {
+      "release-type" : "beta",
+      "archive_public" : true,
 
       "GPKG_DUMP" : {
         "url":"https://data.3dbag.nl/v20240420/3dbag_nl.gpkg.zip",
