@@ -23,6 +23,23 @@
     seedrandom "^3.0.5"
     yargs "^17.5.1"
 
+"@achrinza/event-pubsub@5.0.11":
+  version "5.0.11"
+  resolved "https://registry.yarnpkg.com/@achrinza/event-pubsub/-/event-pubsub-5.0.11.tgz#8aadeb5b4d8d8b7ac7631269793bdb12fc38f78d"
+  integrity sha512-H/bswjSh/wMIgtizHIdeQQuquzBsia0uqf0IaadMKhS7jv5wX0iMqkVbYDZhUhbjJqXnfX4jjzgclt24aizdHA==
+  dependencies:
+    "@achrinza/strong-type" "0.1.14"
+
+"@achrinza/node-ipc@10.1.11":
+  version "10.1.11"
+  resolved "https://registry.yarnpkg.com/@achrinza/node-ipc/-/node-ipc-10.1.11.tgz#22263c89aa7a5f3ae42d072b0b1e28b6e5e84800"
+  integrity sha512-3z2yix2G8KP8gW6dWgRPj61Mu2nleqbWqTuS5vluZiXe2VDFkimqaeb4fnuS6JV2nhJz4gX+PR5PQjRKsuXm8w==
+  dependencies:
+    "@achrinza/event-pubsub" "5.0.11"
+    "@achrinza/strong-type" "1.1.20"
+    "@node-ipc/js-queue" "2.0.3"
+    js-message "1.0.7"
+
 "@achrinza/node-ipc@9.2.2":
   version "9.2.2"
   resolved "https://registry.yarnpkg.com/@achrinza/node-ipc/-/node-ipc-9.2.2.tgz#ae1b5d3d6a9362034eea60c8d946b93893c2e4ec"
@@ -31,6 +48,16 @@
     "@node-ipc/js-queue" "2.0.3"
     event-pubsub "4.3.0"
     js-message "1.0.7"
+
+"@achrinza/strong-type@0.1.14":
+  version "0.1.14"
+  resolved "https://registry.yarnpkg.com/@achrinza/strong-type/-/strong-type-0.1.14.tgz#8d72de8ff2849143093d1acaafdd377299818683"
+  integrity sha512-Se5kMdqRxrjBfpUnVS819OUqW6XUj2ryOHNkZizQ44FGQMfr5X+RXyi4Y8DZn5+lsx2sdnIylpmK6N7TGMpDrw==
+
+"@achrinza/strong-type@1.1.20":
+  version "1.1.20"
+  resolved "https://registry.yarnpkg.com/@achrinza/strong-type/-/strong-type-1.1.20.tgz#8dc16812aec359e85403209537fa141347ff9fdb"
+  integrity sha512-7+A0aC1C6tt1j69phZocl13RZ4vzz6W6jFhSUty9KNgKyoUH48oeZlSQdj2VONlT+sbdkfO7VJJbWiKBqNwebA==
 
 "@ampproject/remapping@^2.2.0":
   version "2.3.0"
