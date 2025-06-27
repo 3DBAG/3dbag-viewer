@@ -13,12 +13,13 @@
     "node": ">=16.0.0 <25.0.0"
   },
   "dependencies": {
+    "3d-tiles-renderer": "0.3.3",
+    "3d-tiles-tools": "^0.2.1",
+    "@achrinza/node-ipc": "10.1.11",
     "@mdi/font": "^5.7.55",
     "@tweenjs/tween.js": "^18.6.4",
     "@vuedoc/md": "^3.0.0",
     "@vuedoc/parser": "^3.0.0",
-    "3d-tiles-renderer": "0.3.3",
-    "3d-tiles-tools": "^0.2.1",
     "buefy": "^0.9.3",
     "core-js": "^3.6.5",
     "debounce": "^1.2.0",
