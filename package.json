@@ -10,20 +10,22 @@
   },
   "engines": {
     "npm": ">=8.0.0 <9.0.0",
-    "node": ">=16.0.0 <17.0.0"
+    "node": ">=16.0.0 <25.0.0"
   },
   "dependencies": {
+    "3d-tiles-renderer": "0.3.3",
+    "3d-tiles-tools": "^0.2.1",
+    "@achrinza/node-ipc": "10.1.11",
     "@mdi/font": "^5.7.55",
     "@tweenjs/tween.js": "^18.6.4",
     "@vuedoc/md": "^3.0.0",
     "@vuedoc/parser": "^3.0.0",
-    "3d-tiles-renderer": "0.3.3",
-    "3d-tiles-tools": "^0.2.1",
     "buefy": "^0.9.3",
     "core-js": "^3.6.5",
     "debounce": "^1.2.0",
     "jest": "^26.4.2",
     "lodash": "^4.17.20",
+    "node-ipc": "^11.0.2",
     "ol": "^6.5.0",
     "proj4": "^2.7.2",
     "sass": "^1.27.0",
