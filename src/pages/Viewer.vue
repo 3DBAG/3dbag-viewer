@@ -95,7 +95,7 @@ export default {
 
 		return {
 
-			customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
+			customTilesUrl: '/tiles/tileset.json',
 			BAG3DVersionData: this.$root.$data[ 'version_data' ],
 
 			camOffset: {
@@ -124,7 +124,7 @@ export default {
 			showLocationBox: false,
 			locationBoxText: "",
 
-			tileset: 'lod22',
+			tileset: 'custom',
 			lods: {
 				lod22: {
 					name: "LoD 2.2",

@@ -1,6 +1,6 @@
 import {
 	Texture,
-	PlaneBufferGeometry,
+	PlaneGeometry,
 	MeshBasicMaterial,
 	Mesh,
 	Group,
@@ -166,7 +166,7 @@ export class TilesRenderer {
 
 	createTile( tile, transform ) {
 
-		var geometry = this.track( new PlaneBufferGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
+		var geometry = this.track( new PlaneGeometry( tile.tileMatrix.tileSpanX, tile.tileMatrix.tileSpanY ) );
 
 		var mesh = new Mesh( geometry, this.tempMaterial );
 		mesh.name = this.tileLevel;
