@@ -310,6 +310,7 @@
           <tr>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.file") }}</th>
+            <th>{{ $t("download.description") }}</th>
             <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
@@ -324,13 +325,31 @@
                 download
               > metadata.json </a>
             </td>
+            <td>
+              {{ $t("download.metadatadesc") }}
+            </td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
+          </tr>
+          <tr>
+            <td>
+              txt
+            </td>
+            <td>
+              <a
+                :href="missing_buildings_url"
+                download
+              > missing_buildings.txt </a>
+            </td>
+            <td>
+              {{ $t("download.nonreconstructeddesc") }}
+            </td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
       </table>
     </div>
     <b-button
-      label="Preview Metadata"
+      label="Preview metadata.json"
       icon-left="magnify"
       @click="showMetadataJSON=true"
     />
@@ -507,6 +526,7 @@ export default {
 			Cesium3DTilesLoD13URL: this.$root.$data[ "version_data" ][ "3DTilesets" ][ "lod13" ],
 			Cesium3DTilesLoD22URL: this.$root.$data[ "version_data" ][ "3DTilesets" ][ "lod22" ],
 			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
+			missing_buildings_url: this.$root.$data[ "version_data" ][ "missing_buildings" ],
 			versions_data_archived: this.$root.$data[ "versions_data_archived" ],
 			metadata_json: Object(),
 			activeTileData: {

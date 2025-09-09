@@ -39,7 +39,8 @@
         "lod12": "https://data.3dbag.nl/v20250903/cesium3dtiles/lod12/tileset.json"
       },
 
-      "metadata": "https://data.3dbag.nl/v20250903/metadata.json"
+      "metadata": "https://data.3dbag.nl/v20250903/metadata.json",
+      "missing_buildings": "https://data.3dbag.nl/v20250903/missing_buildings.txt"
     },
     "v2024.12.16" : {
       "release-type" : "beta",
