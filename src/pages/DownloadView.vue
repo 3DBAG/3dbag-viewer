@@ -209,8 +209,8 @@
           </tr>
           <tr>
             <td>
-              Cesium 3D Tiles (LoD1.2) <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#cesium-3d-tiles'"
+              3D Tiles (LoD1.2) <a
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#3d-tiles'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -221,8 +221,8 @@
           </tr>
           <tr>
             <td>
-              Cesium 3D Tiles (LoD1.3) <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#cesium-3d-tiles'"
+              3D Tiles (LoD1.3) <a
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#3d-tiles'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -233,8 +233,8 @@
           </tr>
           <tr>
             <td>
-              Cesium 3D Tiles (LoD2.2) <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#cesium-3d-tiles'"
+              3D Tiles (LoD2.2) <a
+                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#3d-tiles'"
                 target="_blank"
               ><b-icon
                 size="is-small"
