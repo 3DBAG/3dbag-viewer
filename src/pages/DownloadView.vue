@@ -326,7 +326,7 @@
               > metadata.json </a>
             </td>
             <td>
-            {{ $t("download.metadatadesc") }}
+              {{ $t("download.metadatadesc") }}
             </td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
@@ -336,12 +336,12 @@
             </td>
             <td>
               <a
-                :href="metadata_url"
+                :href="not_reconstructed_url"
                 download
               > not_reconstructed_buildings.txt </a>
             </td>
             <td>
-            {{ $t("download.nonreconstructeddesc") }}
+              {{ $t("download.nonreconstructeddesc") }}
             </td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
@@ -349,7 +349,7 @@
       </table>
     </div>
     <b-button
-      label="Preview Metadata"
+      label="Preview metadata.json"
       icon-left="magnify"
       @click="showMetadataJSON=true"
     />
@@ -526,6 +526,7 @@ export default {
 			Cesium3DTilesLoD13URL: this.$root.$data[ "version_data" ][ "3DTilesets" ][ "lod13" ],
 			Cesium3DTilesLoD22URL: this.$root.$data[ "version_data" ][ "3DTilesets" ][ "lod22" ],
 			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
+			not_reconstructed_url: this.$root.$data[ "version_data" ][ "not_reconstructed" ],
 			versions_data_archived: this.$root.$data[ "versions_data_archived" ],
 			metadata_json: Object(),
 			activeTileData: {
