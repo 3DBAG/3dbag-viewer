@@ -40,7 +40,7 @@
       },
 
       "metadata": "https://data.3dbag.nl/v20250903/metadata.json",
-      "not_reconstructed": "https://data.3dbag.nl/v20250903/not_reconstructed_buildings.txt"
+      "missing_buildings": "https://data.3dbag.nl/v20250903/missing_buildings.txt"
     },
     "v2024.12.16" : {
       "release-type" : "beta",

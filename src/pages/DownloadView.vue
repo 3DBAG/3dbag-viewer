@@ -336,9 +336,9 @@
             </td>
             <td>
               <a
-                :href="not_reconstructed_url"
+                :href="missing_buildings_url"
                 download
-              > not_reconstructed_buildings.txt </a>
+              > missing_buildings.txt </a>
             </td>
             <td>
               {{ $t("download.nonreconstructeddesc") }}
@@ -526,7 +526,7 @@ export default {
 			Cesium3DTilesLoD13URL: this.$root.$data[ "version_data" ][ "3DTilesets" ][ "lod13" ],
 			Cesium3DTilesLoD22URL: this.$root.$data[ "version_data" ][ "3DTilesets" ][ "lod22" ],
 			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
-			not_reconstructed_url: this.$root.$data[ "version_data" ][ "not_reconstructed" ],
+			missing_buildings_url: this.$root.$data[ "version_data" ][ "missing_buildings" ],
 			versions_data_archived: this.$root.$data[ "versions_data_archived" ],
 			metadata_json: Object(),
 			activeTileData: {
