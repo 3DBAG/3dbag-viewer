@@ -503,9 +503,9 @@ export default {
 			WFSURL: this.$root.$data[ "version_data" ][ "WFS" ],
 			WMSURL: this.$root.$data[ "version_data" ][ "WMS" ],
 			OGCAPIURL: this.$root.$data[ "version_data" ][ "OGCAPI" ],
-			Cesium3DTilesLoD12URL: this.$root.$data[ "version_data" ][ "Cesium3DTilesets" ][ "lod12" ],
-			Cesium3DTilesLoD13URL: this.$root.$data[ "version_data" ][ "Cesium3DTilesets" ][ "lod13" ],
-			Cesium3DTilesLoD22URL: this.$root.$data[ "version_data" ][ "Cesium3DTilesets" ][ "lod22" ],
+			Cesium3DTilesLoD12URL: this.$root.$data[ "version_data" ][ "3DTilesets" ][ "lod12" ],
+			Cesium3DTilesLoD13URL: this.$root.$data[ "version_data" ][ "3DTilesets" ][ "lod13" ],
+			Cesium3DTilesLoD22URL: this.$root.$data[ "version_data" ][ "3DTilesets" ][ "lod22" ],
 			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
 			versions_data_archived: this.$root.$data[ "versions_data_archived" ],
 			metadata_json: Object(),
@@ -692,7 +692,7 @@ export default {
 					// sample data center
 					// center: [120953, 486328],
 					// 3Dgeoinfo office
-					center: [ 155000.0, 463000.0 ],
+					center: [ 85177.9151549, 446749.16831151 ],
 					maxZoom: 19,
 					zoom: 12
 				} );
