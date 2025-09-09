@@ -310,6 +310,7 @@
           <tr>
             <th>{{ $t("download.format") }}</th>
             <th>{{ $t("download.file") }}</th>
+            <th>{{ $t("download.description") }}</th>
             <th>{{ $t("download.version") }}</th>
           </tr>
         </thead>
@@ -323,6 +324,24 @@
                 :href="metadata_url"
                 download
               > metadata.json </a>
+            </td>
+            <td>
+            {{ $t("download.metadatadesc") }}
+            </td>
+            <td>{{ $root.$data[ "version_number" ] }}</td>
+          </tr>
+          <tr>
+            <td>
+              txt
+            </td>
+            <td>
+              <a
+                :href="metadata_url"
+                download
+              > not_reconstructed_buildings.txt </a>
+            </td>
+            <td>
+            {{ $t("download.nonreconstructeddesc") }}
             </td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
