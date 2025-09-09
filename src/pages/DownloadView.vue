@@ -712,7 +712,7 @@ export default {
 					// sample data center
 					// center: [120953, 486328],
 					// 3Dgeoinfo office
-					center: [ 85177.9151549, 446749.16831151 ],
+					center: [ 155000.0, 463000.0 ],
 					maxZoom: 19,
 					zoom: 12
 				} );
