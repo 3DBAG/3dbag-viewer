@@ -23,6 +23,7 @@
     "buefy": "^0.9.3",
     "core-js": "^3.6.5",
     "debounce": "^1.2.0",
+    "flatgeobuf": "3.19.0",
     "jest": "^26.4.2",
     "lodash": "^4.17.20",
     "node-ipc": "^11.0.2",

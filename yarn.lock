@@ -1589,6 +1589,11 @@
   "resolved" "https://registry.npmjs.org/@protobufjs/utf8/-/utf8-1.1.0.tgz"
   "version" "1.1.0"
 
+"@repeaterjs/repeater@3.0.4":
+  "integrity" "sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA=="
+  "resolved" "https://registry.npmjs.org/@repeaterjs/repeater/-/repeater-3.0.4.tgz"
+  "version" "3.0.4"
+
 "@sinonjs/commons@^1.7.0":
   "integrity" "sha512-Ky+XkAkqPZSm3NLBeUng77EBQl3cmeJhITaGHdYH8kjVB+aun3S4XBRti2zt17mtt0mIUDiNxYeoJm6drVvBJQ=="
   "resolved" "https://registry.npmjs.org/@sinonjs/commons/-/commons-1.8.6.tgz"
@@ -6216,6 +6221,20 @@
     "flatted" "^2.0.0"
     "rimraf" "2.6.3"
     "write" "1.0.3"
+
+"flatbuffers@2.0.4":
+  "integrity" "sha512-4rUFVDPjSoP0tOII34oQf+72NKU7E088U5oX7kwICahft0UB2kOQ9wUzzCp+OHxByERIfxRDCgX5mP8Pjkfl0g=="
+  "resolved" "https://registry.npmjs.org/flatbuffers/-/flatbuffers-2.0.4.tgz"
+  "version" "2.0.4"
+
+"flatgeobuf@3.19.0":
+  "integrity" "sha512-q3x4j2WhUFEgauOOJJTujmNaZhAKJclLFex/RCr605o/WVJ8vIGK4zhfSU1R8L1m1VGWRuu5mnZnZT9Cw8HNGw=="
+  "resolved" "https://registry.npmjs.org/flatgeobuf/-/flatgeobuf-3.19.0.tgz"
+  "version" "3.19.0"
+  dependencies:
+    "@repeaterjs/repeater" "3.0.4"
+    "flatbuffers" "2.0.4"
+    "slice-source" "0.4.1"
 
 "flatted@^2.0.0":
   "integrity" "sha512-r5wGx7YeOwNWNlCA0wQ86zKyDLMQr+/RB8xy74M4hTphfmjlijTSSXGuH8rnvKZnfT9i+75zmd8jcKdMR4O6jA=="
@@ -12564,6 +12583,11 @@
     "ansi-styles" "^3.2.0"
     "astral-regex" "^1.0.0"
     "is-fullwidth-code-point" "^2.0.0"
+
+"slice-source@0.4.1":
+  "integrity" "sha512-YiuPbxpCj4hD9Qs06hGAz/OZhQ0eDuALN0lRWJez0eD/RevzKqGdUx1IOMUnXgpr+sXZLq3g8ERwbAH0bCb8vg=="
+  "resolved" "https://registry.npmjs.org/slice-source/-/slice-source-0.4.1.tgz"
+  "version" "0.4.1"
 
 "snapdragon-node@^2.0.1":
   "integrity" "sha512-O27l4xaMYt/RSQ5TR3vpWCAB5Kb/czIcqUFOM/C4fYcLnbZUc1PkjTAMjof2pBWaSTwOUd6qUHcFGVGj7aIwnw=="

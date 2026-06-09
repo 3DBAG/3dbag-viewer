@@ -477,12 +477,13 @@ import View from "ol/View";
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
 import { WMTS as WMTSSource, Vector as VectorSource } from 'ol/source';
 import { optionsFromCapabilities as WMTSoptionsFromCapabilities } from 'ol/source/WMTS';
-import { WMTSCapabilities, GeoJSON } from 'ol/format';
+import { WMTSCapabilities } from 'ol/format';
 import { Select as OLSelect } from 'ol/interaction';
 import { click as OLclick } from 'ol/events/condition';
 import { register as olproj4register } from 'ol/proj/proj4';
 import { get as olproj4get } from 'ol/proj';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
+import { generic as FlatGeoBufGeneric, ol as FlatGeoBuf } from 'flatgeobuf';
 
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
@@ -685,19 +686,42 @@ export default {
 				} );
 
 				const vectorSource = new VectorSource( {
-					format: new GeoJSON(),
-					loader: function ( extent ) {
+					loader: async function ( extent, resolution, projection, success, failure ) {
 
-						fetch( that.WFSURL + '?' +
-      'version=1.1.0&request=GetFeature&typename=BAG3D:Tiles&' +
-      'outputFormat=application/json&srsname=EPSG:28992&' +
-      'bbox=' + extent.join( ',' ) + ',EPSG:28992'
-						).then( r => r.json() ).then( data => {
+						const features = [];
+						const rect = {
+							minX: extent[ 0 ],
+							minY: extent[ 1 ],
+							maxX: extent[ 2 ],
+							maxY: extent[ 3 ],
+						};
 
-							this.clear();
-							this.addFeatures( this.getFormat().readFeatures( data ) );
+						try {
 
-						} );
+							// The tile index declares Unknown at collection level, but its features are Polygons.
+							const tileIndex = FlatGeoBuf.deserialize( that.TileIndexFileURL, rect, ( header ) => {
+
+								header.geometryType = FlatGeoBufGeneric.GeometryType.Polygon;
+
+							} );
+
+							for await ( const feature of tileIndex ) {
+
+								feature.setId( feature.get( 'tile_id' ) );
+								features.push( feature );
+
+							}
+
+							this.addFeatures( features );
+							success( features );
+
+						} catch ( error ) {
+
+							this.removeLoadedExtent( extent );
+							failure();
+							console.error( 'Failed to load the FlatGeoBuf tile index.', error );
+
+						}
 
 					},
 					strategy: bboxStrategy,
