@@ -11,6 +11,25 @@
 	"plugins": [ "jest" ],
 
 	"rules": {
+		"vue/multi-word-component-names": "off",
 		"no-unused-vars": [ 1, { "args": "none" } ]
-	}
+	},
+
+	"overrides": [
+		{
+			"files": [ "babel.config.js" ],
+			"rules": {
+				"array-bracket-spacing": "off"
+			}
+		},
+		{
+			"files": [ "tests/**/*.js" ],
+			"env": {
+				"jest": true
+			},
+			"rules": {
+				"padded-blocks": "off"
+			}
+		}
+	]
 }
