@@ -138,7 +138,7 @@
             <td>
               FlatGeoBuf
               <a
-                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/fgb'"
+                :href="config.docsUrl + '/' + this.$route.params.locale + '/delivery/fgb'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -174,7 +174,7 @@
           <tr>
             <td>
               WMS <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#wms-2d'"
+                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#wms-2d'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -186,7 +186,7 @@
           <tr>
             <td>
               WFS <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#wfs-2d'"
+                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#wfs-2d'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -198,7 +198,7 @@
           <tr>
             <td>
               3D API (experimental) <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#3dbag-api-3d'"
+                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#3dbag-api-3d'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -210,7 +210,7 @@
           <tr>
             <td>
               Cesium 3D Tiles (LoD1.2) <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#cesium-3d-tiles'"
+                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#cesium-3d-tiles'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -222,7 +222,7 @@
           <tr>
             <td>
               Cesium 3D Tiles (LoD1.3) <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#cesium-3d-tiles'"
+                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#cesium-3d-tiles'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -234,7 +234,7 @@
           <tr>
             <td>
               Cesium 3D Tiles (LoD2.2) <a
-                :href="'https://docs.3dbag.nl/' + $route.params.locale + '/delivery/webservices#cesium-3d-tiles'"
+                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#cesium-3d-tiles'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -280,7 +280,7 @@
             <td>
               GPKG
               <a
-                :href="'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/gpkg'"
+                :href="config.docsUrl + '/' + this.$route.params.locale + '/delivery/gpkg'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -414,36 +414,36 @@
       <a
         property="dct:title"
         rel="cc:attributionURL"
-        href="https://3dbag.nl"
+        :href="config.webUrl"
       >3DBAG</a> by the
       <a
         rel="cc:attributionURL dct:creator"
         property="cc:attributionName"
-        href="https://3d.bk.tudelft.nl/"
+        :href="config.geoinfoUrl"
       >3D geoinformation research group</a>
       and
       <a
         rel="cc:attributionURL dct:creator"
         property="cc:attributionName"
-        href="https://3dgi.xyz/"
+        :href="config.threeDgiUrl"
       >3DGI</a>
       is licensed under
       <a
-        href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1"
+        :href="config.creativecommonsUrl"
         target="_blank"
         rel="license noopener noreferrer"
         style="display:inline-block;"
       >CC BY 4.0<img
         style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
-        src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"
+        :src="config.creativeCommonsIconUrl + '/cc.svg?ref=chooser-v1'"
       ><img
         style="height:22px!important;margin-left:3px;vertical-align:text-bottom;"
-        src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"
+        :src="config.creativeCommonsIconUrl + '/by.svg?ref=chooser-v1'"
       ></a>
     </p>
     <p>
       Read the <a
-        href="https://docs.3dbag.nl/en/copyright"
+        :href="config.docsUrl + '/en/copyright'"
         target="_blank"
       >terms of use for the 3DBAG</a>.
     </p>
@@ -467,6 +467,7 @@ import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
+import { appConfig } from '@/config';
 
 function formatBytes( bytes, decimals ) {
 
@@ -490,6 +491,7 @@ export default {
 	data() {
 
 		return {
+			config: appConfig,
 			mapVisible: false,
 			showMetadataJSON: false,
 			map: null,
@@ -609,7 +611,7 @@ export default {
 			let tilecoords = this.selectedTile.split( "-" );
 			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replaceAll( "{TID_X}", tilecoords[ 0 ] ).replaceAll( "{TID_Y}", tilecoords[ 1 ] ).replaceAll( "{TID_Z}", tilecoords[ 2 ] );
 			const format_lower = format.toLowerCase();
-			this.activeTileData[ format ][ "docsURL" ] = 'https://docs.3dbag.nl/' + this.$route.params.locale + '/delivery/' + format_lower;
+			this.activeTileData[ format ][ "docsURL" ] = appConfig.docsUrl + '/' + this.$route.params.locale + '/delivery/' + format_lower;
 
 			// we should be able to figure out md5 hasd and files size with a HEAD request
 			// also can check if the file exists to not put broken link
@@ -643,7 +645,7 @@ export default {
 
 			var that = this;
 
-			fetch( 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?request=getcapabilities&service=wmts' ).then( function ( response ) {
+			fetch( appConfig.brtUrl + 'request=getcapabilities&service=wmts' ).then( function ( response ) {
 
 				return response.text();
 

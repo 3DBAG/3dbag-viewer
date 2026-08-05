@@ -67,7 +67,7 @@
                 <td>
                   <a
                     target="_blank"
-                    :href="'https://docs.3dbag.nl/' + $route.params.locale + '/schema/attributes/#'+name"
+                    :href="config.docsUrl + '/' + $route.params.locale + '/schema/attributes/#' + name"
                   >{{ name }}</a>
                 </td>
                 <td>
@@ -78,7 +78,7 @@
           </table>
         </div>
         <p class="mb-2">
-          {{ $t("BuildingInfo.attr1") }} <a :href="'https://docs.3dbag.nl/'+$route.params.locale+'/schema/attributes/' ">{{ $t("documentation") }}</a>.
+          {{ $t("BuildingInfo.attr1") }} <a :href="config.docsUrl + '/' + $route.params.locale + '/schema/attributes/' ">{{ $t("documentation") }}</a>.
         </p>
         <p>
           <a
@@ -108,6 +108,8 @@
 </template>
 
 <script>
+import { appConfig } from '@/config';
+
 export default {
 
 	name: 'BuildingInformation',
@@ -132,9 +134,10 @@ export default {
 		}
 	},
 
-	data: function () {
+	data() {
 
 		return {
+			config: appConfig,
 			attr_names: [ 'identificatie',
 				'status',
 				'oorspronkelijkbouwjaar',
