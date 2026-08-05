@@ -56,8 +56,10 @@ export function resolveVersionManifest( manifest, config = appConfig ) {
 	if ( manifest && typeof manifest === 'object' ) {
 
 		return Object.keys( manifest ).reduce( ( resolved, key ) => {
+
 			resolved[ key ] = resolveVersionManifest( manifest[ key ], config );
 			return resolved;
+
 		}, {} );
 
 	}
