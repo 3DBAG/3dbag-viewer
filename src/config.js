@@ -1,11 +1,15 @@
 const env = typeof process !== 'undefined' && process.env ? process.env : {};
 
 function withoutTrailingSlash( value ) {
+
 	return value.replace( /\/+$/, '' );
+
 }
 
 function envUrl( name, fallback ) {
+
 	return withoutTrailingSlash( env[ name ] || fallback );
+
 }
 
 export const appConfig = {
@@ -29,6 +33,7 @@ export const appConfig = {
 };
 
 export function resolveConfiguredUrl( value, config = appConfig ) {
+
 	if ( typeof value !== 'string' ) return value;
 	const productionOrigins = [
 		[ 'https://data.3dbag.nl', config.dataUrl ],
@@ -38,18 +43,25 @@ export function resolveConfiguredUrl( value, config = appConfig ) {
 	];
 
 	return productionOrigins.reduce( ( resolved, [ origin, configuredOrigin ] ) => {
+
 		return resolved.split( origin ).join( configuredOrigin );
+
 	}, value );
+
 }
 
 export function resolveVersionManifest( manifest, config = appConfig ) {
+
 	if ( Array.isArray( manifest ) ) return manifest.map( value => resolveVersionManifest( value, config ) );
 	if ( manifest && typeof manifest === 'object' ) {
+
 		return Object.keys( manifest ).reduce( ( resolved, key ) => {
 			resolved[ key ] = resolveVersionManifest( manifest[ key ], config );
 			return resolved;
 		}, {} );
+
 	}
 
 	return resolveConfiguredUrl( manifest, config );
+
 }

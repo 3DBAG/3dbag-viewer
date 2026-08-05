@@ -20,7 +20,9 @@ import { appConfig } from '@/config';
 export default {
 	name: "DashboardView",
 	data() {
+
 		return { dashboardUrl: appConfig.dashboardUrl + '/dashboard' };
+
 	},
 };
 </script>

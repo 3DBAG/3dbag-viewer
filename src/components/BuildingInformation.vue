@@ -114,10 +114,6 @@ export default {
 
 	name: 'BuildingInformation',
 
-	data() {
-		return { config: appConfig };
-	},
-
 	props: {
 		show: {
 			type: Boolean,
@@ -138,9 +134,10 @@ export default {
 		}
 	},
 
-	data: function () {
+	data() {
 
 		return {
+			config: appConfig,
 			attr_names: [ 'identificatie',
 				'status',
 				'oorspronkelijkbouwjaar',
