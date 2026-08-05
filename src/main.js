@@ -9,6 +9,9 @@ import { InlineSvgPlugin } from 'vue-inline-svg';
 
 import BAG3D from '@/assets/3dbag_versions.json';
 import landmarkLocations from '@/assets/landmark_locations.json';
+import { appConfig, resolveVersionManifest } from '@/config';
+
+const configuredBAG3D = resolveVersionManifest( BAG3D );
 
 Vue.use( InlineSvgPlugin );
 Vue.use( Buefy );
@@ -17,10 +20,11 @@ Vue.config.productionTip = false;
 
 new Vue( {
 	data: {
-		version_data: BAG3D[ "versions" ][ BAG3D[ "latest" ] ],
-		version_number: BAG3D[ "latest" ],
+		config: appConfig,
+		version_data: configuredBAG3D[ "versions" ][ configuredBAG3D[ "latest" ] ],
+		version_number: configuredBAG3D[ "latest" ],
 		// versions_data_archived: Object.entries( BAG3D[ "versions" ] ).filter( x => x[ 0 ][ 'archive_public' ] ),
-		versions_data_archived: Object.entries( BAG3D[ "versions" ] ).reduce( ( acc, [ key, value ] ) => {
+		versions_data_archived: Object.entries( configuredBAG3D[ "versions" ] ).reduce( ( acc, [ key, value ] ) => {
 
 			if ( value[ "archive_public" ] ) {
 

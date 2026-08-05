@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
+    "test:unit": "jest --runInBand",
     "docs": "npx vuedoc.md src/components/*.vue --output docs/"
   },
   "engines": {

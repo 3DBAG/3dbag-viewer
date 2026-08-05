@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import { appConfig } from '@/config';
 import debounce from 'debounce';
 import Proj4 from 'proj4';
 
@@ -127,7 +128,7 @@ export default {
 			}
 
 			this.isGeocoding = true;
-			fetch( 'https://nominatim.openstreetmap.org/search?q=' + name + '&format=json&countrycodes=nl&accept-language=nl' )
+			fetch( appConfig.nominatimUrl + '?q=' + name + '&format=json&countrycodes=nl&accept-language=nl' )
 				.then( res => {
 
 					const contentType = res.headers.get( "content-type" );

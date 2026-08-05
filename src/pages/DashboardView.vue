@@ -7,7 +7,7 @@
       <iframe
         class="wrapped-iframe"
         width="100%"
-        src="https://dev.3dbag.nl/dashboard"
+        :src="dashboardUrl"
         allowfullscreen
       />
     </div>
@@ -15,8 +15,13 @@
 </template>
 
 <script>
+import { appConfig } from '@/config';
+
 export default {
 	name: "DashboardView",
+	data() {
+		return { dashboardUrl: appConfig.dashboardUrl + '/dashboard' };
+	},
 };
 </script>
 

@@ -20,6 +20,15 @@ npm run serve
 npm run build
 ```
 
+### Environment-specific URLs
+
+The viewer resolves the URLs in `src/assets/3dbag_versions.json` at build time.
+Production URLs are the defaults. To build against a local services stack, copy
+`.env.local.example` to `.env.local` and run `npm run build` or `npm run serve`.
+
+The main service variables are `VUE_APP_WEB_URL`, `VUE_APP_DOCS_URL`,
+`VUE_APP_API_URL`, `VUE_APP_DATA_URL`, and `VUE_APP_DASHBOARD_URL`.
+
 ### Lints and fixes files
 ```
 npm run lint

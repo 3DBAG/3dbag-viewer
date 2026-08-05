@@ -40,6 +40,7 @@ import {
 } from '../terrain-tiles';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import markerSprite from '@/assets/locationmarker.png';
+import { appConfig } from '@/config';
 
 const Tweakpane = require( 'tweakpane' );
 const TWEEN = require( '@tweenjs/tween.js' );
@@ -95,7 +96,7 @@ export default {
 	props: {
 		tilesUrl: {
 			type: String,
-			default: 'http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json'
+			default: appConfig.dataUrl + '/3dtiles/ZuidHolland/lod13/tileset1.json'
 		},
 		basemapOptions: {
 			type: Object,
@@ -104,7 +105,7 @@ export default {
 				return {
 					type: "wmts",
 					options: {
-						url: 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?',
+						url: appConfig.brtUrl,
 						layer: 'standaard',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",

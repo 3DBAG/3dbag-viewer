@@ -26,7 +26,7 @@
             height="28"
           >
           <a
-            href="https://3d.bk.tudelft.nl"
+            :href="config.geoinfoUrl"
             class="logo-text"
             style="color: #333"
           >tudelft3d</a>
@@ -40,7 +40,7 @@
             height="28"
           >
           <a
-            href="https://3dgi.xyz"
+            :href="config.threeDgiUrl"
             class="logo-text"
             style="color: #333"
           >3DGI</a>
@@ -67,7 +67,7 @@
           <div class="navbar-item tags has-addons">
             <a
               class="tag"
-              :href="'https://docs.3dbag.nl/' + currentLocale + '/overview/release_notes/#20241216-beta'"
+              :href="config.docsUrl + '/' + currentLocale + '/overview/release_notes/#20241216-beta'"
             >{{ $root.$data['version_number'] }}
             </a>
             <span class="tag is-danger">{{ $root.$data['version_data']['release-type'] }}</span>
@@ -96,14 +96,14 @@
             {{ $t("nav.dashboard") }}
           </router-link>
           <a
-            :href="'https://docs.3dbag.nl/' + currentLocale"
+            :href="config.docsUrl + '/' + currentLocale"
             class="navbar-item docs-link"
           >
             {{ $t("nav.docs") }}
           </a>
           <a
             class="navbar-item"
-            :href="currentLocale == 'en' ? 'https://forms.gle/NZg83heXM75pAmfVA' : 'https://forms.gle/N1FPRp3RG45EaBjUA'"
+            :href="currentLocale == 'en' ? config.feedbackUrlEn : config.feedbackUrlNl"
           >
             {{ $t("nav.feedback") }}
           </a>
@@ -120,6 +120,7 @@
 <script>
 
 import LocaleSwitcher from './components/LocaleSwitcher';
+import { appConfig } from '@/config';
 
 export default {
 
@@ -132,6 +133,7 @@ export default {
 
 		return {
 
+			config: appConfig,
 			showBurgerMenu: false,
 			showAbout: false,
 

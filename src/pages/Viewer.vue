@@ -57,7 +57,7 @@
           {{ $t("viewer.baselayer1") }}
           <a
             v-if="basemapOptions.attributionURL"
-            href="https://www.pdok.nl/"
+            :href="config.pdokUrl"
           >
             {{ basemapOptions.attribution }}
           </a>
@@ -65,7 +65,7 @@
             {{ basemapOptions.attribution }}
           </span> |
         </span>
-        <a :href="'https://docs.3dbag.nl/'+$route.params.locale+'/copyright' ">© 3DBAG by tudelft3d and 3DGI</a>
+        <a :href="config.docsUrl + '/' + $route.params.locale + '/copyright' ">© 3DBAG by tudelft3d and 3DGI</a>
       </p>
     </div>
     <div id="debug-panel" />
@@ -78,6 +78,7 @@ import DropDownSelector from '@/components/DropDownSelector.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
 import Compass from '@/components/Compass.vue';
+import { appConfig } from '@/config';
 
 export default {
 
@@ -95,7 +96,8 @@ export default {
 
 		return {
 
-			customTilesUrl: 'https://godzilla.bk.tudelft.nl/3dtiles/lod22_kadaster/tileset1.json',
+			config: appConfig,
+			customTilesUrl: appConfig.dataUrl + '/3dtiles/lod22_kadaster/tileset1.json',
 			BAG3DVersionData: this.$root.$data[ 'version_data' ],
 
 			camOffset: {
@@ -187,9 +189,9 @@ export default {
 
 					type: "wms",
 					attribution: "PDOK",
-					attributionURL: "https://www.pdok.nl/",
+					attributionURL: appConfig.pdokUrl,
 					options: {
-						url: 'https://geodata.nationaalgeoregister.nl/top10nlv2/ows?',
+						url: appConfig.top10nlUrl,
 						layer: 'top10nlv2',
 						style: '',
 						imageFormat: 'image/png'
@@ -200,9 +202,9 @@ export default {
 				luchtfoto2018: {
 					type: "wms",
 					attribution: "PDOK",
-					attributionURL: "https://www.pdok.nl/",
+					attributionURL: appConfig.pdokUrl,
 					options: {
-						url: 'https://geodata.nationaalgeoregister.nl/luchtfoto/rgb/wmts?',
+						url: appConfig.luchtfoto2018Url,
 						layer: '2018_ortho25',
 						style: 'default',
 						imageFormat: 'image/png'
@@ -212,9 +214,9 @@ export default {
 				brtachtergrondkaart: {
 					type: "wmts",
 					attribution: "PDOK",
-					attributionURL: "https://www.pdok.nl/",
+					attributionURL: appConfig.pdokUrl,
 					options: {
-						url: 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?',
+						url: appConfig.brtUrl,
 						layer: 'standaard',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
@@ -228,9 +230,9 @@ export default {
 				brtachtergrondkaartgrijs: {
 					type: "wmts",
 					attribution: "PDOK",
-					attributionURL: "https://www.pdok.nl/",
+					attributionURL: appConfig.pdokUrl,
 					options: {
-						url: 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?',
+						url: appConfig.brtUrl,
 						layer: 'grijs',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
@@ -244,9 +246,9 @@ export default {
 				luchtfotoWMTS: {
 					type: "wmts",
 					attribution: "PDOK",
-					attributionURL: "https://www.pdok.nl/",
+					attributionURL: appConfig.pdokUrl,
 					options: {
-						url: 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0?',
+						url: appConfig.luchtfotoUrl,
 						layer: 'Actueel_ortho25',
 						style: 'default',
 						tileMatrixSet: "EPSG:28992",
@@ -270,7 +272,7 @@ export default {
 			return `https://docs.google.com/forms/d/e/
 				1FAIpQLScIVBEWkpOraOIpOb1SOwRvpSnlQxLFDDYsqK4MrZgOqvNjWw/viewform?
 				entry.401142300=${ this.tilesUrl }&
-				entry.1880096492=${ escape( "https://3dbag.nl/#" + this.$route.fullPath ) }`;
+				entry.1880096492=${ escape( appConfig.webUrl + "/#" + this.$route.fullPath ) }`;
 
 		}
 
