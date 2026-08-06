@@ -159,6 +159,9 @@ export default {
 		this.controls = null;
 		this.tiles = null;
 		this.terrainTiles = null;
+		this.terrainOverlayPlugin = null;
+		this.basemapOverlay = null;
+		this.wmtsCapabilitiesCache = new Map();
 		this.raycaster = null;
 		this.mouse = null;
 		this.rayIntersect = null;
@@ -683,7 +686,24 @@ export default {
 
 			if ( this.basemapOptions.type !== 'wmts' ) return null;
 			const options = this.basemapOptions.options;
-			const capabilities = await new WMTSCapabilitiesLoader().loadAsync( getCapabilitiesUrl( options.url ) );
+			const capabilitiesUrl = getCapabilitiesUrl( options.url );
+			let capabilitiesPromise = this.wmtsCapabilitiesCache.get( capabilitiesUrl );
+			if ( ! capabilitiesPromise ) {
+
+				capabilitiesPromise = new WMTSCapabilitiesLoader().loadAsync( capabilitiesUrl ).catch( error => {
+
+					if ( this.wmtsCapabilitiesCache.get( capabilitiesUrl ) === capabilitiesPromise ) {
+
+						this.wmtsCapabilitiesCache.delete( capabilitiesUrl );
+
+					}
+					throw error;
+
+				} );
+				this.wmtsCapabilitiesCache.set( capabilitiesUrl, capabilitiesPromise );
+
+			}
+			const capabilities = await capabilitiesPromise;
 			const layer = capabilities.layers.find( item => item.identifier === options.layer );
 			if ( ! layer ) throw new Error( `WMTS layer "${ options.layer }" was not found.` );
 			const tileMatrixSet = layer.tileMatrixSets.find( item => {
@@ -708,14 +728,7 @@ export default {
 		async reinitBasemap() {
 
 			const generation = ++ this.basemapGeneration;
-			if ( this.terrainTiles ) {
-
-				this.setNavigationSurface();
-				this.contentGroup.remove( this.terrainTiles.group );
-				this.terrainTiles.dispose();
-				this.terrainTiles = null;
-
-			}
+			this.installTerrainRenderer();
 
 			let overlay = null;
 			try {
@@ -724,36 +737,38 @@ export default {
 
 			} catch ( error ) {
 
+				if ( generation !== this.basemapGeneration ) return;
 				console.warn( 'Unable to load the selected basemap; using untextured terrain.', error );
 
 			}
 			if ( generation !== this.basemapGeneration ) return;
-			this.installTerrainRenderer( overlay );
+			this.setBasemapOverlay( overlay );
 
 		},
-		installTerrainRenderer( overlay ) {
+		setBasemapOverlay( overlay ) {
 
-			if ( this.terrainTiles ) {
+			const plugin = this.terrainOverlayPlugin;
+			if ( ! plugin || overlay === this.basemapOverlay ) return;
+			if ( this.basemapOverlay ) plugin.deleteOverlay( this.basemapOverlay );
+			this.basemapOverlay = overlay;
+			if ( overlay ) plugin.addOverlay( overlay );
+			this.requestRender();
 
-				this.setNavigationSurface();
-				this.contentGroup.remove( this.terrainTiles.group );
-				this.terrainTiles.dispose();
+		},
+		installTerrainRenderer() {
 
-			}
+			if ( this.terrainTiles ) return;
 			const terrainTiles = new TilesRenderer( `${ appConfig.terrainUrl }/` );
 			terrainTiles.errorTarget = TERRAIN_ERROR_TARGET;
 			terrainTiles.registerPlugin( new QuantizedMeshPlugin( {
 				useRecommendedSettings: false
 			} ) );
-			if ( overlay ) {
-
-				terrainTiles.registerPlugin( new ImageOverlayPlugin( {
-					overlays: [ overlay ],
-					resolution: WMTS_TEXTURE_RESOLUTION,
-					enableTileSplitting: false
-				} ) );
-
-			}
+			const overlayPlugin = new ImageOverlayPlugin( {
+				overlays: [],
+				resolution: WMTS_TEXTURE_RESOLUTION,
+				enableTileSplitting: false
+			} );
+			terrainTiles.registerPlugin( overlayPlugin );
 			terrainTiles.setCamera( this.camera );
 			terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
 			terrainTiles.addEventListener( 'needs-update', () => this.requestRender() );
@@ -765,6 +780,7 @@ export default {
 
 			} );
 			this.terrainTiles = terrainTiles;
+			this.terrainOverlayPlugin = overlayPlugin;
 			if ( this.showTerrain ) {
 
 				this.contentGroup.add( terrainTiles.group );
@@ -1069,6 +1085,7 @@ export default {
 		},
 		disposeScene() {
 
+			this.basemapGeneration ++;
 			if ( this.animationFrame !== null ) cancelAnimationFrame( this.animationFrame );
 			if ( this.locationTimer !== null ) window.clearInterval( this.locationTimer );
 			if ( this.routeUpdateTimer !== null ) window.clearTimeout( this.routeUpdateTimer );
@@ -1092,6 +1109,10 @@ export default {
 			}
 			if ( this.tiles ) this.tiles.dispose();
 			if ( this.terrainTiles ) this.terrainTiles.dispose();
+			this.terrainTiles = null;
+			this.terrainOverlayPlugin = null;
+			this.basemapOverlay = null;
+			this.wmtsCapabilitiesCache.clear();
 			if ( this.rayIntersect ) {
 
 				this.rayIntersect.traverse( child => {
