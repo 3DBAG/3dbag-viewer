@@ -1,5 +1,14 @@
 <template>
-  <div id="canvas" />
+  <div id="canvas">
+    <div
+      v-if="tilesError"
+      class="tiles-error"
+      role="status"
+    >
+      <strong>{{ $t( 'viewer.threeDUnavailable' ) }}</strong>
+      <span>{{ $t( 'viewer.threeDUnavailableDescription' ) }}</span>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -32,7 +41,8 @@ import {
 	TorusBufferGeometry
 } from 'three';
 import {
-	TilesRenderer
+	TilesRenderer,
+	TilesRendererBase
 } from '3d-tiles-renderer';
 import {
 	WMSTilesRenderer,
@@ -44,6 +54,40 @@ import { appConfig } from '@/config';
 
 const Tweakpane = require( 'tweakpane' );
 const TWEEN = require( '@tweenjs/tween.js' );
+
+// TilesRenderer 0.3.3 creates an unhandled rejected promise when a tileset
+// request fails. Keep the callback behaviour while handling that rejection so
+// a missing tileset remains a recoverable viewer error.
+class RecoverableTilesRenderer extends TilesRenderer {
+
+	fetchTileSet( url, ...rest ) {
+
+		const promise = TilesRendererBase.prototype.fetchTileSet.call( this, url, ...rest );
+		promise.then( json => {
+
+			if ( this.onLoadTileSet ) {
+
+				Promise.resolve()
+					.then( () => this.onLoadTileSet( json, url ) )
+					.catch( error => console.error( error ) );
+
+			}
+
+		}, error => {
+
+			if ( this.onLoadTileSetError ) {
+
+				this.onLoadTileSetError( error, url );
+
+			}
+
+		} );
+
+		return promise;
+
+	}
+
+}
 
 // Adjusts the three.js standard shader to include batchid highlight
 function batchIdHighlightShaderMixin( shader ) {
@@ -118,6 +162,13 @@ export default {
 
 			}
 		}
+	},
+	data() {
+
+		return {
+			tilesError: null,
+		};
+
 	},
 	watch: {
 		tilesUrl: function ( val ) {
@@ -499,7 +550,11 @@ export default {
 
 			}
 
-			this.tiles = new TilesRenderer( this.tilesUrl );
+			this.tilesError = null;
+			this.sceneTransform = null;
+			this.tiles = new RecoverableTilesRenderer( this.tilesUrl );
+			const tiles = this.tiles;
+			if ( this.controls ) this.controls.enabled = true;
 			this.tiles.displayBoxBounds = true;
 			this.tiles.colorMode = 7;
 			this.tiles.lruCache.minSize = this.lruCacheMinSize;
@@ -517,6 +572,8 @@ export default {
 			this.tiles.setResolutionFromRenderer( this.dummyCamera, this.renderer );
 
 			this.tiles.onLoadTileSet = () => {
+
+				if ( this.tiles !== tiles ) return;
 
 				if ( init ) {
 
@@ -568,6 +625,21 @@ export default {
 				this.reinitBasemap();
 
 				this.needsRerender = 2;
+
+			};
+
+			this.tiles.onLoadTileSetError = ( error, url ) => {
+
+				if ( this.tiles !== tiles ) return;
+				// An external nested tileset can fail without invalidating the root.
+				if ( url !== tiles.rootURL ) return;
+
+				this.tilesError = error;
+				this.show3DTiles = false;
+				this.offsetParent.remove( tiles.group );
+				if ( this.controls ) this.controls.enabled = false;
+				this.$emit( 'object-picked', undefined );
+				this.needsRerender = 1;
 
 			};
 
@@ -750,6 +822,8 @@ export default {
 		},
 		onPointerMove( evt ) {
 
+			if ( this.tilesError ) return;
+
 			if ( this.castOnHover || evt.ctrlKey ) {
 
 				let snapTolerance = 0;
@@ -766,11 +840,15 @@ export default {
 		},
 		onPointerDown( evt ) {
 
+			if ( this.tilesError ) return;
+
 			this.pointerCaster.startClientX = evt.clientX;
 			this.pointerCaster.startClientY = evt.clientY;
 
 		},
 		onPointerUp( evt ) {
+
+			if ( this.tilesError ) return;
 
 			if (
 				this.pointerCaster.startClientX == evt.clientX &&
@@ -989,7 +1067,7 @@ export default {
 				this.needsRerender --;
 
 				// update tiles center
-				if ( this.tiles.getBounds( this.box ) ) {
+				if ( ! this.tilesError && this.tiles.getBounds( this.box ) ) {
 
 					this.box.getCenter( this.tiles.group.position );
 					this.tiles.group.position.multiplyScalar( - 1 );
@@ -1010,7 +1088,7 @@ export default {
 
 				const camdist = this.camera.position.distanceToSquared( this.controls.target );
 
-				if ( camdist < 1750 * 1750 ) {
+				if ( ! this.tilesError && camdist < 1750 * 1750 ) {
 
 					this.tiles.update();
 
@@ -1055,7 +1133,25 @@ export default {
 
 <style scoped>
 #canvas {
+  position: relative;
   width: 100%;
   height: 100%;
+}
+
+.tiles-error {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 28rem;
+  padding: 1rem 1.25rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 0.25rem;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 </style>

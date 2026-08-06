@@ -156,7 +156,7 @@ export default {
 
 	mounted() {
 
-		// this.serviceNotice();
+		this.serviceNotice();
 
 	},
 
@@ -167,9 +167,9 @@ export default {
 				indefinite: true,
 				'pause-on-hover': true,
 				duration: 10000,
-				message: "We ervaren momenteel technische problemen met de WFS dienst. We werken aan een oplossing.",
+				message: this.$t( 'serviceNotice.body' ),
 				position: 'is-bottom',
-				type: 'is-primary'
+				type: 'is-danger'
 			} );
 
 		},

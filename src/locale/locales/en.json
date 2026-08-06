@@ -20,14 +20,16 @@
     "title": "About 3DBAG and the AHN4 update"
   },
   "serviceNotice" : {
-    "title": "Status AHN4 update",
-    "body" : "For news about the upcoming AHN4 update follow us on"
+    "title": "Service disruption",
+    "body" : "Following a security incident, we are working hard to restore the 3DBAG services. We apologize for the temporary disruption."
   },
   "viewer": {
     "feedback": "Give feedback",
     "issue": "Report a problem with this building",
     "baselayer1": "Baselayer from",
-    "baselayer2": "Baselayer"
+    "baselayer2": "Baselayer",
+    "threeDUnavailable": "3D view unavailable",
+    "threeDUnavailableDescription": "The 3D data for this version could not be loaded."
   },
   "BuildingInfo": {
     "attr1": "Attribute descriptions you can find in the "
