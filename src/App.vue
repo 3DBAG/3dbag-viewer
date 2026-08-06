@@ -67,7 +67,7 @@
           <div class="navbar-item tags has-addons">
             <a
               class="tag"
-              :href="config.docsUrl + '/' + currentLocale + '/overview/release_notes/#20241216-beta'"
+              :href="config.docsUrl + '/' + currentLocale + '/overview/release_notes/#20250903-beta'"
             >{{ $root.$data['version_number'] }}
             </a>
             <span class="tag is-danger">{{ $root.$data['version_data']['release-type'] }}</span>
@@ -167,7 +167,7 @@ export default {
 				indefinite: true,
 				'pause-on-hover': true,
 				duration: 10000,
-				message: "U bent welkom op de 3DBAG <a class='has-text-weight-semibold has-text-light' href='https://www.geonovum.nl/over-geonovum/agenda/3dbag-developers-startbijeenkomst'>developersbijeenkomst</a> op 13 november",
+				message: "We ervaren momenteel technische problemen met de WFS dienst. We werken aan een oplossing.",
 				position: 'is-bottom',
 				type: 'is-primary'
 			} );

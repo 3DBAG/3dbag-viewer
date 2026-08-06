@@ -10,6 +10,13 @@ Requires Node version 26 (you can use [nvm](https://github.com/nvm-sh/nvm) to in
 npm install
 ```
 
+Alternatively, use the Nix development shell, which provides Node 26 and npm 11:
+
+```
+nix develop
+npm install
+```
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve

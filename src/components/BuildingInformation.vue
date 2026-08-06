@@ -152,6 +152,8 @@ export default {
 				'b3_kas_warenhuis',
 				'b3_extrusie',
 				'b3_n_vlakken',
+				'b3_h_nok',
+				'b3_n_nok',
 				'b3_pw_onvoldoende',
 				'b3_pw_datum',
 				'b3_pw_bron',

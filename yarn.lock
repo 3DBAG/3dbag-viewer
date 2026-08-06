@@ -1560,6 +1560,11 @@
   resolved "https://registry.npmjs.org/@polka/url/-/url-1.0.0-next.29.tgz"
   integrity sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==
 
+"@repeaterjs/repeater@3.0.4":
+  version "3.0.4"
+  resolved "https://registry.npmjs.org/@repeaterjs/repeater/-/repeater-3.0.4.tgz"
+  integrity sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==
+
 "@sideway/address@^4.1.5":
   version "4.1.5"
   resolved "https://registry.npmjs.org/@sideway/address/-/address-4.1.5.tgz"
@@ -5660,6 +5665,20 @@ flat@^5.0.2:
   version "5.0.2"
   resolved "https://registry.npmjs.org/flat/-/flat-5.0.2.tgz"
   integrity sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==
+
+"flatbuffers@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.npmjs.org/flatbuffers/-/flatbuffers-2.0.4.tgz"
+  integrity sha512-4rUFVDPjSoP0tOII34oQf+72NKU7E088U5oX7kwICahft0UB2kOQ9wUzzCp+OHxByERIfxRDCgX5mP8Pjkfl0g==
+
+"flatgeobuf@3.19.0":
+  version "3.19.0"
+  resolved "https://registry.npmjs.org/flatgeobuf/-/flatgeobuf-3.19.0.tgz"
+  integrity sha512-q3x4j2WhUFEgauOOJJTujmNaZhAKJclLFex/RCr605o/WVJ8vIGK4zhfSU1R8L1m1VGWRuu5mnZnZT9Cw8HNGw==
+  dependencies:
+    "@repeaterjs/repeater" "3.0.4"
+    flatbuffers "2.0.4"
+    slice-source "0.4.1"
 
 flatted@^3.2.9:
   version "3.4.4"
@@ -11138,6 +11157,11 @@ slash@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/slash/-/slash-3.0.0.tgz"
   integrity sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==
+
+"slice-source@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.npmjs.org/slice-source/-/slice-source-0.4.1.tgz"
+  integrity sha512-YiuPbxpCj4hD9Qs06hGAz/OZhQ0eDuALN0lRWJez0eD/RevzKqGdUx1IOMUnXgpr+sXZLq3g8ERwbAH0bCb8vg==
 
 snapdragon-node@^2.0.1:
   version "2.1.1"
