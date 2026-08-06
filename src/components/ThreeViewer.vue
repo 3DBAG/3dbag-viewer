@@ -66,6 +66,10 @@ import {
 const Tweakpane = require( 'tweakpane' );
 const TWEEN = require( '@tweenjs/tween.js' );
 const HIGHLIGHT_COLOR = 0xFFC107;
+const BUILDING_ERROR_TARGET = 48;
+const BUILDING_MAX_VIEW_DISTANCE = 1750;
+const WMTS_ERROR_TARGET = 8;
+const WMTS_MAX_ZOOM_LEVEL = 18;
 
 function disposeMaterial( material ) {
 
@@ -143,6 +147,7 @@ export default {
 		this.renderer = null;
 		this.scene = null;
 		this.contentGroup = null;
+		this.controlsSurface = null;
 		this.camera = null;
 		this.controls = null;
 		this.tiles = null;
@@ -151,6 +156,11 @@ export default {
 		this.mouse = null;
 		this.rayIntersect = null;
 		this.selectedObject = null;
+		this.viewPivot = new Vector3();
+		this.viewPivotValid = false;
+		this.viewPivotDirty = true;
+		this.compassNeedsUpdate = true;
+		this.buildingsVisible = true;
 		this.needsRerender = 0;
 		this.animationFrame = null;
 		this.clock = new Clock();
@@ -267,6 +277,28 @@ export default {
 			};
 
 		},
+		updateViewPivot() {
+
+			if ( ! this.controls ) return null;
+			const pivot = this.controls.getPivotPoint( this.viewPivot );
+			this.viewPivotValid = pivot !== null;
+			this.viewPivotDirty = false;
+			return pivot;
+
+		},
+		getViewPivot() {
+
+			if ( this.viewPivotDirty || ! this.viewPivotValid ) return this.updateViewPivot();
+			return this.viewPivot;
+
+		},
+		setViewPivot( pivot ) {
+
+			this.viewPivot.copy( pivot );
+			this.viewPivotValid = true;
+			this.viewPivotDirty = false;
+
+		},
 		setCameraPosFromRoute( query ) {
 
 			if ( this.routeUpdateTimer !== null ) {
@@ -286,6 +318,8 @@ export default {
 			this.camera.updateMatrixWorld();
 			this.controls.resetState();
 			this.controls.update( 0 );
+			this.setViewPivot( frame.target );
+			this.compassNeedsUpdate = false;
 
 			if ( query.placeMarker === 'true' ) this.placeMarkerOnPoint( frame.target );
 			this.emitCompassRotation( frame.target );
@@ -296,7 +330,8 @@ export default {
 
 			const tilesFrame = this.getTilesFrame();
 			if ( ! tilesFrame || ! this.controls ) return;
-			const target = this.controls.getPivotPoint( new Vector3() );
+			const target = this.getViewPivot();
+			if ( ! target ) return;
 			const route = cameraFrameToRoute(
 				tilesFrame.ellipsoid,
 				tilesFrame.group,
@@ -365,7 +400,8 @@ export default {
 
 			const tilesFrame = this.getTilesFrame();
 			if ( ! tilesFrame || ! this.controls ) return;
-			const target = this.controls.getPivotPoint( new Vector3() );
+			const target = this.getViewPivot();
+			if ( ! target ) return;
 			const newPosition = getNorthFacingCameraPosition(
 				tilesFrame.ellipsoid,
 				tilesFrame.group,
@@ -407,7 +443,8 @@ export default {
 
 			const tilesFrame = this.getTilesFrame();
 			if ( ! tilesFrame || ! this.controls ) return;
-			target = target || this.controls.getPivotPoint( new Vector3() );
+			target = target || this.getViewPivot();
+			if ( ! target ) return;
 			const rotation = getCompassRotation(
 				tilesFrame.ellipsoid,
 				tilesFrame.group,
@@ -527,8 +564,15 @@ export default {
 			}
 
 			this.tilesError = null;
+			this.viewPivotValid = false;
+			this.viewPivotDirty = true;
+			this.compassNeedsUpdate = true;
+			this.buildingsVisible = true;
 			const tiles = new TilesRenderer( this.tilesUrl );
 			this.tiles = tiles;
+			tiles.errorTarget = BUILDING_ERROR_TARGET;
+			tiles.loadAncestors = false;
+			tiles.loadSiblings = false;
 			tiles.registerPlugin( new GLTFExtensionsPlugin( {
 				metadata: true,
 				meshoptDecoder: MeshoptDecoder
@@ -570,6 +614,8 @@ export default {
 
 				if ( this.tiles !== tiles ) return;
 				this.controls.setEllipsoid( tiles.ellipsoid, tiles.group );
+				this.viewPivotDirty = true;
+				this.compassNeedsUpdate = true;
 				if ( initializeCamera ) this.initializeCameraPosition();
 				this.requestRender();
 
@@ -631,7 +677,7 @@ export default {
 				tileMatrixSet: tileMatrixSet.identifier,
 				style: options.style || 'default',
 				format: options.format || layer.format,
-				tileMatrices: tileMatrixSet.tileMatrices,
+				tileMatrices: tileMatrixSet.tileMatrices.slice( 0, WMTS_MAX_ZOOM_LEVEL + 1 ),
 				projection: 'EPSG:3857',
 				contentBoundingBox: layer.boundingBox && layer.boundingBox.bounds
 			} );
@@ -671,10 +717,12 @@ export default {
 
 			}
 			const terrainTiles = new TilesRenderer();
+			terrainTiles.errorTarget = WMTS_ERROR_TARGET;
 			terrainTiles.registerPlugin( new GeneratedSurfacePlugin( {
 				overlay,
 				shape: 'ellipsoid',
-				applyOverlayTexture: Boolean( overlay )
+				applyOverlayTexture: Boolean( overlay ),
+				useRecommendedSettings: false
 			} ) );
 			terrainTiles.setCamera( this.camera );
 			terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
@@ -698,6 +746,9 @@ export default {
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
 			this.contentGroup = new Group();
 			this.scene.add( this.contentGroup );
+			// Keep streamed tile geometry out of the controls raycast scene. The
+			// ellipsoid provides the interaction surface without scanning buildings.
+			this.controlsSurface = new Group();
 			const canvas = this.$el;
 			this.renderer = new WebGLRenderer( { antialias: window.devicePixelRatio <= 1 } );
 			this.renderer.setPixelRatio( window.devicePixelRatio );
@@ -712,7 +763,7 @@ export default {
 			this.camera.lookAt( new Vector3() );
 			this.camera.updateMatrixWorld();
 
-			this.controls = new GlobeControls( this.contentGroup, this.camera, this.renderer.domElement );
+			this.controls = new GlobeControls( this.controlsSurface, this.camera, this.renderer.domElement );
 			this.controls.setEllipsoid( WGS84_ELLIPSOID, this.contentGroup );
 			this.controls.enableDamping = true;
 			this.controls.dampingFactor = 0.15;
@@ -721,7 +772,8 @@ export default {
 			this.controls.adjustHeight = false;
 			this.onControlsChange = () => {
 
-				this.emitCompassRotation();
+				this.viewPivotDirty = true;
+				this.compassNeedsUpdate = true;
 				this.scheduleRouteUpdate();
 				this.requestRender();
 
@@ -776,20 +828,20 @@ export default {
 		},
 		onPointerMove( event ) {
 
-			if ( this.tilesError ) return;
+			if ( this.tilesError || ! this.buildingsVisible ) return;
 			if ( this.castOnHover || event.ctrlKey ) this.castRay( event.clientX, event.clientY, event.altKey ? 5 : 0 );
 
 		},
 		onPointerDown( event ) {
 
-			if ( this.tilesError ) return;
+			if ( this.tilesError || ! this.buildingsVisible ) return;
 			this.pointerCaster.startClientX = event.clientX;
 			this.pointerCaster.startClientY = event.clientY;
 
 		},
 		onPointerUp( event ) {
 
-			if ( this.tilesError ) return;
+			if ( this.tilesError || ! this.buildingsVisible ) return;
 			if (
 				this.pointerCaster.startClientX === event.clientX &&
 				this.pointerCaster.startClientY === event.clientY
@@ -908,23 +960,58 @@ export default {
 			this.requestRender();
 
 		},
+		updateBuildingVisibility( pivot ) {
+
+			if ( ! this.tiles || ! this.controls ) return false;
+			if ( ! this.tiles.root ) return true;
+			if ( ! pivot ) return this.buildingsVisible;
+			const shouldShow = this.camera.position.distanceTo( pivot ) <= BUILDING_MAX_VIEW_DISTANCE;
+			if ( shouldShow !== this.buildingsVisible ) {
+
+				this.buildingsVisible = shouldShow;
+				if ( shouldShow ) {
+
+					this.contentGroup.add( this.tiles.group );
+
+				} else {
+
+					this.contentGroup.remove( this.tiles.group );
+					this.clearSelection();
+					this.rayIntersect.visible = false;
+					this.$emit( 'object-picked', undefined );
+
+				}
+				this.requestRender();
+
+			}
+			return shouldShow;
+
+		},
 		renderScene( time = 0 ) {
 
 			this.animationFrame = requestAnimationFrame( this.renderScene );
 			const delta = Math.min( this.clock.getDelta(), 0.1 );
 			TWEEN.update( time );
 			if ( this.controls ) this.controls.update( delta );
-			if ( this.tiles && ! this.tilesError ) this.tiles.update();
-			if ( this.terrainTiles && this.showTerrain ) this.terrainTiles.update();
-			if ( this.tiles && this.tiles.lruCache && this.tiles.lruCache.itemSet ) {
-
-				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
-
-			}
 
 			if ( this.needsRerender > 0 ) {
 
 				this.needsRerender --;
+				const pivot = this.getViewPivot();
+				if ( this.compassNeedsUpdate ) {
+
+					this.emitCompassRotation( pivot );
+					this.compassNeedsUpdate = false;
+
+				}
+				const buildingsVisible = this.updateBuildingVisibility( pivot );
+				if ( buildingsVisible && ! this.tilesError ) this.tiles.update();
+				if ( this.terrainTiles && this.showTerrain ) this.terrainTiles.update();
+				if ( this.tiles && this.tiles.lruCache && this.tiles.lruCache.itemSet ) {
+
+					this.lruCacheSize = this.tiles.lruCache.itemSet.size;
+
+				}
 				this.renderer.render( this.scene, this.camera );
 
 			}
