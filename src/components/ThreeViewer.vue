@@ -42,8 +42,9 @@ import {
 	WGS84_ELLIPSOID
 } from '3d-tiles-renderer/three';
 import {
-	GeneratedSurfacePlugin,
 	GLTFExtensionsPlugin,
+	ImageOverlayPlugin,
+	QuantizedMeshPlugin,
 	WMTSCapabilitiesLoader,
 	WMTSTilesOverlay
 } from '3d-tiles-renderer/three/plugins';
@@ -68,7 +69,8 @@ const TWEEN = require( '@tweenjs/tween.js' );
 const HIGHLIGHT_COLOR = 0xFFC107;
 const BUILDING_ERROR_TARGET = 48;
 const BUILDING_MAX_VIEW_DISTANCE = 1750;
-const WMTS_ERROR_TARGET = 8;
+const TERRAIN_ERROR_TARGET = 8;
+const WMTS_TEXTURE_RESOLUTION = 768;
 const WMTS_MAX_ZOOM_LEVEL = 18;
 
 function disposeMaterial( material ) {
@@ -254,13 +256,23 @@ export default {
 			if ( visible ) {
 
 				this.contentGroup.add( this.terrainTiles.group );
+				this.setNavigationSurface( this.terrainTiles.group );
 
 			} else {
 
 				this.contentGroup.remove( this.terrainTiles.group );
+				this.setNavigationSurface();
 
 			}
 			this.requestRender();
+
+		},
+		setNavigationSurface( surface = null ) {
+
+			if ( ! this.controls ) return;
+			this.controls.setScene( surface || this.controlsSurface );
+			this.viewPivotDirty = true;
+			this.compassNeedsUpdate = true;
 
 		},
 		requestRender() {
@@ -688,6 +700,7 @@ export default {
 			const generation = ++ this.basemapGeneration;
 			if ( this.terrainTiles ) {
 
+				this.setNavigationSurface();
 				this.contentGroup.remove( this.terrainTiles.group );
 				this.terrainTiles.dispose();
 				this.terrainTiles = null;
@@ -701,7 +714,7 @@ export default {
 
 			} catch ( error ) {
 
-				console.warn( 'Unable to load the selected basemap; using an untextured globe.', error );
+				console.warn( 'Unable to load the selected basemap; using untextured terrain.', error );
 
 			}
 			if ( generation !== this.basemapGeneration ) return;
@@ -712,30 +725,42 @@ export default {
 
 			if ( this.terrainTiles ) {
 
+				this.setNavigationSurface();
 				this.contentGroup.remove( this.terrainTiles.group );
 				this.terrainTiles.dispose();
 
 			}
-			const terrainTiles = new TilesRenderer();
-			terrainTiles.errorTarget = WMTS_ERROR_TARGET;
-			terrainTiles.registerPlugin( new GeneratedSurfacePlugin( {
-				overlay,
-				shape: 'ellipsoid',
-				applyOverlayTexture: Boolean( overlay ),
+			const terrainTiles = new TilesRenderer( `${ appConfig.terrainUrl }/` );
+			terrainTiles.errorTarget = TERRAIN_ERROR_TARGET;
+			terrainTiles.registerPlugin( new QuantizedMeshPlugin( {
 				useRecommendedSettings: false
 			} ) );
+			if ( overlay ) {
+
+				terrainTiles.registerPlugin( new ImageOverlayPlugin( {
+					overlays: [ overlay ],
+					resolution: WMTS_TEXTURE_RESOLUTION,
+					enableTileSplitting: false
+				} ) );
+
+			}
 			terrainTiles.setCamera( this.camera );
 			terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
 			terrainTiles.addEventListener( 'needs-update', () => this.requestRender() );
 			terrainTiles.addEventListener( 'load-error', event => {
 
 				if ( this.terrainTiles !== terrainTiles ) return;
-				console.warn( `Failed to load basemap content: ${ event.url }`, event.error );
-				if ( overlay ) this.installTerrainRenderer( null );
+				const source = event.overlay ? 'basemap imagery' : 'quantized-mesh terrain';
+				console.warn( `Failed to load ${ source }: ${ event.url || appConfig.terrainUrl }`, event.error );
 
 			} );
 			this.terrainTiles = terrainTiles;
-			if ( this.showTerrain ) this.contentGroup.add( terrainTiles.group );
+			if ( this.showTerrain ) {
+
+				this.contentGroup.add( terrainTiles.group );
+				this.setNavigationSurface( terrainTiles.group );
+
+			}
 			this.requestRender();
 
 		},
@@ -746,8 +771,9 @@ export default {
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
 			this.contentGroup = new Group();
 			this.scene.add( this.contentGroup );
-			// Keep streamed tile geometry out of the controls raycast scene. The
-			// ellipsoid provides the interaction surface without scanning buildings.
+			// Start with an empty navigation surface so controls can fall back to the
+			// ellipsoid. Once terrain is installed this is replaced by the terrain-only
+			// tiles group, keeping dense building meshes out of navigation raycasts.
 			this.controlsSurface = new Group();
 			const canvas = this.$el;
 			this.renderer = new WebGLRenderer( { antialias: window.devicePixelRatio <= 1 } );
