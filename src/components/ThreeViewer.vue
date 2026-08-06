@@ -72,11 +72,33 @@ const TWEEN = require( '@tweenjs/tween.js' );
 const HIGHLIGHT_COLOR = 0xFFC107;
 const BUILDING_ERROR_TARGET = 48;
 const BUILDING_MAX_VIEW_DISTANCE = 1750;
+const BUILDING_TILE_PRIORITY = 2;
 const TERRAIN_ERROR_TARGET = 8;
+const TERRAIN_TILE_PRIORITY = 1;
 const WMTS_TEXTURE_RESOLUTION = 768;
 const WMTS_MAX_ZOOM_LEVEL = 18;
 const PICKER_LOCAL_NORMAL = new Vector3( 0, 0, 1 );
 const pickerNormalMatrix = new Matrix3();
+
+class TileRequestPriorityPlugin {
+
+	constructor( name, tilePriority ) {
+
+		this.name = name;
+		this.tilePriority = tilePriority;
+
+	}
+
+	preprocessNode( tile ) {
+
+		// The shared renderer queues dispatch larger priority values first. WMTS
+		// requests use negative priorities, so the resulting order is buildings,
+		// terrain, then imagery.
+		tile.priority = this.tilePriority;
+
+	}
+
+}
 
 function disposeMaterial( material ) {
 
@@ -598,6 +620,10 @@ export default {
 			tiles.errorTarget = BUILDING_ERROR_TARGET;
 			tiles.loadAncestors = false;
 			tiles.loadSiblings = false;
+			tiles.registerPlugin( new TileRequestPriorityPlugin(
+				'BUILDING_TILE_REQUEST_PRIORITY',
+				BUILDING_TILE_PRIORITY
+			) );
 			tiles.registerPlugin( new GLTFExtensionsPlugin( {
 				metadata: true,
 				meshoptDecoder: MeshoptDecoder
@@ -760,6 +786,10 @@ export default {
 			if ( this.terrainTiles ) return;
 			const terrainTiles = new TilesRenderer( `${ appConfig.terrainUrl }/` );
 			terrainTiles.errorTarget = TERRAIN_ERROR_TARGET;
+			terrainTiles.registerPlugin( new TileRequestPriorityPlugin(
+				'TERRAIN_TILE_REQUEST_PRIORITY',
+				TERRAIN_TILE_PRIORITY
+			) );
 			terrainTiles.registerPlugin( new QuantizedMeshPlugin( {
 				useRecommendedSettings: false
 			} ) );
