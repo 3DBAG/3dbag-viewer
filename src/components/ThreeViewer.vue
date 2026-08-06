@@ -20,6 +20,7 @@ import {
 	DirectionalLight,
 	FogExp2,
 	Group,
+	LinearToneMapping,
 	Mesh,
 	MeshBasicMaterial,
 	MeshLambertMaterial,
@@ -174,12 +175,13 @@ export default {
 		this.markerName = 'geocoding-marker';
 		this.pointerCaster = { startClientX: 0, startClientY: 0 };
 
-		this.pointIntensity = 0.4;
-		this.directionalIntensity = 0.8;
-		this.ambientIntensity = 0.5;
-		this.dirX = 0.63;
-		this.dirY = 1;
-		this.dirZ = 0;
+		this.pointIntensity = 0.6;
+		this.directionalIntensity = 1.15;
+		this.ambientIntensity = 0.9;
+		this.exposure = 1.15;
+		this.dirX = 1;
+		this.dirY = - 0.5;
+		this.dirZ = 1.5;
 		this.meshColor = '#c4c8cf';
 		this.enableFog = false;
 		this.fogDensity = 0.0000004;
@@ -217,6 +219,8 @@ export default {
 				.on( 'change', value => this.dirLight.intensity = value );
 			appearance.addInput( this, 'pointIntensity', { min: 0, max: 2, step: 0.1 } )
 				.on( 'change', value => this.pLight.intensity = value );
+			appearance.addInput( this, 'exposure', { min: 0.5, max: 2, step: 0.05 } )
+				.on( 'change', value => this.renderer.toneMappingExposure = value );
 			appearance.addInput( this, 'meshColor' ).on( 'change', value => this.setMeshColor( value ) );
 
 			const misc = this.pane.addFolder( { expanded: false, title: 'Misc' } );
@@ -780,6 +784,8 @@ export default {
 			this.renderer.setPixelRatio( window.devicePixelRatio );
 			this.renderer.setSize( canvas.clientWidth, canvas.clientHeight );
 			this.renderer.outputColorSpace = SRGBColorSpace;
+			this.renderer.toneMapping = LinearToneMapping;
+			this.renderer.toneMappingExposure = this.exposure;
 			this.renderer.domElement.style.display = 'block';
 			canvas.appendChild( this.renderer.domElement );
 
