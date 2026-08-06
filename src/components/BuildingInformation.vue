@@ -41,7 +41,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr v-if="building.tileID">
                 <td>{{ $t("tilenumber") }}</td>
                 <td>
                   <span>
@@ -92,8 +92,9 @@
       <b-button
         type="is-static"
         :icon-left="'arrow-expand-vertical'"
+        :title="$t('BuildingInfo.ellipsoidalHeight')"
       >
-        <b>{{ h_clicked }}</b> m
+        <b>{{ h_clicked }}</b> m <span class="is-hidden-mobile">({{ $t('BuildingInfo.ellipsoid') }})</span>
       </b-button>
     </div>
     <div class="control">
@@ -125,8 +126,9 @@ export default {
 
 				return {
 
-					pz: 0,
-					batchID: '-999'
+					height: 0,
+					heightReference: 'WGS84_ELLIPSOID',
+					featureId: null
 
 				};
 
@@ -189,7 +191,8 @@ export default {
 
 		h_clicked: function () {
 
-			if ( this.building.pz ) return this.building.pz.toFixed( 1 );
+			const height = this.building.height === undefined ? this.building.pz : this.building.height;
+			if ( Number.isFinite( height ) ) return height.toFixed( 1 );
 			return null;
 
 		},

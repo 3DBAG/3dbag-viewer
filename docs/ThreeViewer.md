@@ -1,130 +1,28 @@
 # ThreeViewer
 
+`ThreeViewer` renders 3DBAG 3D Tiles 1.1 content in its native ECEF coordinate frame. It enables meshopt-compressed glTF content and exposes per-building `EXT_mesh_features` and `EXT_structural_metadata` data when an object is picked.
+
 ## Props
 
-| Name              | Type     | Description | Default                                                                                                                                                                                                                                                                        |
-| ----------------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `tiles-url`       | `String` |             | `"http://godzilla.bk.tudelft.nl/3dtiles/ZuidHolland/lod13/tileset1.json"`                                                                                                                                                                                                      |
-| `basemap-options` | `Object` |             | `() => { return { type: "wmts", options: { url: 'https://geodata.nationaalgeoregister.nl/tiles/service/wmts?', layer: 'brtachtergrondkaart', style: 'default', tileMatrixSet: "EPSG:28992", service: "WMTS", request: "GetTile", version: "1.0.0", format: "image/png" } }; }` |
+| Name | Type | Description |
+| --- | --- | --- |
+| `tiles-url` | `String` | URL of the 3D Tiles tileset. The default points to the current LoD 2.2 Cesium 3D Tiles feed. |
+| `basemap-options` | `Object` | PDOK WMTS source configuration. Globe overlays require an EPSG:3857 tile matrix set. |
 
 ## Events
 
-| Name            | Description                                                                                                               |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `cam-offset`    | emit camera offset for url generation in the parent app<br>**Arguments**<br><ul><li>**`cam_offset: any`**</li></ul>       |
-| `object-picked` | <br>**Arguments**<br><ul><li>**`{ "batchID": batch_id, "identificatie": identificatie, "rmse": "-" }: object`**</li></ul> |
+| Name | Description |
+| --- | --- |
+| `cam-offset` | Camera offset in the route-compatible local east/up/south frame. |
+| `cam-rotation-z` | Compass rotation relative to local north. |
+| `object-picked` | Semantic selection containing `featureId`, `featureClass`, `attributes`, `height`, `heightReference` (`WGS84_ELLIPSOID`), `azimuthAngle`, and nullable `tileID`. `batchID` and `pz` are temporary compatibility aliases for `featureId` and `height`. An empty selection emits `undefined`. |
 
-## Methods
+## Route compatibility
 
-### initTweakPane()
+The existing `rdx`, `rdy`, `ox`, `oy`, and `oz` query parameters remain supported. RD target coordinates are transformed to WGS84/ECEF; offsets retain their former east, up, and south meanings.
 
-**Syntax**
+## Public methods
 
-```typescript
-initTweakPane(): void
-```
-
-### setCameraPosFromRoute()
-
-**Syntax**
-
-```typescript
-setCameraPosFromRoute(q: unknow): void
-```
-
-### setRouteFromCameraPos()
-
-**Syntax**
-
-```typescript
-setRouteFromCameraPos(): void
-```
-
-### reinitTiles()
-
-**Syntax**
-
-```typescript
-reinitTiles(): void
-```
-
-### reinitBasemap()
-
-**Syntax**
-
-```typescript
-reinitBasemap(): void
-```
-
-### initScene()
-
-**Syntax**
-
-```typescript
-initScene(): void
-```
-
-### onWindowResize()
-
-**Syntax**
-
-```typescript
-onWindowResize(): void
-```
-
-### onPointerMove()
-
-**Syntax**
-
-```typescript
-onPointerMove(e: unknow): void
-```
-
-### onPointerDown()
-
-**Syntax**
-
-```typescript
-onPointerDown(): void
-```
-
-### onDblClick()
-
-**Syntax**
-
-```typescript
-onDblClick(): void
-```
-
-### onPointerLeave()
-
-**Syntax**
-
-```typescript
-onPointerLeave(): void
-```
-
-### castRay()
-
-**Syntax**
-
-```typescript
-castRay(): void
-```
-
-### updateTerrain()
-
-**Syntax**
-
-```typescript
-updateTerrain(): unknow
-```
-
-### renderScene()
-
-**Syntax**
-
-```typescript
-renderScene(): void
-```
-
+- `pointCameraToNorth()` rotates the camera to face local north without changing its range or altitude.
+- `setCameraPosFromRoute(query)` restores a camera position from the route query.
+- `setRouteFromCameraPos()` serializes the current globe camera back to the route query.

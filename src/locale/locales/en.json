@@ -32,7 +32,9 @@
     "threeDUnavailableDescription": "The 3D data for this version could not be loaded."
   },
   "BuildingInfo": {
-    "attr1": "Attribute descriptions you can find in the "
+    "attr1": "Attribute descriptions you can find in the ",
+    "ellipsoid": "WGS84 ellipsoid",
+    "ellipsoidalHeight": "WGS84 ellipsoidal height"
   },
   "SearchBar": {
     "search": "Search for a place",

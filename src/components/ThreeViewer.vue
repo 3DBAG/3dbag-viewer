@@ -13,125 +13,79 @@
 
 <script>
 import {
-	Scene,
-	Color,
-	FogExp2,
-	WebGLRenderer,
-	sRGBEncoding,
-	PerspectiveCamera,
-	Group,
-	Box3,
-	DirectionalLight,
-	PointLight,
 	AmbientLight,
-	Vector2,
-	Vector3,
+	Clock,
+	Color,
+	CylinderGeometry,
+	DirectionalLight,
+	FogExp2,
+	Group,
+	Mesh,
+	MeshBasicMaterial,
+	MeshLambertMaterial,
+	PerspectiveCamera,
+	PointLight,
 	Raycaster,
-	MOUSE,
-	TOUCH,
-	ShaderMaterial,
-	ShaderLib,
-	UniformsUtils,
-	TextureLoader,
+	Scene,
 	Sprite,
 	SpriteMaterial,
-	MeshBasicMaterial,
-	Mesh,
-	CylinderBufferGeometry,
-	TorusBufferGeometry
+	SRGBColorSpace,
+	TextureLoader,
+	TorusGeometry,
+	Vector2,
+	Vector3,
+	WebGLRenderer
 } from 'three';
 import {
+	GlobeControls,
 	TilesRenderer,
-	TilesRendererBase
-} from '3d-tiles-renderer';
+	WGS84_ELLIPSOID
+} from '3d-tiles-renderer/three';
 import {
-	WMSTilesRenderer,
-	WMTSTilesRenderer
-} from '../terrain-tiles';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+	GeneratedSurfacePlugin,
+	GLTFExtensionsPlugin,
+	WMTSCapabilitiesLoader,
+	WMTSTilesOverlay
+} from '3d-tiles-renderer/three/plugins';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import markerSprite from '@/assets/locationmarker.png';
 import { appConfig } from '@/config';
+import {
+	cameraFrameToRoute,
+	getCompassRotation,
+	getNorthFacingCameraPosition,
+	getWorldFrame,
+	routeToCameraFrame,
+	worldToCartographic
+} from '@/utils/globeCoordinates';
+import {
+	getPreferredHighlightAttribute,
+	getSemanticFeature
+} from '@/utils/semanticFeatures';
 
 const Tweakpane = require( 'tweakpane' );
 const TWEEN = require( '@tweenjs/tween.js' );
+const HIGHLIGHT_COLOR = 0xFFC107;
 
-// TilesRenderer 0.3.3 creates an unhandled rejected promise when a tileset
-// request fails. Keep the callback behaviour while handling that rejection so
-// a missing tileset remains a recoverable viewer error.
-class RecoverableTilesRenderer extends TilesRenderer {
+function disposeMaterial( material ) {
 
-	fetchTileSet( url, ...rest ) {
+	if ( Array.isArray( material ) ) {
 
-		const promise = TilesRendererBase.prototype.fetchTileSet.call( this, url, ...rest );
-		promise.then( json => {
+		material.forEach( item => item.dispose() );
 
-			if ( this.onLoadTileSet ) {
+	} else if ( material ) {
 
-				Promise.resolve()
-					.then( () => this.onLoadTileSet( json, url ) )
-					.catch( error => console.error( error ) );
-
-			}
-
-		}, error => {
-
-			if ( this.onLoadTileSetError ) {
-
-				this.onLoadTileSetError( error, url );
-
-			}
-
-		} );
-
-		return promise;
+		material.dispose();
 
 	}
 
 }
 
-// Adjusts the three.js standard shader to include batchid highlight
-function batchIdHighlightShaderMixin( shader ) {
+function getCapabilitiesUrl( url ) {
 
-	const newShader = { ...shader };
-	newShader.uniforms = {
-		highlightedBatchId: { value: - 1 },
-		highlightColor: { value: new Color( 0xFFC107 ).convertSRGBToLinear() },
-		...UniformsUtils.clone( shader.uniforms ),
-	};
-	newShader.extensions = {
-		derivatives: true,
-	};
-	newShader.lights = true;
-	newShader.fog = true;
-	newShader.vertexShader =
-		`
-			attribute float _batchid;
-			varying float batchid;
-		` +
-		newShader.vertexShader.replace(
-			/#include <uv_vertex>/,
-			`
-			#include <uv_vertex>
-			batchid = _batchid;
-			`
-		);
-	newShader.fragmentShader =
-		`
-			varying float batchid;
-			uniform float highlightedBatchId;
-			uniform vec3 highlightColor;
-		` +
-		newShader.fragmentShader.replace(
-			/vec4 diffuseColor = vec4\( diffuse, opacity \);/,
-			`
-			vec4 diffuseColor =
-				abs( batchid - highlightedBatchId ) < 0.5 ?
-				vec4( highlightColor, opacity ) :
-				vec4( diffuse, opacity );
-			`
-		);
-
-	return newShader;
+	const serviceUrl = url.replace( /[?&]+$/, '' );
+	const separator = serviceUrl.includes( '?' ) ? '&' : '?';
+	return `${ serviceUrl }${ separator }service=WMTS&request=GetCapabilities&version=1.0.0`;
 
 }
 
@@ -140,23 +94,20 @@ export default {
 	props: {
 		tilesUrl: {
 			type: String,
-			default: appConfig.dataUrl + '/3dtiles/ZuidHolland/lod13/tileset1.json'
+			default: appConfig.dataUrl + '/v20250903/cesium3dtiles/lod22/tileset.json'
 		},
 		basemapOptions: {
 			type: Object,
 			default: () => {
 
 				return {
-					type: "wmts",
+					type: 'wmts',
 					options: {
 						url: appConfig.brtUrl,
 						layer: 'standaard',
 						style: 'default',
-						tileMatrixSet: "EPSG:28992",
-						service: "WMTS",
-						request: "GetTile",
-						version: "1.0.0",
-						format: "image/png"
+						tileMatrixSet: 'EPSG:3857',
+						format: 'image/png'
 					}
 				};
 
@@ -166,967 +117,863 @@ export default {
 	data() {
 
 		return {
-			tilesError: null,
+			tilesError: null
 		};
 
 	},
 	watch: {
-		tilesUrl: function ( val ) {
+		tilesUrl() {
 
 			this.reinitTiles();
-			this.needsRerender = 1;
 
 		},
-		basemapOptions: function ( val ) {
+		basemapOptions() {
 
 			this.reinitBasemap();
-			this.needsRerender = 1;
 
 		},
-		$route( to, from ) {
+		$route( to ) {
 
-			this.setCameraPosFromRoute( to.query );
+			if ( ! this.ignoreRouteCameraUpdate ) this.setCameraPosFromRoute( to.query );
 
-		},
+		}
 	},
 	beforeCreate() {
 
 		this.renderer = null;
 		this.scene = null;
-		this.offsetParent = null;
+		this.contentGroup = null;
 		this.camera = null;
-		this.dummyCamera = null;
 		this.controls = null;
-		this.material = null;
-		this.highlightMaterial = null;
-
+		this.tiles = null;
+		this.terrainTiles = null;
 		this.raycaster = null;
 		this.mouse = null;
-
-		this.box = null;
-
-		this.tiles = null;
-
+		this.rayIntersect = null;
+		this.selectedObject = null;
 		this.needsRerender = 0;
-
-		this.pointerCaster = {
-			startClientX: 0,
-			startClientY: 0
-		};
-
-		// debug
-		this.lruCacheSize = 0;
-		this.lruCacheMinSize = 85;
-		this.lruCacheMaxSize = 115;
+		this.animationFrame = null;
+		this.clock = new Clock();
+		this.basemapGeneration = 0;
+		this.selectionGeneration = 0;
+		this.locationTimer = null;
+		this.routeUpdateTimer = null;
+		this.ignoreRouteCameraUpdate = false;
+		this.markerName = 'geocoding-marker';
+		this.pointerCaster = { startClientX: 0, startClientY: 0 };
 
 		this.pointIntensity = 0.4;
 		this.directionalIntensity = 0.8;
 		this.ambientIntensity = 0.5;
-
 		this.dirX = 0.63;
 		this.dirY = 1;
 		this.dirZ = 0;
-
-		this.meshShading = "normal";
-		this.meshColor = "#c4c8cf";
-
-		this.nearPlane = 2;
-		this.farPlane = 300000;
-		this.dummyFarPlane = 3500;
-
-		this.maxDistShowTiles = 1750 * 1750;
-		this.show3DTiles = true;
-
-		this.fog = null;
+		this.meshColor = '#c4c8cf';
 		this.enableFog = false;
-		this.fogDensity = 0.0004;
+		this.fogDensity = 0.0000004;
 		this.fogColor = '#eeeeee';
-
-		this.errorTarget = 0;
-		this.errorThreshold = 60;
-
 		this.castOnHover = false;
-		this.overrideCast = false; // Defines if we should override the original TilesRenderer raycasting
-
 		this.showTerrain = true;
 		this.pane = null;
-
-		this.selectedObject = null;
-
-		this.sceneTransform = null;
-
-		this.rayIntersect = null;
+		this.lruCacheSize = 0;
 
 	},
 	mounted() {
 
 		this.initScene();
-		if ( process.env.NODE_ENV === 'development' ) {
+		if ( process.env.NODE_ENV === 'development' ) this.initTweakPane();
 
-			this.initTweakPane();
+	},
+	beforeDestroy() {
 
-		}
+		this.disposeScene();
 
 	},
 	methods: {
 		initTweakPane() {
 
-			var el = document.getElementById( "debug-panel" );
-			el.setAttribute( "style", "position: absolute; top: 3.75rem;right: 0.5rem;" );
-			el.setAttribute( "class", "is-hidden-mobile" );
+			const el = document.getElementById( 'debug-panel' );
+			if ( ! el || ! this.tiles ) return;
+			el.setAttribute( 'style', 'position: absolute; top: 0.5rem;right: 0.5rem;' );
+			el.setAttribute( 'class', 'is-hidden-mobile' );
 			this.pane = new Tweakpane( { title: 'debug', expanded: false, container: el } );
 
-			// Camera
-			const f3 = this.pane.addFolder( {
-				expanded: false,
-				title: 'Camera',
-			} );
-			f3.addInput( this, "nearPlane", { min: 1, max: 1000 } ).on( 'change', ( val ) => {
+			const appearance = this.pane.addFolder( { expanded: false, title: 'Appearance' } );
+			appearance.addInput( this, 'ambientIntensity', { min: 0, max: 2, step: 0.1 } )
+				.on( 'change', value => this.ambLight.intensity = value );
+			appearance.addInput( this, 'directionalIntensity', { min: 0, max: 2, step: 0.1 } )
+				.on( 'change', value => this.dirLight.intensity = value );
+			appearance.addInput( this, 'pointIntensity', { min: 0, max: 2, step: 0.1 } )
+				.on( 'change', value => this.pLight.intensity = value );
+			appearance.addInput( this, 'meshColor' ).on( 'change', value => this.setMeshColor( value ) );
 
-				this.camera.near = val; this.camera.updateProjectionMatrix();
+			const misc = this.pane.addFolder( { expanded: false, title: 'Misc' } );
+			misc.addInput( this, 'showTerrain' ).on( 'change', value => this.setTerrainVisibility( value ) );
+			misc.addInput( this, 'castOnHover' );
 
-			} );
-			f3.addInput( this, "farPlane", { min: 100, max: 20000 } ).on( 'change', ( val ) => {
-
-				this.camera.far = val; this.camera.updateProjectionMatrix();
-
-			} );
-			f3.addInput( this, "dummyFarPlane", { min: 100, max: 5000 } ).on( 'change', ( val ) => {
-
-				this.dummyCamera.far = val; this.dummyCamera.updateProjectionMatrix();
-
-			} );
-
-			f3.addInput( this, "enableFog" ).on( 'change', ( val ) => val ? this.scene.fog = this.fog : this.scene.fog = null );
-			f3.addInput( this, "fogDensity", { min: 0.0001, max: 0.01 } ).on( 'change', ( val ) => this.fog.density = val );
-			f3.addInput( this, "fogColor" ).on( 'change', ( val ) => {
-
-				this.fog.color.set( val ); this.scene.background.set( val );
-
-			} );
-
-			// Appearance
-			const f4 = this.pane.addFolder( {
-				expanded: false,
-				title: 'Appearance',
-			} );
-			f4.addInput( this, "ambientIntensity", { min: 0, max: 2, step: 0.1 } ).on( 'change', ( val ) => {
-
-				this.ambLight.intensity = val;
-
-			} );
-			f4.addInput( this, "directionalIntensity", { min: 0, max: 2, step: 0.1 } ).on( 'change', ( val ) => {
-
-				this.dirLight.intensity = val;
-
-			} );
-			f4.addInput( this, "pointIntensity", { min: 0, max: 2, step: 0.1 } ).on( 'change', ( val ) => {
-
-				this.pLight.intensity = val;
-
-			} );
-			const f5 = f4.addFolder( {
-				expanded: false,
-				title: 'PointLight dir',
-			} ).on( 'change', ( val ) => this.dirLight.position.set( this.dirX, this.dirY, this.dirZ ) );
-			f5.addInput( this, "dirX", { min: 0, max: 1, step: 0.01 } );
-			f5.addInput( this, "dirY", { min: 0, max: 1, step: 0.01 } );
-			f5.addInput( this, "dirZ", { min: 0, max: 1, step: 0.01 } );
-
-			f4.addInput( this, "meshColor" ).on( 'change', ( val ) => {
-
-				this.material.uniforms.diffuse.value = new Color( val ).convertSRGBToLinear();
-				this.highlightMaterial.uniforms.diffuse.value = new Color( val ).convertSRGBToLinear();
-
-			} );
-
-			// Misc
-			const f6 = this.pane.addFolder( {
-				expanded: false,
-				title: 'Misc',
-			} );
-			f6.addInput( this, "showTerrain" )
-				.on( 'change', ( val ) => {
-
-					if ( val ) {
-
-						this.offsetParent.add( this.terrainTiles.group );
-
-					} else {
-
-						this.offsetParent.remove( this.terrainTiles.group );
-
-					}
-
-				} );
-			f6.addInput( this, "castOnHover" );
-			f6.addInput( this, "overrideCast" );
-
-			// stats
-			const f7 = this.pane.addFolder( {
-				expanded: true,
-				title: 'Stats',
-			} );
-			f7.addMonitor( this.tiles.stats, "parsing" );
-			f7.addMonitor( this.tiles.stats, "downloading" );
-			f7.addMonitor( this.tiles.stats, "failed" );
-			f7.addMonitor( this.tiles.stats, "inFrustum" );
-			f7.addMonitor( this.tiles.stats, "used" );
-			f7.addMonitor( this.tiles.stats, "active" );
-			f7.addMonitor( this.tiles.stats, "visible" );
-			f7.addMonitor( this, "lruCacheSize" );
-			f7.addInput( this, "lruCacheMinSize", { min: 10, max: 500, step: 1 } )
-				.on( 'change', ( val ) => {
-
-					this.tiles.lruCache.minSize = val;
-
-				} );
-			f7.addInput( this, "lruCacheMaxSize", { min: 10, max: 500, step: 1 } )
-				.on( 'change', ( val ) => {
-
-					this.tiles.lruCache.maxSize = val;
-
-				} );
-
-			this.pane.on( "change", ( val ) => this.needsRerender = 1 );
+			const stats = this.pane.addFolder( { expanded: true, title: 'Stats' } );
+			[ 'parsing', 'downloading', 'failed', 'inFrustum', 'used', 'active', 'visible' ]
+				.forEach( key => stats.addMonitor( this.tiles.stats, key ) );
+			stats.addMonitor( this, 'lruCacheSize' );
+			this.pane.on( 'change', () => this.requestRender() );
 
 		},
-		setCameraPosFromRoute( q ) {
+		setMeshColor( color ) {
 
-			if ( ! this.tiles.root ) {
+			if ( ! this.tiles ) return;
+			this.tiles.forEachLoadedModel( scene => {
 
-				return;
+				scene.traverse( child => {
 
-			}
+					const materials = Array.isArray( child.material ) ? child.material : [ child.material ];
+					materials.filter( Boolean ).forEach( material => {
 
-			let rd_x = parseFloat( q.rdx );
-			let rd_y = parseFloat( q.rdy );
-			let ox = parseFloat( q.ox );
-			let oy = parseFloat( q.oy );
-			let oz = parseFloat( q.oz );
-			// compute local tileset coordinates
+						if ( material.color ) material.color.set( color );
 
-			if ( isNaN( rd_x ) ) {
+					} );
 
-				return;
+				} );
 
-			}
+			} );
+			this.requestRender();
 
-			let tileset_offset_x = this.tiles.root.cached.transform.elements[ 12 ];
-			let tileset_offset_y = this.tiles.root.cached.transform.elements[ 13 ];
-			let local_x = rd_x - tileset_offset_x;
-			let local_y = 0;
-			let local_z = - ( rd_y - tileset_offset_y );
+		},
+		setTerrainVisibility( visible ) {
 
-			// move target and maintain the relative camera position
-			this.controls.target.x = local_x;
-			this.controls.target.z = local_z;
-			this.camera.position.x = local_x + ox;
-			this.camera.position.y = local_y + oy;
-			this.camera.position.z = local_z + oz;
+			if ( ! this.terrainTiles ) return;
+			if ( visible ) {
 
-			this.controls.update();
+				this.contentGroup.add( this.terrainTiles.group );
 
-			if ( q.placeMarker == "true" ) {
+			} else {
 
-				this.placeMarkerOnPoint( new Vector3( local_x, local_y, local_z ) );
-				delete q.placeMarker;
+				this.contentGroup.remove( this.terrainTiles.group );
 
 			}
+			this.requestRender();
+
+		},
+		requestRender() {
+
+			this.needsRerender = Math.max( this.needsRerender, 2 );
+
+		},
+		getTilesFrame() {
+
+			if ( ! this.tiles || ! this.tiles.root ) return null;
+			return {
+				ellipsoid: this.tiles.ellipsoid,
+				group: this.tiles.group
+			};
+
+		},
+		setCameraPosFromRoute( query ) {
+
+			if ( this.routeUpdateTimer !== null ) {
+
+				window.clearTimeout( this.routeUpdateTimer );
+				this.routeUpdateTimer = null;
+
+			}
+			const tilesFrame = this.getTilesFrame();
+			if ( ! tilesFrame || ! this.controls ) return;
+			const frame = routeToCameraFrame( tilesFrame.ellipsoid, tilesFrame.group, query );
+			if ( ! frame ) return;
+
+			this.camera.position.copy( frame.cameraPosition );
+			this.camera.up.copy( frame.up );
+			this.camera.lookAt( frame.target );
+			this.camera.updateMatrixWorld();
+			this.controls.resetState();
+			this.controls.update( 0 );
+
+			if ( query.placeMarker === 'true' ) this.placeMarkerOnPoint( frame.target );
+			this.emitCompassRotation( frame.target );
+			this.requestRender();
 
 		},
 		setRouteFromCameraPos() {
 
-			if ( ! this.tiles.root ) {
+			const tilesFrame = this.getTilesFrame();
+			if ( ! tilesFrame || ! this.controls ) return;
+			const target = this.controls.getPivotPoint( new Vector3() );
+			const route = cameraFrameToRoute(
+				tilesFrame.ellipsoid,
+				tilesFrame.group,
+				this.camera.position,
+				target
+			);
+			const cameraOffset = { x: route.ox, y: route.oy, z: route.oz };
+			this.$emit( 'cam-offset', cameraOffset );
 
-				return;
+			const query = Object.assign( {}, this.$router.currentRoute.query, route );
+			delete query.placeMarker;
+			this.ignoreRouteCameraUpdate = true;
+			this.$router.push( { url: '/', query } )
+				.catch( () => {} )
+				.finally( () => {
 
-			}
+					this.$nextTick( () => {
 
-			// compute current camera position relative to target
-			let local_x = this.controls.target.x;
-			let local_z = this.controls.target.z;
-			let tileset_offset_x = this.tiles.root.cached.transform.elements[ 12 ];
-			let tileset_offset_y = this.tiles.root.cached.transform.elements[ 13 ];
+						this.ignoreRouteCameraUpdate = false;
 
-			// compute RD coordinates
-			let RdX = local_x + tileset_offset_x;
-			let RdY = ( - local_z ) + tileset_offset_y;
+					} );
 
-			let cam_offset = {
-				x: this.camera.position.x - this.controls.target.x,
-				y: this.camera.position.y - this.controls.target.y,
-				z: this.camera.position.z - this.controls.target.z };
+				} );
 
-			// emit camera offset for url generation in the parent app
-			this.$emit( 'cam-offset', cam_offset );
-			// push values to url, catch errors (ie NavigationDuplicated, when pushin a route that is equal to the current route)
-			let q = Object.assign( {}, this.$router.currentRoute.query );
-			q.rdx = RdX;
-			q.rdy = RdY;
-			q.ox = cam_offset.x;
-			q.oy = cam_offset.y;
-			q.oz = cam_offset.z;
+		},
+		scheduleRouteUpdate() {
 
-			this.$router.push(
-				{ url: '/', query: q }
-			).catch( err => {} );
+			if ( this.routeUpdateTimer !== null ) window.clearTimeout( this.routeUpdateTimer );
+			this.routeUpdateTimer = window.setTimeout( () => {
 
-			// console.log( {rdx: RdX, rdy: RdY, cam_offset: cam_offset} );
+				this.routeUpdateTimer = null;
+				this.setRouteFromCameraPos();
+
+			}, 250 );
 
 		},
 		placeMarkerOnPoint( position ) {
 
-			var marker = this.scene.getObjectByName( this.markerName );
-
-			if ( marker != "undefined" ) {
-
-				this.scene.remove( marker );
-
-			}
-
-			var textureLoader = new TextureLoader();
-			var map = textureLoader.load( markerSprite );
-			var material = new SpriteMaterial( { map: map } );
-			var sprite = new Sprite( material );
-
-			// Render sprite on top of other objects & fixed size regardless of zoom
-			material.depthWrite = false;
-			material.depthTest = false;
-			material.sizeAttenuation = false;
-
-			sprite.position.set( position.x, position.y, position.z );
+			this.removeMarker();
+			const map = new TextureLoader().load( markerSprite, () => this.requestRender() );
+			const material = new SpriteMaterial( {
+				map,
+				depthWrite: false,
+				depthTest: false,
+				sizeAttenuation: false
+			} );
+			const sprite = new Sprite( material );
+			sprite.position.copy( position );
 			sprite.scale.set( 0.04, 0.10, 1 );
 			sprite.name = this.markerName;
-
 			this.scene.add( sprite );
+			this.requestRender();
 
-			this.needsRerender = 1;
+		},
+		removeMarker() {
+
+			if ( ! this.scene ) return;
+			const marker = this.scene.getObjectByName( this.markerName );
+			if ( ! marker ) return;
+			this.scene.remove( marker );
+			if ( marker.material.map ) marker.material.map.dispose();
+			marker.material.dispose();
 
 		},
 		pointCameraToNorth() {
 
-			// Position camera to the south of the point it's focusing on
-			const centre = new Vector2( this.controls.target.x, this.controls.target.z );
-			const pos = new Vector2( this.camera.position.x, this.camera.position.z );
-			const radius = centre.distanceTo( pos );
-			const x = radius * Math.cos( Math.PI / 2 ) + centre.x;
-			const z = radius * Math.sin( Math.PI / 2 ) + centre.y;
-
-			const oldPos = { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z };
-			const newPos = { x: x, y: this.camera.position.y, z: z };
-
-			const duration = 1000 * ( Math.abs( this.camera.rotation.z ) / 3.14 );
-
-			function animate( time ) {
-
-				requestAnimationFrame( animate );
-				TWEEN.update( time );
-
-			}
-
-			requestAnimationFrame( animate );
-
-			new TWEEN.Tween( oldPos )
-				.to( newPos, duration )
+			const tilesFrame = this.getTilesFrame();
+			if ( ! tilesFrame || ! this.controls ) return;
+			const target = this.controls.getPivotPoint( new Vector3() );
+			const newPosition = getNorthFacingCameraPosition(
+				tilesFrame.ellipsoid,
+				tilesFrame.group,
+				this.camera.position,
+				target
+			);
+			const cartographic = worldToCartographic( tilesFrame.ellipsoid, tilesFrame.group, target );
+			const up = getWorldFrame(
+				tilesFrame.ellipsoid,
+				tilesFrame.group,
+				cartographic.lat,
+				cartographic.lon
+			).up;
+			const tweenPosition = this.camera.position.clone();
+			this.controls.enabled = false;
+			new TWEEN.Tween( tweenPosition )
+				.to( newPosition, 600 )
 				.easing( TWEEN.Easing.Quadratic.Out )
 				.onUpdate( () => {
 
-					this.camera.position.x = oldPos.x;
-					this.camera.position.z = oldPos.z;
-					this.camera.lookAt( this.controls.target );
+					this.camera.position.copy( tweenPosition );
+					this.camera.up.copy( up );
+					this.camera.lookAt( target );
+					this.requestRender();
 
-					this.needsRerender = 1;
+				} )
+				.onComplete( () => {
+
+					this.controls.enabled = true;
+					this.controls.resetState();
+					this.emitCompassRotation( target );
+					this.setRouteFromCameraPos();
 
 				} )
 				.start();
 
 		},
-		reinitTiles( init ) {
+		emitCompassRotation( target = null ) {
 
+			const tilesFrame = this.getTilesFrame();
+			if ( ! tilesFrame || ! this.controls ) return;
+			target = target || this.controls.getPivotPoint( new Vector3() );
+			const rotation = getCompassRotation(
+				tilesFrame.ellipsoid,
+				tilesFrame.group,
+				this.camera,
+				target
+			);
+			this.$emit( 'cam-rotation-z', rotation );
+
+		},
+		createFeatureMaterial( object ) {
+
+			let highlightAttribute = null;
+			try {
+
+				highlightAttribute = getPreferredHighlightAttribute( object );
+
+			} catch ( error ) {
+
+				console.warn( 'Unable to prepare semantic highlighting.', error );
+
+			}
+			const material = new MeshLambertMaterial( { color: this.meshColor } );
+			if ( ! highlightAttribute || ! object.geometry.getAttribute( highlightAttribute ) ) return material;
+
+			const highlightedFeatureId = { value: - 1 };
+			material.userData.highlightedFeatureId = highlightedFeatureId;
+			material.userData.highlightAttribute = highlightAttribute;
+			material.onBeforeCompile = shader => {
+
+				shader.uniforms.highlightedFeatureId = highlightedFeatureId;
+				shader.uniforms.highlightColor = { value: new Color( HIGHLIGHT_COLOR ) };
+				shader.vertexShader = `
+					attribute float ${ highlightAttribute };
+					varying float semanticFeatureId;
+				` + shader.vertexShader.replace(
+					'#include <begin_vertex>',
+					`#include <begin_vertex>
+					semanticFeatureId = ${ highlightAttribute };`
+				);
+				shader.fragmentShader = `
+					varying float semanticFeatureId;
+					uniform float highlightedFeatureId;
+					uniform vec3 highlightColor;
+				` + shader.fragmentShader.replace(
+					'vec4 diffuseColor = vec4( diffuse, opacity );',
+					`vec4 diffuseColor =
+						abs( semanticFeatureId - highlightedFeatureId ) < 0.5 ?
+						vec4( highlightColor, opacity ) : vec4( diffuse, opacity );`
+				);
+
+			};
+			material.customProgramCacheKey = () => `semantic-highlight-${ highlightAttribute }`;
+			return material;
+
+		},
+		handleLoadModel( event ) {
+
+			event.scene.traverse( child => {
+
+				if ( ! child.isMesh || ! child.material ) return;
+				const originalMaterial = child.material;
+				child.material = Array.isArray( originalMaterial ) ?
+					originalMaterial.map( () => this.createFeatureMaterial( child ) ) :
+					this.createFeatureMaterial( child );
+				disposeMaterial( originalMaterial );
+
+			} );
+			this.requestRender();
+
+		},
+		clearSelection() {
+
+			if ( ! this.selectedObject ) return;
+			const materials = Array.isArray( this.selectedObject.material ) ?
+				this.selectedObject.material : [ this.selectedObject.material ];
+			materials.filter( Boolean ).forEach( material => {
+
+				if ( material.userData.highlightedFeatureId ) {
+
+					material.userData.highlightedFeatureId.value = - 1;
+
+				}
+
+			} );
+			this.selectedObject = null;
+
+		},
+		highlightFeature( object, semanticFeature ) {
+
+			const materials = Array.isArray( object.material ) ? object.material : [ object.material ];
+			let highlighted = false;
+			materials.filter( Boolean ).forEach( material => {
+
+				if (
+					material.userData.highlightedFeatureId &&
+					material.userData.highlightAttribute === semanticFeature.highlightAttribute
+				) {
+
+					material.userData.highlightedFeatureId.value = semanticFeature.featureId;
+					highlighted = true;
+
+				}
+
+			} );
+			if ( highlighted ) this.selectedObject = object;
+
+		},
+		reinitTiles( initializeCamera = false ) {
+
+			this.clearSelection();
+			this.selectionGeneration ++;
 			if ( this.tiles ) {
 
-				this.offsetParent.remove( this.tiles.group );
+				this.contentGroup.remove( this.tiles.group );
+				this.tiles.dispose();
 
 			}
 
 			this.tilesError = null;
-			this.sceneTransform = null;
-			this.tiles = new RecoverableTilesRenderer( this.tilesUrl );
-			const tiles = this.tiles;
-			if ( this.controls ) this.controls.enabled = true;
-			this.tiles.displayBoxBounds = true;
-			this.tiles.colorMode = 7;
-			this.tiles.lruCache.minSize = this.lruCacheMinSize;
-			this.tiles.lruCache.maxSize = this.lruCacheMaxSize;
+			const tiles = new TilesRenderer( this.tilesUrl );
+			this.tiles = tiles;
+			tiles.registerPlugin( new GLTFExtensionsPlugin( {
+				metadata: true,
+				meshoptDecoder: MeshoptDecoder
+			} ) );
+			tiles.setCamera( this.camera );
+			tiles.setResolutionFromRenderer( this.camera, this.renderer );
+			tiles.addEventListener( 'needs-update', () => this.requestRender() );
+			tiles.addEventListener( 'load-model', event => {
 
-			this.tiles.errorTarget = this.errorTarget;
-			this.tiles.errorThreshold = this.errorThreshold;
-			this.tiles.loadSiblings = false;
-			this.tiles.maxDepth = 15;
-			this.tiles.showEmptyTiles = true;
+				if ( this.tiles === tiles ) this.handleLoadModel( event );
 
-			this.tiles.downloadQueue.priorityCallback = tile => 1 / tile.cached.distance;
+			} );
+			tiles.addEventListener( 'dispose-model', event => {
 
-			this.tiles.setCamera( this.dummyCamera );
-			this.tiles.setResolutionFromRenderer( this.dummyCamera, this.renderer );
+				if ( this.selectedObject && event.scene.getObjectById( this.selectedObject.id ) ) {
 
-			this.tiles.onLoadTileSet = () => {
-
-				if ( this.tiles !== tiles ) return;
-
-				if ( init ) {
-
-					// Ensure the tileset is loaded prior to setting the position from the url parameters (we need the tileset transform to do that)
-					let q = this.$router.currentRoute.query;
-					if ( "rdx" in q && "rdy" in q && "ox" in q && "oy" in q && "oz" in q ) {
-
-						this.setCameraPosFromRoute( q );
-
-					} else {
-
-						// viewport randomly selected from landmarks
-						const landmarks = this.$root.$data[ 'landmarkLocations' ];
-						const keys = Object.keys( landmarks );
-						const landmark = landmarks[ keys[ keys.length * Math.random() << 0 ] ];
-
-						this.$parent.$data[ 'locationBoxText' ] = landmark.name;
-						this.$parent.$data[ 'showLocationBox' ] = true;
-
-						this.setCameraPosFromRoute( {
-							rdx: landmark.rdx,
-							rdy: landmark.rdy,
-							ox: landmark.ox,
-							oy: landmark.oy,
-							oz: landmark.oz
-						} );
-
-						var start = new Date().getTime();
-						var interval = setInterval( function () {
-
-							var timeLapsed = new Date().getTime() - start;
-							var stop = ( this.tiles.stats.downloading <= 2 && timeLapsed >= 10000 ) || timeLapsed > 25000;
-
-							if ( stop ) {
-
-								this.$parent.$data[ 'showLocationBox' ] = false;
-								clearInterval( interval );
-
-							}
-
-						}.bind( this ), 2000 );
-
-					}
+					this.clearSelection();
 
 				}
 
-				const transform = this.tiles.root.cached.transform;
-				this.sceneTransform = new Vector3( transform.elements[ 12 ], transform.elements[ 13 ], transform.elements[ 14 ] );
-				this.reinitBasemap();
-
-				this.needsRerender = 2;
-
-			};
-
-			this.tiles.onLoadTileSetError = ( error, url ) => {
+			} );
+			tiles.addEventListener( 'load-error', event => {
 
 				if ( this.tiles !== tiles ) return;
-				// An external nested tileset can fail without invalidating the root.
-				if ( url !== tiles.rootURL ) return;
+				if ( event.tile === null ) {
 
-				this.tilesError = error;
-				this.show3DTiles = false;
-				this.offsetParent.remove( tiles.group );
-				if ( this.controls ) this.controls.enabled = false;
-				this.$emit( 'object-picked', undefined );
-				this.needsRerender = 1;
+					this.tilesError = event.error;
+					this.$emit( 'object-picked', undefined );
 
-			};
+				} else {
 
-			this.tiles.onLoadModel = ( s ) => {
+					console.warn( `Failed to load 3D Tiles content: ${ event.url }`, event.error );
 
-				s.traverse( c => {
+				}
+				this.requestRender();
 
-					if ( c.material ) {
+			} );
+			tiles.addEventListener( 'load-root-tileset', () => {
 
-						c.material.dispose();
-						c.material = this.material;
+				if ( this.tiles !== tiles ) return;
+				this.controls.setEllipsoid( tiles.ellipsoid, tiles.group );
+				if ( initializeCamera ) this.initializeCameraPosition();
+				this.requestRender();
 
-						if ( c.geometry ) {
-
-							c.geometry.computeBoundingBox();
-
-						}
-
-					}
-
-				} );
-
-				this.needsRerender = 1;
-
-			};
-
-			this.offsetParent.add( this.tiles.group );
+			} );
+			this.contentGroup.add( tiles.group );
+			this.requestRender();
 
 		},
-		reinitBasemap() {
+		initializeCameraPosition() {
+
+			const query = this.$router.currentRoute.query;
+			if ( [ 'rdx', 'rdy', 'ox', 'oy', 'oz' ].every( key => key in query ) ) {
+
+				this.setCameraPosFromRoute( query );
+				return;
+
+			}
+
+			const landmarks = this.$root.$data.landmarkLocations;
+			const keys = Object.keys( landmarks );
+			const landmark = landmarks[ keys[ keys.length * Math.random() << 0 ] ];
+			this.$parent.$data.locationBoxText = landmark.name;
+			this.$parent.$data.showLocationBox = true;
+			this.setCameraPosFromRoute( landmark );
+
+			const started = Date.now();
+			this.locationTimer = window.setInterval( () => {
+
+				const elapsed = Date.now() - started;
+				const stop = ( this.tiles.stats.downloading <= 2 && elapsed >= 10000 ) || elapsed > 25000;
+				if ( stop ) {
+
+					this.$parent.$data.showLocationBox = false;
+					window.clearInterval( this.locationTimer );
+					this.locationTimer = null;
+
+				}
+
+			}, 2000 );
+
+		},
+		async createBasemapOverlay() {
+
+			if ( this.basemapOptions.type !== 'wmts' ) return null;
+			const options = this.basemapOptions.options;
+			const capabilities = await new WMTSCapabilitiesLoader().loadAsync( getCapabilitiesUrl( options.url ) );
+			const layer = capabilities.layers.find( item => item.identifier === options.layer );
+			if ( ! layer ) throw new Error( `WMTS layer "${ options.layer }" was not found.` );
+			const tileMatrixSet = layer.tileMatrixSets.find( item => {
+
+				return item && ( item.identifier === options.tileMatrixSet || /:3857$/i.test( item.supportedCRS ) );
+
+			} );
+			if ( ! tileMatrixSet ) throw new Error( `WMTS layer "${ options.layer }" has no EPSG:3857 matrix set.` );
+
+			return new WMTSTilesOverlay( {
+				url: options.url.replace( /[?&]+$/, '' ),
+				layer: options.layer,
+				tileMatrixSet: tileMatrixSet.identifier,
+				style: options.style || 'default',
+				format: options.format || layer.format,
+				tileMatrices: tileMatrixSet.tileMatrices,
+				projection: 'EPSG:3857',
+				contentBoundingBox: layer.boundingBox && layer.boundingBox.bounds
+			} );
+
+		},
+		async reinitBasemap() {
+
+			const generation = ++ this.basemapGeneration;
+			if ( this.terrainTiles ) {
+
+				this.contentGroup.remove( this.terrainTiles.group );
+				this.terrainTiles.dispose();
+				this.terrainTiles = null;
+
+			}
+
+			let overlay = null;
+			try {
+
+				overlay = await this.createBasemapOverlay();
+
+			} catch ( error ) {
+
+				console.warn( 'Unable to load the selected basemap; using an untextured globe.', error );
+
+			}
+			if ( generation !== this.basemapGeneration ) return;
+			this.installTerrainRenderer( overlay );
+
+		},
+		installTerrainRenderer( overlay ) {
 
 			if ( this.terrainTiles ) {
 
-				this.offsetParent.remove( this.terrainTiles.group );
+				this.contentGroup.remove( this.terrainTiles.group );
+				this.terrainTiles.dispose();
 
 			}
+			const terrainTiles = new TilesRenderer();
+			terrainTiles.registerPlugin( new GeneratedSurfacePlugin( {
+				overlay,
+				shape: 'ellipsoid',
+				applyOverlayTexture: Boolean( overlay )
+			} ) );
+			terrainTiles.setCamera( this.camera );
+			terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
+			terrainTiles.addEventListener( 'needs-update', () => this.requestRender() );
+			terrainTiles.addEventListener( 'load-error', event => {
 
-			if ( this.basemapOptions.type == "wms" ) {
+				if ( this.terrainTiles !== terrainTiles ) return;
+				console.warn( `Failed to load basemap content: ${ event.url }`, event.error );
+				if ( overlay ) this.installTerrainRenderer( null );
 
-				this.terrainTiles = new WMSTilesRenderer(
-					this.basemapOptions.options.url,
-					this.basemapOptions.options.layer,
-					this.basemapOptions.options.style
-				);
-
-				// this.terrainTiles.imageFormat = this.basemapOptions.imageFormat;
-
-			} else {
-
-				this.terrainTiles = new WMTSTilesRenderer( this.basemapOptions.options, () => this.needsRerender = 1 );
-
-			}
-
-			this.offsetParent.add( this.terrainTiles.group );
-
-			this.terrainTiles.onLoadTile = () => this.needsRerender = 1;
+			} );
+			this.terrainTiles = terrainTiles;
+			if ( this.showTerrain ) this.contentGroup.add( terrainTiles.group );
+			this.requestRender();
 
 		},
 		initScene() {
 
 			this.scene = new Scene();
-			this.scene.background = new Color( "#000000" );
+			this.scene.background = new Color( '#d9eefc' );
 			this.fog = new FogExp2( this.fogColor, this.fogDensity );
-
-			this.material = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
-			this.material.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
-
-			this.highlightMaterial = new ShaderMaterial( batchIdHighlightShaderMixin( ShaderLib.lambert ) );
-			this.highlightMaterial.uniforms.diffuse.value = new Color( this.meshColor ).convertSRGBToLinear();
-
-			let canvas = document.getElementById( "canvas" );
-
-			// enable AA only for non high DPI screens
-			this.renderer = new WebGLRenderer( { antialias: window.devicePixelRatio > 1 ? false : true } );
-			// this.renderer = new WebGLRenderer( { antialias: false } );
+			this.contentGroup = new Group();
+			this.scene.add( this.contentGroup );
+			const canvas = this.$el;
+			this.renderer = new WebGLRenderer( { antialias: window.devicePixelRatio <= 1 } );
 			this.renderer.setPixelRatio( window.devicePixelRatio );
 			this.renderer.setSize( canvas.clientWidth, canvas.clientHeight );
-			this.renderer.setClearColor( 0xd9eefc );
-			this.renderer.outputEncoding = sRGBEncoding;
-			this.renderer.autoClear = false;
-
+			this.renderer.outputColorSpace = SRGBColorSpace;
+			this.renderer.domElement.style.display = 'block';
 			canvas.appendChild( this.renderer.domElement );
 
-			this.camera = new PerspectiveCamera( 50, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.farPlane );
-			this.camera.position.set( 400, 400, 400 );
+			this.camera = new PerspectiveCamera( 50, canvas.clientWidth / canvas.clientHeight, 1, 30000000 );
+			const initial = WGS84_ELLIPSOID.getCartographicToPosition( 0.91, 0.09, 250000, new Vector3() );
+			this.camera.position.copy( initial );
+			this.camera.lookAt( new Vector3() );
+			this.camera.updateMatrixWorld();
 
-			this.dummyCamera = new PerspectiveCamera( 30, canvas.clientWidth / canvas.clientHeight, this.nearPlane, this.dummyFarPlane );
-
-			this.offsetParent = new Group();
-			this.scene.add( this.offsetParent );
-
-			this.box = new Box3();
-
-			this.raycaster = new Raycaster();
-
-			this.mouse = new Vector2();
-
-			this.reinitTiles( true );
-			this.show3DTiles = true;
-
-			this.controls = new OrbitControls( this.camera, this.renderer.domElement );
-			this.controls.screenSpacePanning = false;
+			this.controls = new GlobeControls( this.contentGroup, this.camera, this.renderer.domElement );
+			this.controls.setEllipsoid( WGS84_ELLIPSOID, this.contentGroup );
 			this.controls.enableDamping = true;
 			this.controls.dampingFactor = 0.15;
-			this.controls.minDistance = 20;
-			this.controls.maxDistance = 150000;
-			this.controls.maxPolarAngle = 0.8;
-			this.controls.mouseButtons = {
-				LEFT: MOUSE.PAN,
-				MIDDLE: MOUSE.DOLLY,
-				RIGHT: MOUSE.ROTATE
-			};
-			this.controls.touches = {
-				ONE: TOUCH.ROTATE,
-				TWO: TOUCH.DOLLY_PAN
-			};
-			this.controls.addEventListener( "change", () => this.needsRerender = 1 );
-			this.controls.addEventListener( "change", () => this.$emit( 'cam-rotation-z', this.camera.rotation.z ) );
-			this.controls.addEventListener( "end", this.setRouteFromCameraPos );
+			this.controls.minDistance = 10;
+			this.controls.maxDistance = 1000000;
+			this.controls.adjustHeight = false;
+			this.onControlsChange = () => {
 
+				this.emitCompassRotation();
+				this.scheduleRouteUpdate();
+				this.requestRender();
+
+			};
+			this.controls.addEventListener( 'change', this.onControlsChange );
+
+			this.raycaster = new Raycaster();
+			this.mouse = new Vector2();
 			this.renderer.domElement.addEventListener( 'pointermove', this.onPointerMove, false );
 			this.renderer.domElement.addEventListener( 'pointerdown', this.onPointerDown, false );
 			this.renderer.domElement.addEventListener( 'pointerup', this.onPointerUp, false );
 			this.renderer.domElement.addEventListener( 'pointerleave', this.onPointerLeave, false );
 
-			// lights
 			this.pLight = new PointLight( 0xffffff, this.pointIntensity, 0, 1 );
 			this.camera.add( this.pLight );
 			this.scene.add( this.camera );
-
 			this.dirLight = new DirectionalLight( 0xffffff, this.directionalIntensity );
 			this.dirLight.position.set( this.dirX, this.dirY, this.dirZ );
 			this.scene.add( this.dirLight );
-
 			this.ambLight = new AmbientLight( 0xffffff, this.ambientIntensity );
 			this.scene.add( this.ambLight );
 
-			//this.hemLight = new HemisphereLight( 0xffffbb, 0x080820, 1 );
-			//this.scene.add(this.hemLight);
-
-			this.rayIntersect = new Group();
-
-			const rayIntersectMat = new MeshBasicMaterial( { color: 0xe91e63 } );
-			const rayMesh = new Mesh( new CylinderBufferGeometry( 0.25, 0.25, 6 ), rayIntersectMat );
+			this.rayIntersect = new Mesh();
+			const rayIntersectMaterial = new MeshBasicMaterial( { color: 0xe91e63 } );
+			const rayMesh = new Mesh( new CylinderGeometry( 0.25, 0.25, 6 ), rayIntersectMaterial );
 			rayMesh.rotation.x = Math.PI / 2;
 			rayMesh.position.z += 3;
 			this.rayIntersect.add( rayMesh );
-
-			const rayRing = new Mesh( new TorusBufferGeometry( 1.5, 0.2, 16, 100 ), rayIntersectMat );
-			this.rayIntersect.add( rayRing );
-			this.scene.add( this.rayIntersect );
+			this.rayIntersect.add( new Mesh( new TorusGeometry( 1.5, 0.2, 16, 100 ), rayIntersectMaterial ) );
 			this.rayIntersect.visible = false;
+			this.scene.add( this.rayIntersect );
 
-
-			this.offsetParent.rotation.x = - Math.PI / 2;
-
+			this.reinitTiles( true );
 			this.reinitBasemap();
-
-			this.needsRerender = 1;
+			this.requestRender();
 			this.renderScene();
-
 			window.addEventListener( 'resize', this.onWindowResize, false );
 
 		},
 		onWindowResize() {
 
-			let canvas = document.getElementById( "canvas" );
-
-			const width = canvas.clientWidth;
-			const height = canvas.clientHeight;
-
+			const width = this.$el.clientWidth;
+			const height = this.$el.clientHeight;
 			this.camera.aspect = width / height;
-			this.renderer.setSize( width, height );
-
 			this.camera.updateProjectionMatrix();
+			this.renderer.setSize( width, height );
 			this.renderer.setPixelRatio( window.devicePixelRatio );
-
-			this.needsRerender = 1;
-
-		},
-		onPointerMove( evt ) {
-
-			if ( this.tilesError ) return;
-
-			if ( this.castOnHover || evt.ctrlKey ) {
-
-				let snapTolerance = 0;
-				if ( evt.altKey ) {
-
-					snapTolerance = 5;
-
-				}
-
-				this.castRay( evt.clientX, evt.clientY, snapTolerance );
-
-			}
+			if ( this.tiles ) this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
+			if ( this.terrainTiles ) this.terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
+			this.requestRender();
 
 		},
-		onPointerDown( evt ) {
+		onPointerMove( event ) {
 
 			if ( this.tilesError ) return;
-
-			this.pointerCaster.startClientX = evt.clientX;
-			this.pointerCaster.startClientY = evt.clientY;
+			if ( this.castOnHover || event.ctrlKey ) this.castRay( event.clientX, event.clientY, event.altKey ? 5 : 0 );
 
 		},
-		onPointerUp( evt ) {
+		onPointerDown( event ) {
 
 			if ( this.tilesError ) return;
+			this.pointerCaster.startClientX = event.clientX;
+			this.pointerCaster.startClientY = event.clientY;
 
+		},
+		onPointerUp( event ) {
+
+			if ( this.tilesError ) return;
 			if (
-				this.pointerCaster.startClientX == evt.clientX &&
-				this.pointerCaster.startClientY == evt.clientY
+				this.pointerCaster.startClientX === event.clientX &&
+				this.pointerCaster.startClientY === event.clientY
 			) {
 
-				this.castRay( evt.clientX, evt.clientY );
+				this.castRay( event.clientX, event.clientY );
 
 			}
 
 		},
-		castRay( clientX, clientY, snapTolerance = 0 ) {
+		onPointerLeave() {
 
+			this.rayIntersect.visible = false;
+			this.requestRender();
+
+		},
+		async castRay( clientX, clientY, snapTolerance = 0 ) {
+
+			const generation = ++ this.selectionGeneration;
 			const rect = this.renderer.domElement.getBoundingClientRect();
-			this.mouse.x = ( ( clientX - rect.left ) / this.renderer.domElement.clientWidth ) * 2 - 1;
-			this.mouse.y = - ( ( clientY - rect.top ) / this.renderer.domElement.clientHeight ) * 2 + 1;
-
+			this.mouse.x = ( ( clientX - rect.left ) / rect.width ) * 2 - 1;
+			this.mouse.y = - ( ( clientY - rect.top ) / rect.height ) * 2 + 1;
 			this.raycaster.setFromCamera( this.mouse, this.camera );
 
-			// check if we are hitting the geocoding marker. Eearly return if that was the case.
 			const marker = this.scene.getObjectByName( this.markerName );
+			if ( marker ) {
 
-			if ( marker != undefined ) {
+				const markerResults = this.raycaster.intersectObject( marker, true );
+				if ( markerResults.length && markerResults[ 0 ].uv && markerResults[ 0 ].uv.y >= 0.5 ) {
 
-				const results = this.raycaster.intersectObject( marker, true );
-
-				if ( results.length && results[ 0 ].uv.y >= 0.5 ) {
-
-					this.scene.remove( marker );
-					this.needsRerender = 1;
+					this.removeMarker();
+					this.requestRender();
 					return;
 
 				}
 
 			}
 
-			// check if we are hitting a building
-			let results = [];
-
-			if ( this.overrideCast ) {
-
-				for ( let i = 0; i < this.tiles.group.children.length; i ++ ) {
-
-					const c = this.tiles.group.children[ i ].children[ 0 ];
-					Object.getPrototypeOf( c ).raycast.call( c, this.raycaster, results );
-
-				}
-
-				results.sort( ( a, b ) => a.distance - b.distance );
-
-			} else {
-
-				results = this.raycaster.intersectObject( this.tiles.group, true );
-
-			}
-
-			// Set up the highlighted batchid to the material of new object
-			if ( this.selectedObject ) {
-
-				this.selectedObject.material = this.material;
-				this.selectedObject = undefined;
-
-			}
-
-			if ( results.length ) {
-
-				const { face, point, object } = results[ 0 ];
-
-				let closestPoint = null;
-
-				if ( snapTolerance > 0 ) {
-
-					// Snap to closest point
-					const position = object.geometry.getAttribute( 'position' );
-					const m = object.matrixWorld;
-					const points = [
-						new Vector3( position.getX( face.a ), position.getY( face.a ), position.getZ( face.a ) ).applyMatrix4( m ),
-						new Vector3( position.getX( face.b ), position.getY( face.b ), position.getZ( face.b ) ).applyMatrix4( m ),
-						new Vector3( position.getX( face.c ), position.getY( face.c ), position.getZ( face.c ) ).applyMatrix4( m )
-					];
-					let dist = snapTolerance;
-					for ( let i = 0; i < 3; i ++ ) {
-
-						const newDist = point.distanceTo( points[ i ] );
-						if ( newDist < dist ) {
-
-							closestPoint = points[ i ];
-							dist = newDist;
-
-						}
-
-					}
-
-					if ( closestPoint === null ) {
-
-						closestPoint = point;
-
-					}
-
-				} else {
-
-					closestPoint = point;
-
-				}
-
-				// Compute and show a marker at the intersection point
-				this.rayIntersect.position.copy( closestPoint );
-				const normal = face.normal;
-				normal.transformDirection( object.matrixWorld );
-				this.rayIntersect.lookAt(
-					closestPoint.x + normal.x,
-					closestPoint.y + normal.y,
-					closestPoint.z + normal.z
-				);
-
-				const azimuthAngle = normal.angleTo( new Vector3( 0, 1, 0 ) ) * 180 / Math.PI;
-
-				this.rayIntersect.visible = true;
-
-				// Get the active tile
-				const info = this.getTileInformationFromActiveObject( object );
-
-				// Get info from batchTable
-				const batch_id_table = object.geometry.getAttribute( '_batchid' );
-				const batch_id = batch_id_table.getX( face.a );
-
-				const batchTable = object.parent.batchTable;
-				const keys = batchTable.getKeys();
-
-				if ( keys.includes( "attributes" ) ) {
-
-					const attributes = JSON.parse( batchTable.getData( "attributes" )[ batch_id ] );
-					const tileID = info.id.replace( /^.*[\\\/]/, '' ).replace( '.b3dm', '' );
-					const pz = closestPoint.y + this.sceneTransform.z;
-					this.$emit( 'object-picked', {
-						"batchID": batch_id,
-						tileID,
-						pz,
-						azimuthAngle,
-						attributes
-					} );
-
-				}
-
-				object.material = this.highlightMaterial;
-				this.highlightMaterial.uniforms.highlightedBatchId.value = batch_id;
-				this.selectedObject = object;
-
-			} else {
+			this.clearSelection();
+			const intersection = this.raycaster.intersectObject( this.tiles.group, true )
+				.find( result => result.face && result.object.userData.meshFeatures );
+			if ( ! intersection ) {
 
 				this.$emit( 'object-picked', undefined );
 				this.rayIntersect.visible = false;
+				this.requestRender();
+				return;
 
 			}
 
-			this.needsRerender = 1;
+			const { face, object, point } = intersection;
+			let closestPoint = point;
+			if ( snapTolerance > 0 ) {
 
-		},
-		getTileInformationFromActiveObject( object ) {
+				const position = object.geometry.getAttribute( 'position' );
+				const vertices = [ face.a, face.b, face.c ].map( index => {
 
-			// Find which tile this scene is associated with. This is slow and
-			// intended for debug purposes only.
-			let targetTile = null;
-			const activeTiles = this.tiles.activeTiles;
-			activeTiles.forEach( tile => {
+					return new Vector3().fromBufferAttribute( position, index ).applyMatrix4( object.matrixWorld );
 
-				if ( targetTile ) {
+				} );
+				closestPoint = vertices.reduce( ( closest, vertex ) => {
 
-					return true;
+					return point.distanceTo( vertex ) < point.distanceTo( closest ) ? vertex : closest;
 
-				}
+				}, point );
+				if ( point.distanceTo( closestPoint ) > snapTolerance ) closestPoint = point;
 
-				const scene = tile.cached.scene;
-				if ( scene ) {
+			}
 
-					scene.traverse( c => {
+			let semanticFeature = null;
+			try {
 
-						if ( c === object ) {
+				semanticFeature = await getSemanticFeature( intersection );
 
-							targetTile = tile;
+			} catch ( error ) {
 
-						}
+				console.warn( 'Unable to read structural metadata for the selected feature.', error );
 
-					} );
+			}
+			if ( generation !== this.selectionGeneration ) return;
+			if ( ! semanticFeature ) {
 
-				}
+				this.$emit( 'object-picked', undefined );
+				this.rayIntersect.visible = false;
+				this.requestRender();
+				return;
 
+			}
+
+			const normal = face.normal.clone().transformDirection( object.matrixWorld );
+			this.rayIntersect.position.copy( closestPoint );
+			this.rayIntersect.lookAt( closestPoint.clone().add( normal ) );
+			this.rayIntersect.visible = true;
+			const tilesFrame = this.getTilesFrame();
+			const cartographic = worldToCartographic( tilesFrame.ellipsoid, tilesFrame.group, closestPoint );
+			const surfaceUp = getWorldFrame(
+				tilesFrame.ellipsoid,
+				tilesFrame.group,
+				cartographic.lat,
+				cartographic.lon,
+				cartographic.height
+			).up;
+			const azimuthAngle = Math.acos( Math.min( 1, Math.max( - 1, normal.dot( surfaceUp ) ) ) ) * 180 / Math.PI;
+			this.highlightFeature( object, semanticFeature );
+			this.$emit( 'object-picked', {
+				featureId: semanticFeature.featureId,
+				featureClass: semanticFeature.featureClass,
+				attributes: semanticFeature.attributes,
+				height: cartographic.height,
+				heightReference: 'WGS84_ELLIPSOID',
+				azimuthAngle,
+				tileID: null,
+				batchID: semanticFeature.featureId,
+				pz: cartographic.height
 			} );
-
-			if ( targetTile ) {
-
-				return {
-
-					distanceToCamera: targetTile.cached.distance,
-					geometricError: targetTile.geometricError,
-					screenSpaceError: targetTile.__error,
-					depth: targetTile.__depth,
-					isLeaf: targetTile.__isLeaf,
-					id: targetTile.content.uri
-
-				};
-
-			} else {
-
-				return null;
-
-			}
+			this.requestRender();
 
 		},
-		renderScene( ) {
+		renderScene( time = 0 ) {
 
-			requestAnimationFrame( this.renderScene );
+			this.animationFrame = requestAnimationFrame( this.renderScene );
+			const delta = Math.min( this.clock.getDelta(), 0.1 );
+			TWEEN.update( time );
+			if ( this.controls ) this.controls.update( delta );
+			if ( this.tiles && ! this.tilesError ) this.tiles.update();
+			if ( this.terrainTiles && this.showTerrain ) this.terrainTiles.update();
+			if ( this.tiles && this.tiles.lruCache && this.tiles.lruCache.itemSet ) {
+
+				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
+
+			}
 
 			if ( this.needsRerender > 0 ) {
 
 				this.needsRerender --;
-
-				// update tiles center
-				if ( ! this.tilesError && this.tiles.getBounds( this.box ) ) {
-
-					this.box.getCenter( this.tiles.group.position );
-					this.tiles.group.position.multiplyScalar( - 1 );
-
-				}
-
-				this.controls.update();
-				this.camera.updateMatrixWorld();
-
-				this.dummyCamera.matrixWorld.copy( this.camera.matrixWorld );
-				this.dummyCamera.position.copy( this.camera.position );
-				this.dummyCamera.quaternion.copy( this.camera.quaternion );
-				this.dummyCamera.scale.copy( this.camera.scale );
-				this.dummyCamera.far = this.dummyFarPlane;
-				this.dummyCamera.updateMatrixWorld();
-
-				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
-
-				const camdist = this.camera.position.distanceToSquared( this.controls.target );
-
-				if ( ! this.tilesError && camdist < 1750 * 1750 ) {
-
-					this.tiles.update();
-
-					if ( ! this.show3DTiles ) {
-
-						this.offsetParent.add( this.tiles.group );
-						this.show3DTiles = true;
-
-					}
-
-				} else {
-
-					if ( this.show3DTiles ) {
-
-						this.offsetParent.remove( this.tiles.group );
-						this.show3DTiles = false;
-
-					}
-
-				}
-
-				if ( this.sceneTransform ) {
-
-					if ( this.showTerrain ) {
-
-						this.terrainTiles.update( this.sceneTransform, this.camera );
-
-					}
-
-				}
-
-				// this.renderer.autoClear is set to false, so we need to clear manually. Because don't want to clear when second scene is rendered.
-				this.renderer.clear();
 				this.renderer.render( this.scene, this.camera );
 
 			}
 
 		},
+		disposeScene() {
+
+			if ( this.animationFrame !== null ) cancelAnimationFrame( this.animationFrame );
+			if ( this.locationTimer !== null ) window.clearInterval( this.locationTimer );
+			if ( this.routeUpdateTimer !== null ) window.clearTimeout( this.routeUpdateTimer );
+			window.removeEventListener( 'resize', this.onWindowResize, false );
+			if ( this.renderer ) {
+
+				const element = this.renderer.domElement;
+				element.removeEventListener( 'pointermove', this.onPointerMove, false );
+				element.removeEventListener( 'pointerdown', this.onPointerDown, false );
+				element.removeEventListener( 'pointerup', this.onPointerUp, false );
+				element.removeEventListener( 'pointerleave', this.onPointerLeave, false );
+
+			}
+			this.removeMarker();
+			this.clearSelection();
+			if ( this.controls ) {
+
+				this.controls.removeEventListener( 'change', this.onControlsChange );
+				this.controls.dispose();
+
+			}
+			if ( this.tiles ) this.tiles.dispose();
+			if ( this.terrainTiles ) this.terrainTiles.dispose();
+			if ( this.rayIntersect ) {
+
+				this.rayIntersect.traverse( child => {
+
+					if ( child.geometry ) child.geometry.dispose();
+					disposeMaterial( child.material );
+
+				} );
+
+			}
+			if ( this.pane ) this.pane.dispose();
+			if ( this.renderer ) {
+
+				this.renderer.dispose();
+				if ( this.renderer.domElement.parentNode ) this.renderer.domElement.parentNode.removeChild( this.renderer.domElement );
+
+			}
+
+		}
 	}
 };
 </script>
@@ -1136,6 +983,7 @@ export default {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 .tiles-error {

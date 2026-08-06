@@ -144,7 +144,7 @@ export default {
 
 			pickedBuilding: {
 
-				batchID: "-",
+				featureId: null,
 				attributes: []
 
 			},
@@ -177,7 +177,8 @@ export default {
 
 			}
 
-			return this.BAG3DVersionData[ '3DTilesets' ][ this.tileset ];
+			const tilesets = this.BAG3DVersionData[ 'Cesium3DTilesets' ] || this.BAG3DVersionData[ '3DTilesets' ];
+			return tilesets[ this.tileset ];
 
 		},
 
@@ -219,7 +220,7 @@ export default {
 						url: appConfig.brtUrl,
 						layer: 'standaard',
 						style: 'default',
-						tileMatrixSet: "EPSG:28992",
+						tileMatrixSet: "EPSG:3857",
 						service: "WMTS",
 						request: "GetTile",
 						version: "1.0.0",
@@ -235,7 +236,7 @@ export default {
 						url: appConfig.brtUrl,
 						layer: 'grijs',
 						style: 'default',
-						tileMatrixSet: "EPSG:28992",
+						tileMatrixSet: "EPSG:3857",
 						service: "WMTS",
 						request: "GetTile",
 						version: "1.0.0",
@@ -251,7 +252,7 @@ export default {
 						url: appConfig.luchtfotoUrl,
 						layer: 'Actueel_ortho25',
 						style: 'default',
-						tileMatrixSet: "EPSG:28992",
+						tileMatrixSet: "EPSG:3857",
 						service: "WMTS",
 						request: "GetTile",
 						version: "1.0.0",
@@ -403,18 +404,23 @@ export default {
 
 #map-options {
 	position: absolute;
+	z-index: 3;
 	margin: 0px;
-	top: 3.75rem;
+	top: 0.5rem;
 	margin: 0 0.5rem;
 }
 
 #viewer {
 
+	position: relative;
 	width: 100%;
 	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
 
 }
 #locationbox {
+	z-index: 2;
 	text-align: center;
 	position: relative;
 	bottom: 2rem;

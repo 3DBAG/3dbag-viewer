@@ -39,7 +39,9 @@
     "threeDUnavailableDescription": "De 3D-gegevens voor deze versie konden niet worden geladen."
   },
   "BuildingInfo": {
-    "attr1": "Attribuut omschrijvingen vind je in de "
+    "attr1": "Attribuut omschrijvingen vind je in de ",
+    "ellipsoid": "WGS84-ellipsoïde",
+    "ellipsoidalHeight": "WGS84-ellipsoïdale hoogte"
   },
   "SearchBar": {
     "search": "Zoek een plaats",
