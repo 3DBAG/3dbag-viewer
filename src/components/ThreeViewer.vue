@@ -182,7 +182,7 @@ export default {
 
 		this.pointIntensity = 0.6;
 		this.directionalIntensity = 1.15;
-		this.ambientIntensity = 0.9;
+		this.ambientIntensity = 1.5;
 		this.exposure = 1.15;
 		this.dirX = 1;
 		this.dirY = - 0.5;
