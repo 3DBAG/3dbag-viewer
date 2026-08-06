@@ -21,6 +21,7 @@ import {
 	FogExp2,
 	Group,
 	LinearToneMapping,
+	Matrix3,
 	Mesh,
 	MeshBasicMaterial,
 	MeshLambertMaterial,
@@ -73,6 +74,8 @@ const BUILDING_MAX_VIEW_DISTANCE = 1750;
 const TERRAIN_ERROR_TARGET = 8;
 const WMTS_TEXTURE_RESOLUTION = 768;
 const WMTS_MAX_ZOOM_LEVEL = 18;
+const PICKER_LOCAL_NORMAL = new Vector3( 0, 0, 1 );
+const pickerNormalMatrix = new Matrix3();
 
 function disposeMaterial( material ) {
 
@@ -834,7 +837,9 @@ export default {
 			rayMesh.rotation.x = Math.PI / 2;
 			rayMesh.position.z += 3;
 			this.rayIntersect.add( rayMesh );
-			this.rayIntersect.add( new Mesh( new TorusGeometry( 1.5, 0.2, 16, 100 ), rayIntersectMaterial ) );
+			const rayRing = new Mesh( new TorusGeometry( 1.5, 0.2, 16, 100 ), rayIntersectMaterial );
+			rayRing.position.z = 0.05;
+			this.rayIntersect.add( rayRing );
 			this.rayIntersect.visible = false;
 			this.scene.add( this.rayIntersect );
 
@@ -963,9 +968,11 @@ export default {
 
 			}
 
-			const normal = face.normal.clone().transformDirection( object.matrixWorld );
+			const normal = face.normal.clone().applyNormalMatrix(
+				pickerNormalMatrix.getNormalMatrix( object.matrixWorld )
+			);
 			this.rayIntersect.position.copy( closestPoint );
-			this.rayIntersect.lookAt( closestPoint.clone().add( normal ) );
+			this.rayIntersect.quaternion.setFromUnitVectors( PICKER_LOCAL_NORMAL, normal );
 			this.rayIntersect.visible = true;
 			const tilesFrame = this.getTilesFrame();
 			const cartographic = worldToCartographic( tilesFrame.ellipsoid, tilesFrame.group, closestPoint );
