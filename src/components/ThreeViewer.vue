@@ -62,6 +62,7 @@ import {
 	worldToCartographic
 } from '@/utils/globeCoordinates';
 import {
+	getHeightAboveFeatureBase,
 	getPreferredHighlightAttribute,
 	getSemanticFeature
 } from '@/utils/semanticFeatures';
@@ -162,6 +163,7 @@ export default {
 		this.mouse = null;
 		this.rayIntersect = null;
 		this.selectedObject = null;
+		this.modelRoots = new WeakMap();
 		this.viewPivot = new Vector3();
 		this.viewPivotValid = false;
 		this.viewPivotDirty = true;
@@ -523,6 +525,7 @@ export default {
 
 			event.scene.traverse( child => {
 
+				this.modelRoots.set( child, event.scene );
 				if ( ! child.isMesh || ! child.material ) return;
 				const originalMaterial = child.material;
 				child.material = Array.isArray( originalMaterial ) ?
@@ -984,17 +987,25 @@ export default {
 				cartographic.height
 			).up;
 			const azimuthAngle = Math.acos( Math.min( 1, Math.max( - 1, normal.dot( surfaceUp ) ) ) ) * 180 / Math.PI;
+			const featureHeight = getHeightAboveFeatureBase(
+				this.modelRoots.get( object ) || object,
+				semanticFeature,
+				closestPoint,
+				surfaceUp
+			);
+			const displayedHeight = featureHeight === null ? cartographic.height : featureHeight;
 			this.highlightFeature( object, semanticFeature );
 			this.$emit( 'object-picked', {
 				featureId: semanticFeature.featureId,
 				featureClass: semanticFeature.featureClass,
 				attributes: semanticFeature.attributes,
-				height: cartographic.height,
-				heightReference: 'WGS84_ELLIPSOID',
+				height: displayedHeight,
+				heightReference: featureHeight === null ? 'WGS84_ELLIPSOID' : 'OBJECT_MIN_VERTEX',
+				ellipsoidalHeight: cartographic.height,
 				azimuthAngle,
 				tileID: null,
 				batchID: semanticFeature.featureId,
-				pz: cartographic.height
+				pz: displayedHeight
 			} );
 			this.requestRender();
 

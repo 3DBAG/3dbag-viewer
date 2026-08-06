@@ -1,5 +1,9 @@
-import { BufferGeometry, Float32BufferAttribute, Mesh, MeshBasicMaterial, Vector3 } from 'three';
-import { getPreferredHighlightAttribute, getSemanticFeature } from '@/utils/semanticFeatures';
+import { BufferGeometry, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, Vector3 } from 'three';
+import {
+	getHeightAboveFeatureBase,
+	getPreferredHighlightAttribute,
+	getSemanticFeature
+} from '@/utils/semanticFeatures';
 
 function createIntersection( featureIds = [ 7 ] ) {
 
@@ -59,6 +63,46 @@ describe( 'semantic feature adapter', () => {
 		const intersection = createIntersection();
 		delete intersection.object.userData.meshFeatures;
 		expect( await getSemanticFeature( intersection ) ).toBeNull();
+
+	} );
+
+	it( 'measures height above the lowest vertex of the selected feature across mesh primitives', async () => {
+
+		const intersection = createIntersection();
+		const feature = await getSemanticFeature( intersection );
+		const secondIntersection = createIntersection();
+		secondIntersection.object.geometry.setAttribute( 'position', new Float32BufferAttribute( [
+			0, 0, - 2,
+			1, 0, 4,
+			0, 1, - 10
+		], 3 ) );
+		secondIntersection.object.geometry.setAttribute(
+			'_feature_id_1',
+			new Float32BufferAttribute( [ 7, 7, 8 ], 1 )
+		);
+		secondIntersection.object.userData.meshFeatures.getFeatureInfo = () => [ { attribute: 1, propertyTable: 0 } ];
+		const root = new Group();
+		root.add( intersection.object, secondIntersection.object );
+		root.updateMatrixWorld( true );
+
+		expect( getHeightAboveFeatureBase(
+			root,
+			feature,
+			new Vector3( 0, 0, 5 ),
+			new Vector3( 0, 0, 1 )
+		) ).toBe( 7 );
+
+	} );
+
+	it( 'does not claim a relative height for texture-backed feature IDs', () => {
+
+		const root = new Group();
+		expect( getHeightAboveFeatureBase(
+			root,
+			{ featureId: 7, featureInfo: { propertyTable: 0 }, highlightAttribute: null },
+			new Vector3(),
+			new Vector3( 0, 0, 1 )
+		) ).toBeNull();
 
 	} );
 

@@ -92,9 +92,13 @@
       <b-button
         type="is-static"
         :icon-left="'arrow-expand-vertical'"
-        :title="$t('BuildingInfo.ellipsoidalHeight')"
+        :title="heightTitle"
       >
-        <b>{{ h_clicked }}</b> m <span class="is-hidden-mobile">({{ $t('BuildingInfo.ellipsoid') }})</span>
+        <b>{{ h_clicked }}</b> m
+        <span
+          v-if="building.heightReference !== 'OBJECT_MIN_VERTEX'"
+          class="is-hidden-mobile"
+        >({{ $t('BuildingInfo.ellipsoid') }})</span>
       </b-button>
     </div>
     <div class="control">
@@ -206,6 +210,13 @@ export default {
 			}
 
 			return '-';
+
+		},
+
+		heightTitle: function () {
+
+			return this.building.heightReference === 'OBJECT_MIN_VERTEX' ?
+				this.$t( 'BuildingInfo.objectHeight' ) : this.$t( 'BuildingInfo.ellipsoidalHeight' );
 
 		}
 

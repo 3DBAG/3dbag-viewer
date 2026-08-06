@@ -41,7 +41,9 @@
   "BuildingInfo": {
     "attr1": "Attribuut omschrijvingen vind je in de ",
     "ellipsoid": "WGS84-ellipsoïde",
-    "ellipsoidalHeight": "WGS84-ellipsoïdale hoogte"
+    "ellipsoidalHeight": "WGS84-ellipsoïdale hoogte",
+    "objectBase": "objectbasis",
+    "objectHeight": "Hoogte boven het laagste punt van het object"
   },
   "SearchBar": {
     "search": "Zoek een plaats",
