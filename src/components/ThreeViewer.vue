@@ -196,6 +196,11 @@ export default {
 		this.buildingsVisible = true;
 		this.needsRerender = 0;
 		this.animationFrame = null;
+		this.resizeObserver = null;
+		this.viewportWidth = 0;
+		this.viewportHeight = 0;
+		this.viewportPixelRatio = 0;
+		this.viewportReady = false;
 		this.clock = new Clock();
 		this.basemapGeneration = 0;
 		this.selectionGeneration = 0;
@@ -309,9 +314,43 @@ export default {
 			this.compassNeedsUpdate = true;
 
 		},
-		requestRender() {
+		requestRender( frames = 2 ) {
 
-			this.needsRerender = Math.max( this.needsRerender, 2 );
+			this.needsRerender = Math.max( this.needsRerender, frames );
+
+		},
+		syncViewportSize() {
+
+			if ( ! this.renderer || ! this.camera ) return false;
+			const width = Math.round( this.$el.clientWidth );
+			const height = Math.round( this.$el.clientHeight );
+			if ( width <= 0 || height <= 0 ) {
+
+				this.viewportReady = false;
+				return false;
+
+			}
+
+			const pixelRatio = window.devicePixelRatio || 1;
+			const wasReady = this.viewportReady;
+			const changed = ! wasReady ||
+				width !== this.viewportWidth ||
+				height !== this.viewportHeight ||
+				pixelRatio !== this.viewportPixelRatio;
+			this.viewportReady = true;
+			if ( ! changed ) return false;
+
+			this.viewportWidth = width;
+			this.viewportHeight = height;
+			this.viewportPixelRatio = pixelRatio;
+			this.camera.aspect = width / height;
+			this.camera.updateProjectionMatrix();
+			this.renderer.setPixelRatio( pixelRatio );
+			this.renderer.setSize( width, height );
+			if ( this.tiles ) this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
+			if ( this.terrainTiles ) this.terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
+			this.requestRender( 3 );
+			return true;
 
 		},
 		getTilesFrame() {
@@ -629,11 +668,14 @@ export default {
 				meshoptDecoder: MeshoptDecoder
 			} ) );
 			tiles.setCamera( this.camera );
-			tiles.setResolutionFromRenderer( this.camera, this.renderer );
-			tiles.addEventListener( 'needs-update', () => this.requestRender() );
+			if ( this.viewportReady ) tiles.setResolutionFromRenderer( this.camera, this.renderer );
+			const invalidate = () => this.requestRender();
+			tiles.addEventListener( 'needs-update', invalidate );
+			tiles.addEventListener( 'needs-render', invalidate );
 			tiles.addEventListener( 'load-model', event => {
 
-				if ( this.tiles === tiles ) this.handleLoadModel( event );
+				if ( this.tiles !== tiles ) return;
+				this.handleLoadModel( event );
 
 			} );
 			tiles.addEventListener( 'dispose-model', event => {
@@ -658,7 +700,7 @@ export default {
 					console.warn( `Failed to load 3D Tiles content: ${ event.url }`, event.error );
 
 				}
-				this.requestRender();
+				this.requestRender( 3 );
 
 			} );
 			tiles.addEventListener( 'load-root-tileset', () => {
@@ -800,8 +842,15 @@ export default {
 			} );
 			terrainTiles.registerPlugin( overlayPlugin );
 			terrainTiles.setCamera( this.camera );
-			terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
-			terrainTiles.addEventListener( 'needs-update', () => this.requestRender() );
+			if ( this.viewportReady ) terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
+			const invalidate = () => this.requestRender();
+			terrainTiles.addEventListener( 'needs-update', invalidate );
+			terrainTiles.addEventListener( 'needs-render', invalidate );
+			terrainTiles.addEventListener( 'load-root-tileset', () => {
+
+				if ( this.terrainTiles === terrainTiles ) this.requestRender( 3 );
+
+			} );
 			terrainTiles.addEventListener( 'load-error', event => {
 
 				if ( this.terrainTiles !== terrainTiles ) return;
@@ -833,19 +882,18 @@ export default {
 			this.controlsSurface = new Group();
 			const canvas = this.$el;
 			this.renderer = new WebGLRenderer( { antialias: window.devicePixelRatio <= 1 } );
-			this.renderer.setPixelRatio( window.devicePixelRatio );
-			this.renderer.setSize( canvas.clientWidth, canvas.clientHeight );
 			this.renderer.outputColorSpace = SRGBColorSpace;
 			this.renderer.toneMapping = LinearToneMapping;
 			this.renderer.toneMappingExposure = this.exposure;
 			this.renderer.domElement.style.display = 'block';
 			canvas.appendChild( this.renderer.domElement );
 
-			this.camera = new PerspectiveCamera( 50, canvas.clientWidth / canvas.clientHeight, 1, 30000000 );
+			this.camera = new PerspectiveCamera( 50, 1, 1, 30000000 );
 			const initial = WGS84_ELLIPSOID.getCartographicToPosition( 0.91, 0.09, 250000, new Vector3() );
 			this.camera.position.copy( initial );
 			this.camera.lookAt( new Vector3() );
 			this.camera.updateMatrixWorld();
+			this.syncViewportSize();
 
 			this.controls = new GlobeControls( this.controlsSurface, this.camera, this.renderer.domElement );
 			this.controls.setEllipsoid( WGS84_ELLIPSOID, this.contentGroup );
@@ -897,19 +945,18 @@ export default {
 			this.requestRender();
 			this.renderScene();
 			window.addEventListener( 'resize', this.onWindowResize, false );
+			if ( window.ResizeObserver ) {
+
+				this.resizeObserver = new window.ResizeObserver( () => this.syncViewportSize() );
+				this.resizeObserver.observe( canvas );
+
+			}
+			this.$nextTick( () => this.syncViewportSize() );
 
 		},
 		onWindowResize() {
 
-			const width = this.$el.clientWidth;
-			const height = this.$el.clientHeight;
-			this.camera.aspect = width / height;
-			this.camera.updateProjectionMatrix();
-			this.renderer.setSize( width, height );
-			this.renderer.setPixelRatio( window.devicePixelRatio );
-			if ( this.tiles ) this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
-			if ( this.terrainTiles ) this.terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
-			this.requestRender();
+			this.syncViewportSize();
 
 		},
 		onPointerMove( event ) {
@@ -1086,11 +1133,12 @@ export default {
 		renderScene( time = 0 ) {
 
 			this.animationFrame = requestAnimationFrame( this.renderScene );
+			if ( ! this.viewportReady ) this.syncViewportSize();
 			const delta = Math.min( this.clock.getDelta(), 0.1 );
 			TWEEN.update( time );
 			if ( this.controls ) this.controls.update( delta );
 
-			if ( this.needsRerender > 0 ) {
+			if ( this.viewportReady && this.needsRerender > 0 ) {
 
 				this.needsRerender --;
 				const pivot = this.getViewPivot();
@@ -1101,7 +1149,7 @@ export default {
 
 				}
 				const buildingsVisible = this.updateBuildingVisibility( pivot );
-				if ( buildingsVisible && ! this.tilesError ) this.tiles.update();
+				if ( buildingsVisible && ! this.tilesError && this.tiles ) this.tiles.update();
 				if ( this.terrainTiles && this.showTerrain ) this.terrainTiles.update();
 				if ( this.tiles && this.tiles.lruCache && this.tiles.lruCache.itemSet ) {
 
@@ -1120,6 +1168,12 @@ export default {
 			if ( this.locationTimer !== null ) window.clearInterval( this.locationTimer );
 			if ( this.routeUpdateTimer !== null ) window.clearTimeout( this.routeUpdateTimer );
 			window.removeEventListener( 'resize', this.onWindowResize, false );
+			if ( this.resizeObserver ) {
+
+				this.resizeObserver.disconnect();
+				this.resizeObserver = null;
+
+			}
 			if ( this.renderer ) {
 
 				const element = this.renderer.domElement;
