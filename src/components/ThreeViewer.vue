@@ -57,6 +57,7 @@ import {
 	cameraFrameToRoute,
 	getCompassRotation,
 	getNorthFacingCameraPosition,
+	getSurfacePoint,
 	getWorldFrame,
 	routeToCameraFrame,
 	worldToCartographic
@@ -185,6 +186,7 @@ export default {
 		this.basemapOverlay = null;
 		this.wmtsCapabilitiesCache = new Map();
 		this.raycaster = null;
+		this.markerHeightRaycaster = null;
 		this.mouse = null;
 		this.rayIntersect = null;
 		this.selectedObject = null;
@@ -208,6 +210,7 @@ export default {
 		this.routeUpdateTimer = null;
 		this.ignoreRouteCameraUpdate = false;
 		this.markerName = 'geocoding-marker';
+		this.markerHeightNeedsUpdate = false;
 		this.pointerCaster = { startClientX: 0, startClientY: 0 };
 
 		this.pointIntensity = 0.6;
@@ -296,6 +299,7 @@ export default {
 
 				this.contentGroup.add( this.terrainTiles.group );
 				this.setNavigationSurface( this.terrainTiles.group );
+				this.queueMarkerHeightCorrection();
 
 			} else {
 
@@ -406,7 +410,7 @@ export default {
 			this.setViewPivot( frame.target );
 			this.compassNeedsUpdate = false;
 
-			if ( query.placeMarker === 'true' ) this.placeMarkerOnPoint( frame.target );
+			if ( query.placeMarker === 'true' ) this.placeMarkerOnPoint( frame.target, frame.up );
 			this.emitCompassRotation( frame.target );
 			this.requestRender();
 
@@ -453,7 +457,7 @@ export default {
 			}, 250 );
 
 		},
-		placeMarkerOnPoint( position ) {
+		placeMarkerOnPoint( position, up ) {
 
 			this.removeMarker();
 			const map = new TextureLoader().load( markerSprite, () => this.requestRender() );
@@ -465,14 +469,44 @@ export default {
 			} );
 			const sprite = new Sprite( material );
 			sprite.position.copy( position );
+			sprite.userData.surfaceAnchor = position.clone();
+			sprite.userData.surfaceUp = up.clone();
 			sprite.scale.set( 0.04, 0.10, 1 );
 			sprite.name = this.markerName;
 			this.scene.add( sprite );
+			this.queueMarkerHeightCorrection();
 			this.requestRender();
+
+		},
+		queueMarkerHeightCorrection() {
+
+			if ( ! this.scene || ! this.scene.getObjectByName( this.markerName ) ) return;
+			this.markerHeightNeedsUpdate = true;
+			this.requestRender();
+
+		},
+		correctMarkerHeight() {
+
+			const marker = this.scene && this.scene.getObjectByName( this.markerName );
+			if ( ! marker || ! this.terrainTiles || ! this.markerHeightRaycaster ) return false;
+			const { surfaceAnchor, surfaceUp } = marker.userData;
+			if ( ! surfaceAnchor || ! surfaceUp ) return false;
+
+			const surfacePoint = getSurfacePoint(
+				this.terrainTiles.group,
+				surfaceAnchor,
+				surfaceUp,
+				this.markerHeightRaycaster
+			);
+			if ( ! surfacePoint ) return false;
+			marker.position.copy( surfacePoint );
+			this.requestRender();
+			return true;
 
 		},
 		removeMarker() {
 
+			this.markerHeightNeedsUpdate = false;
 			if ( ! this.scene ) return;
 			const marker = this.scene.getObjectByName( this.markerName );
 			if ( ! marker ) return;
@@ -846,6 +880,11 @@ export default {
 			const invalidate = () => this.requestRender();
 			terrainTiles.addEventListener( 'needs-update', invalidate );
 			terrainTiles.addEventListener( 'needs-render', invalidate );
+			terrainTiles.addEventListener( 'load-model', () => {
+
+				if ( this.terrainTiles === terrainTiles ) this.queueMarkerHeightCorrection();
+
+			} );
 			terrainTiles.addEventListener( 'load-root-tileset', () => {
 
 				if ( this.terrainTiles === terrainTiles ) this.requestRender( 3 );
@@ -913,6 +952,7 @@ export default {
 			this.controls.addEventListener( 'change', this.onControlsChange );
 
 			this.raycaster = new Raycaster();
+			this.markerHeightRaycaster = new Raycaster();
 			this.mouse = new Vector2();
 			this.renderer.domElement.addEventListener( 'pointermove', this.onPointerMove, false );
 			this.renderer.domElement.addEventListener( 'pointerdown', this.onPointerDown, false );
@@ -1151,6 +1191,12 @@ export default {
 				const buildingsVisible = this.updateBuildingVisibility( pivot );
 				if ( buildingsVisible && ! this.tilesError && this.tiles ) this.tiles.update();
 				if ( this.terrainTiles && this.showTerrain ) this.terrainTiles.update();
+				if ( this.markerHeightNeedsUpdate ) {
+
+					this.markerHeightNeedsUpdate = false;
+					this.correctMarkerHeight();
+
+				}
 				if ( this.tiles && this.tiles.lruCache && this.tiles.lruCache.itemSet ) {
 
 					this.lruCacheSize = this.tiles.lruCache.itemSet.size;

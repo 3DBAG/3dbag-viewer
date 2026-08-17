@@ -1,7 +1,8 @@
-import { Group, Vector3 } from 'three';
+import { Group, Mesh, MeshBasicMaterial, PlaneGeometry, Raycaster, Vector3 } from 'three';
 import {
 	cameraFrameToRoute,
 	getNorthFacingCameraPosition,
+	getSurfacePoint,
 	routeToCameraFrame
 } from '@/utils/globeCoordinates';
 
@@ -72,6 +73,36 @@ describe( 'globe coordinate adapter', () => {
 
 		expect( northPosition.distanceTo( frame.target ) ).toBeCloseTo( oldDistance, 6 );
 		expect( northPosition ).toBeInstanceOf( Vector3 );
+
+	} );
+
+	it( 'finds terrain height along the local surface normal', () => {
+
+		const surface = new Mesh( new PlaneGeometry( 100, 100 ), new MeshBasicMaterial() );
+		surface.position.z = 37;
+		surface.updateMatrixWorld( true );
+		const point = getSurfacePoint(
+			surface,
+			new Vector3( 0, 0, 0 ),
+			new Vector3( 0, 0, 1 ),
+			new Raycaster(),
+			100
+		);
+
+		expect( point ).not.toBeNull();
+		expect( point.z ).toBeCloseTo( 37, 6 );
+
+	} );
+
+	it( 'keeps the ellipsoid fallback when terrain has not loaded', () => {
+
+		expect( getSurfacePoint(
+			new Group(),
+			new Vector3( 0, 0, 0 ),
+			new Vector3( 0, 0, 1 ),
+			new Raycaster(),
+			100
+		) ).toBeNull();
 
 	} );
 
