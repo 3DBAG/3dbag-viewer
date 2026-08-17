@@ -21,7 +21,8 @@
   },
   "serviceNotice" : {
     "title": "Service disruption",
-    "body" : "Following a security incident, we are working hard to restore the 3DBAG services. We apologize for the temporary disruption."
+    "body" : "Following a security incident, we are working hard to restore the 3DBAG services. We apologize for the temporary disruption.",
+    "dismiss": "Dismiss service notice"
   },
   "viewer": {
     "feedback": "Give feedback",

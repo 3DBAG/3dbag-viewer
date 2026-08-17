@@ -22,7 +22,8 @@
   },
   "serviceNotice" : {
     "title": "Dienstonderbreking",
-    "body" : "Na een beveiligingsincident werken we hard aan het herstellen van de 3DBAG-diensten. Onze excuses voor de tijdelijke onderbreking."
+    "body" : "Na een beveiligingsincident werken we hard aan het herstellen van de 3DBAG-diensten. Onze excuses voor de tijdelijke onderbreking.",
+    "dismiss": "Melding sluiten"
   },
   "userMeeting" : {
     "title": "Gebruikersbijeenkomst",
