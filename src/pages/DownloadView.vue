@@ -138,7 +138,7 @@
             <td>
               FlatGeoBuf
               <a
-                :href="config.docsUrl + '/' + this.$route.params.locale + '/delivery/fgb'"
+                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/fgb'"
                 target="_blank"
               ><b-icon
                 size="is-small"
@@ -280,7 +280,7 @@
             <td>
               GPKG
               <a
-                :href="config.docsUrl + '/' + this.$route.params.locale + '/delivery/gpkg'"
+                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/gpkg'"
                 target="_blank"
               ><b-icon
                 size="is-small"

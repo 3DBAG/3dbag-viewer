@@ -7,7 +7,7 @@ $family-sans-serif: "Inter", sans-serif;
 $family-monospace: "Roboto Mono", monospace;
 
 // Import Bulma's core
-@import "~bulma/sass/utilities/_all";
+@import "bulma/sass/utilities/_all";
 
 // Set your colors
 $primary: #2c3e50;
@@ -50,5 +50,5 @@ $link-focus-border: $primary;
 $navbar-breakpoint: $tablet;
 
 // Import Bulma and Buefy styles
-@import "~bulma";
-@import "~buefy/src/scss/buefy";
+@import "bulma/bulma";
+@import "buefy/src/scss/buefy";
