@@ -488,12 +488,15 @@ export default {
 		correctMarkerHeight() {
 
 			const marker = this.scene && this.scene.getObjectByName( this.markerName );
-			if ( ! marker || ! this.terrainTiles || ! this.markerHeightRaycaster ) return false;
+			if ( ! marker || ! this.markerHeightRaycaster ) return false;
 			const { surfaceAnchor, surfaceUp } = marker.userData;
 			if ( ! surfaceAnchor || ! surfaceUp ) return false;
+			const surfaces = [];
+			if ( this.tiles && ! this.tilesError && this.buildingsVisible ) surfaces.push( this.tiles.group );
+			if ( this.terrainTiles ) surfaces.push( this.terrainTiles.group );
 
 			const surfacePoint = getSurfacePoint(
-				this.terrainTiles.group,
+				surfaces,
 				surfaceAnchor,
 				surfaceUp,
 				this.markerHeightRaycaster
@@ -632,6 +635,7 @@ export default {
 				disposeMaterial( originalMaterial );
 
 			} );
+			this.queueMarkerHeightCorrection();
 			this.requestRender();
 
 		},
@@ -714,11 +718,13 @@ export default {
 			} );
 			tiles.addEventListener( 'dispose-model', event => {
 
+				if ( this.tiles !== tiles ) return;
 				if ( this.selectedObject && event.scene.getObjectById( this.selectedObject.id ) ) {
 
 					this.clearSelection();
 
 				}
+				this.queueMarkerHeightCorrection();
 
 			} );
 			tiles.addEventListener( 'load-error', event => {
@@ -734,6 +740,7 @@ export default {
 					console.warn( `Failed to load 3D Tiles content: ${ event.url }`, event.error );
 
 				}
+				this.queueMarkerHeightCorrection();
 				this.requestRender( 3 );
 
 			} );
@@ -748,6 +755,7 @@ export default {
 
 			} );
 			this.contentGroup.add( tiles.group );
+			this.queueMarkerHeightCorrection();
 			this.requestRender();
 
 		},
@@ -1164,6 +1172,7 @@ export default {
 					this.$emit( 'object-picked', undefined );
 
 				}
+				this.queueMarkerHeightCorrection();
 				this.requestRender();
 
 			}

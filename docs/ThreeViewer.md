@@ -21,7 +21,7 @@
 
 The existing `rdx`, `rdy`, `ox`, `oy`, and `oz` query parameters remain supported. RD target coordinates are transformed to WGS84/ECEF; offsets retain their former east, up, and south meanings.
 
-Address markers initially use the ellipsoid target and snap to the terrain elevation as terrain tiles load and refine.
+Address markers initially use the ellipsoid target. They snap to a building roof when the address ray intersects the 3D Tiles geometry, otherwise they use terrain elevation. The height is recalculated as building and terrain tiles load and refine.
 
 ## Public methods
 

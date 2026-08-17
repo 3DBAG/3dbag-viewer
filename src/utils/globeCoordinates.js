@@ -48,9 +48,9 @@ export function getWorldFrame( ellipsoid, ellipsoidGroup, lat, lon, height = 0 )
 
 }
 
-export function getSurfacePoint( surface, position, up, raycaster, rayHeight = 10000 ) {
+export function getSurfacePoint( surfaceOrSurfaces, position, up, raycaster, rayHeight = 10000 ) {
 
-	if ( ! surface || ! raycaster ) return null;
+	if ( ! surfaceOrSurfaces || ! raycaster ) return null;
 	const direction = raycaster.ray.direction.copy( up ).normalize();
 	raycaster.ray.origin.copy( position ).addScaledVector( direction, rayHeight );
 	direction.multiplyScalar( - 1 );
@@ -58,8 +58,15 @@ export function getSurfacePoint( surface, position, up, raycaster, rayHeight = 1
 	raycaster.far = rayHeight * 2;
 	raycaster.firstHitOnly = true;
 
-	const intersection = raycaster.intersectObject( surface, true )[ 0 ];
-	return intersection ? intersection.point.clone() : null;
+	const surfaces = Array.isArray( surfaceOrSurfaces ) ? surfaceOrSurfaces : [ surfaceOrSurfaces ];
+	for ( const item of surfaces ) {
+
+		if ( ! item ) continue;
+		const intersection = raycaster.intersectObject( item, true )[ 0 ];
+		if ( intersection ) return intersection.point.clone();
+
+	}
+	return null;
 
 }
 

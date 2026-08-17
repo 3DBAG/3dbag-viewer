@@ -94,6 +94,45 @@ describe( 'globe coordinate adapter', () => {
 
 	} );
 
+	it( 'prefers a building hit over terrain', () => {
+
+		const building = new Mesh( new PlaneGeometry( 100, 100 ), new MeshBasicMaterial() );
+		building.position.z = 62;
+		building.updateMatrixWorld( true );
+		const terrain = new Mesh( new PlaneGeometry( 100, 100 ), new MeshBasicMaterial() );
+		terrain.position.z = 37;
+		terrain.updateMatrixWorld( true );
+
+		const point = getSurfacePoint(
+			[ building, terrain ],
+			new Vector3( 0, 0, 0 ),
+			new Vector3( 0, 0, 1 ),
+			new Raycaster(),
+			100
+		);
+
+		expect( point.z ).toBeCloseTo( 62, 6 );
+
+	} );
+
+	it( 'falls back to terrain when the building raycast misses', () => {
+
+		const terrain = new Mesh( new PlaneGeometry( 100, 100 ), new MeshBasicMaterial() );
+		terrain.position.z = 37;
+		terrain.updateMatrixWorld( true );
+
+		const point = getSurfacePoint(
+			[ new Group(), terrain ],
+			new Vector3( 0, 0, 0 ),
+			new Vector3( 0, 0, 1 ),
+			new Raycaster(),
+			100
+		);
+
+		expect( point.z ).toBeCloseTo( 37, 6 );
+
+	} );
+
 	it( 'keeps the ellipsoid fallback when terrain has not loaded', () => {
 
 		expect( getSurfacePoint(
