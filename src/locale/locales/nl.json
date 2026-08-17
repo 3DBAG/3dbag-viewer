@@ -82,6 +82,7 @@
     "gpkg_dump": "GPKG dump",
     "tile_index": "Tegel index",
     "archived_title": "Vorige versies",
+    "archived_unavailable": "Deze bestanden zijn tijdelijk niet beschikbaar vanwege een beveiligingsincident.",
     "tile_index_par": "Of je kunt de complete tegel index opvragen."
   }
 }

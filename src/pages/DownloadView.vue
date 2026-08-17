@@ -330,7 +330,7 @@
             </td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
-          <tr>
+          <!-- <tr>
             <td>
               txt
             </td>
@@ -344,7 +344,7 @@
               {{ $t("download.nonreconstructeddesc") }}
             </td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
-          </tr>
+          </tr> -->
         </tbody>
       </table>
     </div>
@@ -380,6 +380,15 @@
       {{ $t("download.archived_title") }}
     </h1>
 
+    <div class="notification archived-downloads-notice">
+      <b-icon
+        icon="information-outline"
+        size="is-small"
+        aria-hidden="true"
+      />
+      <span>{{ $t("download.archived_unavailable") }}</span>
+    </div>
+
     <div class="table-wrapper">
       <table>
         <thead>
@@ -397,25 +406,26 @@
           >
             <td>{{ version }}</td>
             <td>
-              <a
-                :href="data['metadata']"
-                download
-              > metadata.json </a>
+              <span
+                class="has-text-grey"
+                aria-disabled="true"
+              >metadata.json</span>
             </td>
             <td>
-              <a
-                :href="data['GPKG_DUMP']['url']"
-                download
-              > {{ data['GPKG_DUMP']['url'].split('/').pop() }}</a>
-              (<a
-                :href="data['GPKG_DUMP']['url'] + '.sha256.txt'"
-              >SHA-256</a>)
+              <span
+                class="has-text-grey"
+                aria-disabled="true"
+              >{{ data['GPKG_DUMP']['url'].split('/').pop() }}</span>
+              (<span
+                class="has-text-grey"
+                aria-disabled="true"
+              >SHA-256</span>)
             </td>
             <td>
-              <a
-                :href="data['TILE_INDEX']"
-                download
-              > {{ data['TILE_INDEX'] }}</a>
+              <span
+                class="has-text-grey"
+                aria-disabled="true"
+              >{{ data['TILE_INDEX'] }}</span>
             </td>
           </tr>
         </tbody>
@@ -817,6 +827,17 @@ export default {
   width: 80%;
   max-width: 500px;
   box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%)
+}
+
+.archived-downloads-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #4a4a4a;
+  font-size: 0.875rem;
+  background-color: #f5f5f5;
+  border: 1px solid #dbdbdb;
 }
 
 .vjs-value-string {

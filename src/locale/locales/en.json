@@ -74,6 +74,7 @@
     "gpkg_dump": "GPKG dump",
     "tile_index": "Tile index",
     "archived_title": "Previous versions",
+    "archived_unavailable": "These files are temporarily unavailable due to a service disruption.",
     "tile_index_par": "Alternatively you can access the complete tile index directly."
   }
 }
