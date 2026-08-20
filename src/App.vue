@@ -162,8 +162,8 @@ export default {
 			config: appConfig,
 			showBurgerMenu: false,
 			showAbout: false,
-			serviceNoticeVisible: true,
-			serviceNoticeHeight: null,
+			serviceNoticeVisible: false,
+			serviceNoticeHeight: 0,
 			serviceNoticeObserver: null,
 
 		};
@@ -193,6 +193,8 @@ export default {
 	mounted() {
 
 		this.$nextTick( () => {
+
+			if ( ! this.serviceNoticeVisible ) return;
 
 			this.updateServiceNoticeHeight();
 			window.addEventListener( 'resize', this.updateServiceNoticeHeight );
