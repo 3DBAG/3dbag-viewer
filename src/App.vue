@@ -113,13 +113,13 @@
             >
               {{ $t("nav.download") }}
             </router-link>
-            <router-link
-              to="/dashboard"
-              :class="{'is-active': currentRouteName=='Dashboard'}"
-              class="navbar-item"
+            <span
+              class="navbar-item dashboard-link-disabled"
+              role="link"
+              aria-disabled="true"
             >
               {{ $t("nav.dashboard") }}
-            </router-link>
+            </span>
             <a
               :href="config.docsUrl + '/' + currentLocale"
               class="navbar-item docs-link"
@@ -315,6 +315,12 @@ nav.navbar {
 
 .docs-link {
   background-color: rgb(250 250 250 / 1);
+}
+
+nav.navbar .dashboard-link-disabled {
+  color: #7a7a7a;
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 @media screen and (max-width: 768px) {
