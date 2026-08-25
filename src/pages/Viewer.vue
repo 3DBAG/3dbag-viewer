@@ -1,6 +1,7 @@
 <template>
   <div id="viewer">
     <section
+      v-if="tilesUrl"
       id="map-options"
       class="field has-addons"
     >
@@ -10,6 +11,7 @@
         :title="$t('viewer.baselayer2')"
       />
       <DropDownSelector
+        v-if="availableLodCount > 1"
         v-model="tileset"
         title="LoD"
         :options="lods"
@@ -36,10 +38,13 @@
     <BuildingInformation
       :building="pickedBuilding"
       :show="showBuildingInfo"
+      :documentation-enabled="menu.documentation"
+      :feedback-enabled="menu.feedback"
       @close-info="showBuildingInfo = false"
       @report-data="getReportDataIssuePathWithId( pickedBuilding.attributes.identificatie )"
     />
     <ThreeViewer
+      v-if="tilesUrl"
       ref="threeviewer"
       :tiles-url="tilesUrl"
       :basemap-options="basemapOptions"
@@ -48,7 +53,15 @@
       @cam-rotation-z="onCamRotationZ"
     />
     <div
-      v-if="true"
+      v-else
+      class="viewer-data-unavailable"
+      role="status"
+    >
+      <strong>{{ $t( 'viewer.threeDUnavailable' ) }}</strong>
+      <span>{{ $t( 'viewer.threeDUnavailableDescription' ) }}</span>
+    </div>
+    <div
+      v-if="tilesUrl"
       id="attribution"
       class="has-background-white has-text-grey"
     >
@@ -65,7 +78,11 @@
             {{ basemapOptions.attribution }}
           </span> |
         </span>
-        <a :href="config.docsUrl + '/' + $route.params.locale + '/copyright' ">© 3DBAG by tudelft3d and 3DGI</a>
+        <a
+          v-if="menu.documentation"
+          :href="config.docsUrl + '/' + $route.params.locale + '/copyright' "
+        >© 3DBAG by tudelft3d and 3DGI</a>
+        <span v-else>© 3DBAG by tudelft3d and 3DGI</span>
       </p>
     </div>
     <div id="debug-panel" />
@@ -79,6 +96,7 @@ import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
 import Compass from '@/components/Compass.vue';
 import { appConfig } from '@/config';
+import { getDefaultLod, getLodOptions, getTilesetSources } from '@/utils/manifest';
 
 export default {
 
@@ -94,11 +112,13 @@ export default {
 
 	data() {
 
+		const versionData = this.$root.$data[ 'version_data' ] || {};
+
 		return {
 
 			config: appConfig,
-			customTilesUrl: appConfig.dataUrl + '/3dtiles/lod22_kadaster/tileset1.json',
-			BAG3DVersionData: this.$root.$data[ 'version_data' ],
+			menu: this.$root.$data.menu,
+			BAG3DVersionData: versionData,
 
 			camOffset: {
 				x: 400,
@@ -126,21 +146,8 @@ export default {
 			showLocationBox: false,
 			locationBoxText: "",
 
-			tileset: 'lod22',
-			lods: {
-				lod22: {
-					name: "LoD 2.2",
-					icon: "home"
-				},
-				lod13: {
-					name: "LoD 1.3",
-					icon: "home"
-				},
-				lod12: {
-					name: "LoD 1.2",
-					icon: "home"
-				}
-			},
+			tileset: getDefaultLod( versionData ),
+			lods: getLodOptions( versionData ),
 
 			pickedBuilding: {
 
@@ -155,6 +162,11 @@ export default {
 
 	},
 	computed: {
+		availableLodCount() {
+
+			return Object.keys( this.lods ).length;
+
+		},
 
 		filteredDataArray() {
 
@@ -171,14 +183,7 @@ export default {
 
 		tilesUrl: function () {
 
-			if ( this.tileset == 'custom' ) {
-
-				return this.customTilesUrl;
-
-			}
-
-			const tilesets = this.BAG3DVersionData[ 'Cesium3DTilesets' ] || this.BAG3DVersionData[ '3DTilesets' ];
-			return tilesets[ this.tileset ];
+			return getTilesetSources( this.BAG3DVersionData )[ this.tileset ] || null;
 
 		},
 
@@ -283,7 +288,7 @@ export default {
 
 		$route( to, from ) {
 
-			if ( to.query.lod ) {
+			if ( to.query.lod && this.lods[ to.query.lod ] ) {
 
 				this.tileset = to.query.lod;
 
@@ -293,7 +298,7 @@ export default {
 
 		tileset( to, from ) {
 
-			if ( to != from ) {
+			if ( to && to != from ) {
 
 				let q = Object.assign( {}, this.$router.currentRoute.query );
 				q.lod = to;
@@ -309,7 +314,7 @@ export default {
 	},
 	mounted() {
 
-		if ( this.$router.currentRoute.query.lod ) {
+		if ( this.lods[ this.$router.currentRoute.query.lod ] ) {
 
 			this.tileset = this.$router.currentRoute.query.lod;
 
@@ -418,6 +423,20 @@ export default {
 	overflow: hidden;
 	overscroll-behavior: none;
 
+}
+.viewer-data-unavailable {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	max-width: 28rem;
+	padding: 1rem 1.25rem;
+	text-align: center;
+	background: rgba(255, 255, 255, 0.9);
+	border-radius: 0.25rem;
+	transform: translate(-50%, -50%);
 }
 #locationbox {
 	z-index: 2;

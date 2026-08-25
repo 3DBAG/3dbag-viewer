@@ -29,12 +29,47 @@ npm run build
 
 ### Environment-specific URLs
 
-The viewer resolves the URLs in `src/assets/3dbag_versions.json` at build time.
+The viewer resolves the URLs in `src/assets/manifest.json` at build time.
 Production URLs are the defaults. To build against a local services stack, copy
 `.env.local.example` to `.env.local` and run `npm run build` or `npm run serve`.
 
 The main service variables are `VUE_APP_WEB_URL`, `VUE_APP_DOCS_URL`,
 `VUE_APP_API_URL`, `VUE_APP_DATA_URL`, and `VUE_APP_DASHBOARD_URL`.
+
+### Custom data manifest
+
+`src/assets/manifest.json` defines the active data version, the sources shown on
+the download page, and optional navigation links. Sources that are omitted from
+the active version are omitted from the interface. The viewer supports the
+`lod12`, `lod13`, and `lod22` entries in `Cesium3DTilesets` or `3DTilesets`.
+
+For example, a deployment with one experimental tileset and no external project
+links can use:
+
+```json
+{
+  "menu": {
+    "documentation": false,
+    "dashboard": false,
+    "feedback": false
+  },
+  "latest": "experiment",
+  "versions": {
+    "experiment": {
+      "release-type": "experimental",
+      "Cesium3DTilesets": {
+        "lod22": "https://example.test/experiment/tileset.json"
+      }
+    }
+  }
+}
+```
+
+The optional download sources are `TILE_INDEX`, `CityJSON`, `OBJ`, `GPKG`,
+`IFC`, `WMS`, `WFS`, `OGCAPI`, `GPKG_DUMP`, `metadata`, and
+`missing_buildings`. Per-tile downloads require `TILE_INDEX` as well as at least
+one per-tile format. Existing manifests without a `menu` object keep the default
+menu behavior: documentation and feedback are enabled and dashboard is hidden.
 
 ### Lints and fixes files
 ```

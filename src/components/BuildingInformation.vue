@@ -66,9 +66,11 @@
               >
                 <td>
                   <a
+                    v-if="documentationEnabled"
                     target="_blank"
                     :href="config.docsUrl + '/' + $route.params.locale + '/schema/attributes/#' + name"
                   >{{ name }}</a>
+                  <span v-else>{{ name }}</span>
                 </td>
                 <td>
                   <code style="color:inherit">{{ building.attributes[name] }}</code>
@@ -77,10 +79,13 @@
             </tbody>
           </table>
         </div>
-        <p class="mb-2">
+        <p
+          v-if="documentationEnabled"
+          class="mb-2"
+        >
           {{ $t("BuildingInfo.attr1") }} <a :href="config.docsUrl + '/' + $route.params.locale + '/schema/attributes/' ">{{ $t("documentation") }}</a>.
         </p>
-        <p>
+        <p v-if="feedbackEnabled">
           <a
             class="tag is-danger"
             @click="$emit('report-data')"
@@ -120,6 +125,14 @@ export default {
 	name: 'BuildingInformation',
 
 	props: {
+		documentationEnabled: {
+			type: Boolean,
+			default: true
+		},
+		feedbackEnabled: {
+			type: Boolean,
+			default: true
+		},
 		show: {
 			type: Boolean,
 			default: false

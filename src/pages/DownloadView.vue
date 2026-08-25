@@ -1,6 +1,7 @@
 <template>
   <section class="section content">
     <h1
+      v-if="hasTileDownloads"
       id="tile-downloads"
       class="title is-3"
     >
@@ -13,11 +14,12 @@
       </template>
     </h1>
 
-    <p>
+    <p v-if="hasTileDownloads">
       {{ $t("download.staticpar") }}
     </p>
 
     <div
+      v-if="hasTileDownloads"
       class="modal"
       :class="{'is-active': mapVisible}"
     >
@@ -62,7 +64,7 @@
     </div>
 
     <div
-      v-if="selectedTile"
+      v-if="hasTileDownloads && selectedTile"
       class="table-wrapper box"
     >
       <table>
@@ -83,6 +85,7 @@
             <td>{{ selectedTile }}</td>
             <td>
               {{ format }} <a
+                v-if="menu.documentation"
                 :href="activeTileData[format]['docsURL']"
                 target="_blank"
               ><b-icon
@@ -104,6 +107,7 @@
     </div>
 
     <button
+      v-if="hasTileDownloads"
       class="mx-1 mb-5 button is-primary"
       @click="showMap()"
     >
@@ -115,10 +119,13 @@
       </p>
     </button>
 
-    <p>
+    <p v-if="hasTileIndex">
       {{ $t("download.tile_index_par") }}
     </p>
-    <div class="table-wrapper">
+    <div
+      v-if="hasTileIndex"
+      class="table-wrapper"
+    >
       <table>
         <thead>
           <tr>
@@ -138,6 +145,7 @@
             <td>
               FlatGeoBuf
               <a
+                v-if="menu.documentation"
                 :href="config.docsUrl + '/' + $route.params.locale + '/delivery/fgb'"
                 target="_blank"
               ><b-icon
@@ -152,17 +160,21 @@
     </div>
 
     <h1
+      v-if="webServiceRows.length"
       id="webservices"
       class="title is-3"
     >
       Webservices
     </h1>
 
-    <p>
+    <p v-if="webServiceRows.length">
       {{ $t("download.webservicespar") }}
     </p>
 
-    <div class="table-wrapper">
+    <div
+      v-if="webServiceRows.length"
+      class="table-wrapper"
+    >
       <table>
         <thead>
           <tr>
@@ -171,91 +183,41 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <tr
+            v-for="source in webServiceRows"
+            :key="source.key"
+          >
             <td>
-              WMS <a
-                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#wms-2d'"
+              {{ source.label }} <a
+                v-if="menu.documentation"
+                :href="config.docsUrl + '/' + $route.params.locale + source.docsPath"
                 target="_blank"
               ><b-icon
                 size="is-small"
                 icon="help-circle"
               /></a>
             </td>
-            <td><a :href="WMSURL+'?request=getcapabilities'">{{ WMSURL+'?request=getcapabilities' }}</a></td>
-          </tr>
-          <tr>
-            <td>
-              WFS <a
-                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#wfs-2d'"
-                target="_blank"
-              ><b-icon
-                size="is-small"
-                icon="help-circle"
-              /></a>
-            </td>
-            <td><a :href="WFSURL+'?request=getcapabilities'">{{ WFSURL+'?request=getcapabilities' }}</a></td>
-          </tr>
-          <tr>
-            <td>
-              3D API (experimental) <a
-                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#3dbag-api-3d'"
-                target="_blank"
-              ><b-icon
-                size="is-small"
-                icon="help-circle"
-              /></a>
-            </td>
-            <td><a :href="OGCAPIURL">{{ OGCAPIURL }}</a></td>
-          </tr>
-          <tr>
-            <td>
-              3D Tiles (LoD1.2) <a
-                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#3d-tiles'"
-                target="_blank"
-              ><b-icon
-                size="is-small"
-                icon="help-circle"
-              /></a>
-            </td>
-            <td><a :href="Cesium3DTilesLoD12URL">{{ Cesium3DTilesLoD12URL }}</a></td>
-          </tr>
-          <tr>
-            <td>
-              3D Tiles (LoD1.3) <a
-                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#3d-tiles'"
-                target="_blank"
-              ><b-icon
-                size="is-small"
-                icon="help-circle"
-              /></a>
-            </td>
-            <td><a :href="Cesium3DTilesLoD13URL">{{ Cesium3DTilesLoD13URL }}</a></td>
-          </tr>
-          <tr>
-            <td>
-              3D Tiles (LoD2.2) <a
-                :href="config.docsUrl + '/' + $route.params.locale + '/delivery/webservices#3d-tiles'"
-                target="_blank"
-              ><b-icon
-                size="is-small"
-                icon="help-circle"
-              /></a>
-            </td>
-            <td><a :href="Cesium3DTilesLoD22URL">{{ Cesium3DTilesLoD22URL }}</a></td>
+            <td><a :href="source.href">{{ source.href }}</a></td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <h1
+      v-if="gpkgDump"
       id="downloads-gpkg-dump"
       class="title is-3"
     >
       GPKG data dump
     </h1>
 
-    <p>{{ $t("download.gpgkdumppar") }}</p>
-    <div class="table-wrapper">
+    <p v-if="gpkgDump">
+      {{ $t("download.gpgkdumppar") }}
+    </p>
+    <div
+      v-if="gpkgDump"
+      class="table-wrapper"
+    >
       <table>
         <thead>
           <tr>
@@ -270,16 +232,17 @@
           <tr>
             <td>
               <a
-                :href="GPGKDumpFileURL"
+                :href="gpkgDump.url"
                 download
-              > {{ GPGKDumpFileURL.split('/').pop() }} </a>
+              > {{ getUrlFileName( gpkgDump.url ) }} </a>
             </td>
             <td>
-              {{ GPGKDumpFileSHA256 }}
+              {{ gpkgDump.sha256 || '—' }}
             </td>
             <td>
               GPKG
               <a
+                v-if="menu.documentation"
                 :href="config.docsUrl + '/' + $route.params.locale + '/delivery/gpkg'"
                 target="_blank"
               ><b-icon
@@ -287,7 +250,7 @@
                 icon="help-circle"
               /></a>
             </td>
-            <td>{{ GPGKDumpFilesize }}</td>
+            <td>{{ gpkgDump.filesize || '—' }}</td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
         </tbody>
@@ -296,15 +259,21 @@
 
 
     <h1
+      v-if="auxiliaryFiles.length"
       id="metadata"
       class="title is-3"
     >
       Metadata
     </h1>
 
-    <p>{{ $t("download.metadatapar") }}</p>
+    <p v-if="auxiliaryFiles.length">
+      {{ $t("download.metadatapar") }}
+    </p>
 
-    <div class="table-wrapper">
+    <div
+      v-if="auxiliaryFiles.length"
+      class="table-wrapper"
+    >
       <table>
         <thead>
           <tr>
@@ -315,46 +284,32 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>
-              JSON
-            </td>
+          <tr
+            v-for="file in auxiliaryFiles"
+            :key="file.key"
+          >
+            <td>{{ file.format }}</td>
             <td>
               <a
-                :href="metadata_url"
+                :href="file.url"
                 download
-              > metadata.json </a>
+              >{{ getUrlFileName( file.url ) }}</a>
             </td>
-            <td>
-              {{ $t("download.metadatadesc") }}
-            </td>
+            <td>{{ $t( file.descriptionKey ) }}</td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
           </tr>
-          <!-- <tr>
-            <td>
-              txt
-            </td>
-            <td>
-              <a
-                :href="missing_buildings_url"
-                download
-              > missing_buildings.txt </a>
-            </td>
-            <td>
-              {{ $t("download.nonreconstructeddesc") }}
-            </td>
-            <td>{{ $root.$data[ "version_number" ] }}</td>
-          </tr> -->
         </tbody>
       </table>
     </div>
     <b-button
+      v-if="metadataUrl"
       label="Preview metadata.json"
       icon-left="magnify"
       @click="showMetadataJSON=true"
     />
 
     <b-modal
+      v-if="metadataUrl"
       v-model="showMetadataJSON"
       has-modal-card
       width="90%"
@@ -374,13 +329,17 @@
 
 
     <h1
+      v-if="archivedVersions.length"
       id="downloads-versions-dump"
       class="title is-3"
     >
       {{ $t("download.archived_title") }}
     </h1>
 
-    <div class="notification archived-downloads-notice">
+    <div
+      v-if="archivedVersions.length"
+      class="notification archived-downloads-notice"
+    >
       <b-icon
         icon="information-outline"
         size="is-small"
@@ -389,43 +348,60 @@
       <span>{{ $t("download.archived_unavailable") }}</span>
     </div>
 
-    <div class="table-wrapper">
+    <div
+      v-if="archivedVersions.length"
+      class="table-wrapper"
+    >
       <table>
         <thead>
           <tr>
             <th>{{ $t("download.version") }}</th>
-            <th>Metadata</th>
-            <th>{{ $t("download.gpkg_dump") }}</th>
-            <th>{{ $t("download.tile_index") }}</th>
+            <th v-if="hasArchivedMetadata">
+              Metadata
+            </th>
+            <th v-if="hasArchivedGpkgDump">
+              {{ $t("download.gpkg_dump") }}
+            </th>
+            <th v-if="hasArchivedTileIndex">
+              {{ $t("download.tile_index") }}
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="(data, version) in versions_data_archived"
-            :key="version"
+            v-for="entry in archivedVersions"
+            :key="entry.version"
           >
-            <td>{{ version }}</td>
-            <td>
+            <td>{{ entry.version }}</td>
+            <td v-if="hasArchivedMetadata">
               <span
+                v-if="entry.metadata"
                 class="has-text-grey"
                 aria-disabled="true"
-              >metadata.json</span>
+              >{{ getUrlFileName( entry.metadata ) }}</span>
+              <span v-else>—</span>
             </td>
-            <td>
+            <td v-if="hasArchivedGpkgDump">
               <span
+                v-if="entry.gpkgDump"
                 class="has-text-grey"
                 aria-disabled="true"
-              >{{ data['GPKG_DUMP']['url'].split('/').pop() }}</span>
-              (<span
-                class="has-text-grey"
-                aria-disabled="true"
-              >SHA-256</span>)
+              >{{ getUrlFileName( entry.gpkgDump.url ) }}</span>
+              <template v-if="entry.gpkgDump">
+                (<span
+                  class="has-text-grey"
+                  aria-disabled="true"
+                >SHA-256</span>)
+              </template>
+              <span v-else>—</span>
             </td>
-            <td>
+            <td v-if="hasArchivedTileIndex">
               <span
+                v-if="entry.tileIndex"
                 class="has-text-grey"
                 aria-disabled="true"
-              >{{ data['TILE_INDEX'] }}</span>
+              >{{ entry.tileIndex }}</span>
+              <span v-else>—</span>
             </td>
           </tr>
         </tbody>
@@ -470,7 +446,7 @@
         :src="config.creativeCommonsIconUrl + '/by.svg?ref=chooser-v1'"
       ></a>
     </p>
-    <p>
+    <p v-if="menu.documentation">
       Read the <a
         :href="config.docsUrl + '/en/copyright'"
         target="_blank"
@@ -498,9 +474,18 @@ import { generic as FlatGeoBufGeneric, ol as FlatGeoBuf } from 'flatgeobuf';
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import { appConfig } from '@/config';
+import {
+	getArchivedVersions,
+	getAuxiliaryFiles,
+	getGpkgDump,
+	getTileFormats,
+	getWebServiceRows,
+	isDefinedUrl
+} from '@/utils/manifest';
 
 function formatBytes( bytes, decimals ) {
 
+	if ( ! Number.isFinite( bytes ) ) return null;
 	if ( bytes == 0 ) return '0 Bytes';
 	var k = 1024,
 		dm = decimals || 2,
@@ -520,58 +505,100 @@ export default {
 
 	data() {
 
+		const versionData = this.$root.$data[ "version_data" ] || {};
+
 		return {
 			config: appConfig,
+			menu: this.$root.$data.menu,
+			versionData,
+			versionsDataArchived: this.$root.$data[ "versions_data_archived" ] || {},
 			mapVisible: false,
 			showMetadataJSON: false,
 			map: null,
-			tileFormats: [ "CityJSON", "OBJ", "GPKG", "IFC" ],
-
 			selectedTile: null,
-			TileIndexFileURL: this.$root.$data[ "version_data" ][ "TILE_INDEX" ],
-			GPGKDumpFileURL: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "url" ],
-			GPGKDumpFilesize: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "filesize" ],
-			GPGKDumpFileSHA256: this.$root.$data[ "version_data" ][ "GPKG_DUMP" ][ "sha256" ],
-			WFSURL: this.$root.$data[ "version_data" ][ "WFS" ],
-			WMSURL: this.$root.$data[ "version_data" ][ "WMS" ],
-			OGCAPIURL: this.$root.$data[ "version_data" ][ "OGCAPI" ],
-			Cesium3DTilesLoD12URL: this.$root.$data[ "version_data" ][ "Cesium3DTilesets" ][ "lod12" ],
-			Cesium3DTilesLoD13URL: this.$root.$data[ "version_data" ][ "Cesium3DTilesets" ][ "lod13" ],
-			Cesium3DTilesLoD22URL: this.$root.$data[ "version_data" ][ "Cesium3DTilesets" ][ "lod22" ],
-			metadata_url: this.$root.$data[ "version_data" ][ "metadata" ],
-			missing_buildings_url: this.$root.$data[ "version_data" ][ "missing_buildings" ],
-			versions_data_archived: this.$root.$data[ "versions_data_archived" ],
-			metadata_json: Object(),
-			activeTileData: {
-				CityJSON: Object(),
-				OBJ: Object(),
-				GPKG: Object(),
-				IFC: Object(),
-			},
+			metadata_json: {},
+			activeTileData: {},
 		};
 
 	},
 
+	computed: {
+		tileFormatDefinitions() {
+
+			return getTileFormats( this.versionData );
+
+		},
+		tileFormats() {
+
+			return this.tileFormatDefinitions.map( definition => definition.key );
+
+		},
+		hasTileIndex() {
+
+			return isDefinedUrl( this.versionData.TILE_INDEX );
+
+		},
+		hasTileDownloads() {
+
+			return this.hasTileIndex && this.tileFormats.length > 0;
+
+		},
+		TileIndexFileURL() {
+
+			return this.hasTileIndex ? this.versionData.TILE_INDEX : null;
+
+		},
+		gpkgDump() {
+
+			return getGpkgDump( this.versionData );
+
+		},
+		metadataUrl() {
+
+			return isDefinedUrl( this.versionData.metadata ) ? this.versionData.metadata : null;
+
+		},
+		auxiliaryFiles() {
+
+			return getAuxiliaryFiles( this.versionData );
+
+		},
+		webServiceRows() {
+
+			return getWebServiceRows( this.versionData );
+
+		},
+		archivedVersions() {
+
+			return getArchivedVersions( this.versionsDataArchived );
+
+		},
+		hasArchivedMetadata() {
+
+			return this.archivedVersions.some( entry => entry.metadata );
+
+		},
+		hasArchivedGpkgDump() {
+
+			return this.archivedVersions.some( entry => entry.gpkgDump );
+
+		},
+		hasArchivedTileIndex() {
+
+			return this.archivedVersions.some( entry => entry.tileIndex );
+
+		},
+	},
+
 	watch: {
 
-		$route( to, from ) {
+		$route( to ) {
 
-			console.log( to );
-
-			if ( to.query.tid ) {
+			if ( this.hasTileDownloads && to.query.tid ) {
 
 				this.updateTileData( to.query.tid );
 
 			}
-
-		},
-
-		selectedTile: function ( ) {
-
-			this.setFormatData( "CityJSON" );
-			this.setFormatData( "OBJ" );
-			this.setFormatData( "GPKG" );
-			this.setFormatData( "IFC" );
 
 		}
 
@@ -580,16 +607,14 @@ export default {
 	mounted() {
 
 		const tid = this.$router.currentRoute.query.tid;
-		if ( tid ) {
+		if ( this.hasTileDownloads && tid ) {
 
 			this.updateTileData( tid );
 
 		}
 
-		console.log( this.metadata_url );
-		console.log( this.versions_data_archived );
-
-		fetch( this.metadata_url )
+		if ( ! this.metadataUrl ) return;
+		fetch( this.metadataUrl )
 			.then( res => res.json() )
 			.then( ( out ) => {
 
@@ -604,64 +629,84 @@ export default {
 		setActiveTile( tid ) {
 
 			this.$router.push(
-				{ url: '/', query: { tid: tid } }
-			).catch( err => {
-
-				console.log( err );
-
-			} );
+				{ query: { ...this.$route.query, tid } }
+			).catch( () => {} );
 			this.updateTileData( tid );
-			// this.$forceUpdate();
+
+		},
+
+		getUrlFileName( url ) {
+
+			if ( ! isDefinedUrl( url ) ) return '';
+			try {
+
+				return decodeURIComponent( new URL( url, window.location.href ).pathname.split( '/' ).pop() );
+
+			} catch ( error ) {
+
+				return url.split( /[?#]/ )[ 0 ].split( '/' ).pop();
+
+			}
 
 		},
 
 		getFileName( format ) {
 
 			const data = this.activeTileData[ format ];
-			if ( data.fileURL )
-				return data.fileURL.split( '/' ).pop();
-			else
-				return null;
+			return data && data.fileURL ? this.getUrlFileName( data.fileURL ) : null;
 
 		},
 
 		updateTileData( tid ) {
 
+			if ( tid === this.selectedTile && Object.keys( this.activeTileData ).length > 0 ) return;
 			this.selectedTile = tid;
+			this.activeTileData = {};
+			this.tileFormatDefinitions.forEach( definition => this.setFormatData( definition.key ) );
 
 		},
 
 		setFormatHash( format, sha256 ) {
 
-			this.activeTileData[ format ][ "sha256" ] = sha256;
+			if ( this.activeTileData[ format ] && sha256 ) {
+
+				this.$set( this.activeTileData[ format ], "sha256", sha256 );
+
+			}
 
 		},
 
 		setFormatData( format ) {
 
+			const pattern = this.versionData[ format ];
+			if ( ! this.selectedTile || ! isDefinedUrl( pattern ) ) return;
 			let tilecoords = this.selectedTile.split( "-" );
-			this.activeTileData[ format ][ "fileURL" ] = this.$root.$data[ "version_data" ][ format ].replaceAll( "{TID_X}", tilecoords[ 0 ] ).replaceAll( "{TID_Y}", tilecoords[ 1 ] ).replaceAll( "{TID_Z}", tilecoords[ 2 ] );
+			const formatData = {
+				fileURL: pattern.replaceAll( "{TID_X}", tilecoords[ 0 ] ).replaceAll( "{TID_Y}", tilecoords[ 1 ] ).replaceAll( "{TID_Z}", tilecoords[ 2 ] ),
+			};
 			const format_lower = format.toLowerCase();
-			this.activeTileData[ format ][ "docsURL" ] = appConfig.docsUrl + '/' + this.$route.params.locale + '/delivery/' + format_lower;
+			if ( this.menu.documentation ) {
 
-			// we should be able to figure out md5 hasd and files size with a HEAD request
-			// also can check if the file exists to not put broken link
-			fetch( this.activeTileData[ format ][ "fileURL" ], {
+				formatData.docsURL = appConfig.docsUrl + '/' + this.$route.params.locale + '/delivery/' + format_lower;
+
+			}
+			this.$set( this.activeTileData, format, formatData );
+
+			fetch( formatData.fileURL, {
 				method: 'HEAD'
 			} )
 				.then( response => {
 
 					if ( response.ok ) {
 
-						this.activeTileData[ format ][ "Content-Length" ] = formatBytes( parseFloat( response.headers.get( 'Content-Length' ) ), 2 );
+						this.$set( formatData, "Content-Length", formatBytes( parseFloat( response.headers.get( 'Content-Length' ) ), 2 ) );
 
 					}
 
 				} )
-				.catch( ( error ) => {
+				.catch( () => {
 
-					this.activeTileData[ format ][ "fileURL" ] = "";
-					this.activeTileData[ format ][ "Content-Length" ] = "";
+					this.$set( formatData, "Content-Length", "" );
 
 				} );
 
@@ -766,19 +811,17 @@ export default {
 					that.map.addInteraction( select );
 					select.on( 'select', function ( e ) {
 
-						let tile_id = e.selected[ 0 ].get( 'tile_id' );
+						if ( e.selected.length === 0 ) return;
+						const feature = e.selected[ 0 ];
+						let tile_id = feature.get( 'tile_id' );
 						tile_id = tile_id.replaceAll( '/', '-' );
-						console.log( tile_id );
 						that.setActiveTile( tile_id );
 
-						let cityjson_sha256 = e.selected[ 0 ].get( 'cj_sha256' );
-						that.setFormatHash( "CityJSON", cityjson_sha256 );
-						let obj_sha256 = e.selected[ 0 ].get( 'obj_sha256' );
-						that.setFormatHash( "OBJ", obj_sha256 );
-						let gpkg_sha256 = e.selected[ 0 ].get( 'gpkg_sha256' );
-						that.setFormatHash( "GPKG", gpkg_sha256 );
-						let ifc_sha256 = e.selected[ 0 ].get( 'ifc_sha256' );
-						that.setFormatHash( "IFC", ifc_sha256 );
+						that.tileFormatDefinitions.forEach( definition => {
+
+							that.setFormatHash( definition.key, feature.get( definition.hashProperty ) );
+
+						} );
 
 					} );
 
@@ -790,6 +833,7 @@ export default {
 
 		showMap() {
 
+			if ( ! this.hasTileDownloads ) return;
 			this.mapVisible = true;
 
 			if ( ! this.map ) {

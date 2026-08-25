@@ -7,11 +7,14 @@ import Buefy from 'buefy';
 import '@/styles/bulma.scss';
 import { InlineSvgPlugin } from 'vue-inline-svg';
 
-import BAG3D from '@/assets/3dbag_versions.json';
+import manifest from '@/assets/manifest.json';
 import landmarkLocations from '@/assets/landmark_locations.json';
 import { appConfig, resolveVersionManifest } from '@/config';
+import { normalizeMenu } from '@/utils/manifest';
 
-const configuredBAG3D = resolveVersionManifest( BAG3D );
+const configuredManifest = resolveVersionManifest( manifest );
+const configuredVersions = configuredManifest.versions || {};
+const configuredVersionData = configuredVersions[ configuredManifest.latest ] || {};
 
 Vue.use( InlineSvgPlugin );
 Vue.use( Buefy );
@@ -21,10 +24,10 @@ Vue.config.productionTip = false;
 new Vue( {
 	data: {
 		config: appConfig,
-		version_data: configuredBAG3D[ "versions" ][ configuredBAG3D[ "latest" ] ],
-		version_number: configuredBAG3D[ "latest" ],
-		// versions_data_archived: Object.entries( BAG3D[ "versions" ] ).filter( x => x[ 0 ][ 'archive_public' ] ),
-		versions_data_archived: Object.entries( configuredBAG3D[ "versions" ] ).reduce( ( acc, [ key, value ] ) => {
+		menu: normalizeMenu( configuredManifest ),
+		version_data: configuredVersionData,
+		version_number: configuredManifest[ "latest" ],
+		versions_data_archived: Object.entries( configuredVersions ).reduce( ( acc, [ key, value ] ) => {
 
 			if ( value[ "archive_public" ] ) {
 

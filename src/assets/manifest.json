@@ -1,4 +1,9 @@
 {
+  "menu": {
+    "documentation": true,
+    "dashboard": false,
+    "feedback": true
+  },
   "latest": "v2025.09.03",
   "versions": {
     "v2025.09.03" : {
@@ -39,8 +44,7 @@
         "lod12": "https://data.3dbag.nl/v20250903/cesium3dtiles/lod12/tileset.json"
       },
 
-      "metadata": "https://data.3dbag.nl/v20250903/metadata.json",
-      "missing_buildings": "https://data.3dbag.nl/v20250903/missing_buildings.txt"
+      "metadata": "https://data.3dbag.nl/v20250903/metadata.json"
     },
     "v2024.12.16" : {
       "release-type" : "beta",

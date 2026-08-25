@@ -91,11 +91,19 @@
           <div class="navbar-start">
             <div class="navbar-item tags has-addons">
               <a
+                v-if="menu.documentation"
                 class="tag"
                 :href="config.docsUrl + '/' + currentLocale + '/overview/release_notes/#20250903-beta'"
               >{{ $root.$data['version_number'] }}
               </a>
-              <span class="tag is-danger">{{ $root.$data['version_data']['release-type'] }}</span>
+              <span
+                v-else
+                class="tag"
+              >{{ $root.$data['version_number'] }}</span>
+              <span
+                v-if="$root.$data['version_data']['release-type']"
+                class="tag is-danger"
+              >{{ $root.$data['version_data']['release-type'] }}</span>
             </div>
           </div>
           <div class="navbar-end">
@@ -113,20 +121,23 @@
             >
               {{ $t("nav.download") }}
             </router-link>
-            <span
-              class="navbar-item dashboard-link-disabled"
-              role="link"
-              aria-disabled="true"
+            <router-link
+              v-if="menu.dashboard"
+              to="/dashboard"
+              :class="{'is-active': currentRouteName=='Dashboard'}"
+              class="navbar-item"
             >
               {{ $t("nav.dashboard") }}
-            </span>
+            </router-link>
             <a
+              v-if="menu.documentation"
               :href="config.docsUrl + '/' + currentLocale"
               class="navbar-item docs-link"
             >
               {{ $t("nav.docs") }}
             </a>
             <a
+              v-if="menu.feedback"
               class="navbar-item"
               :href="currentLocale == 'en' ? config.feedbackUrlEn : config.feedbackUrlNl"
             >
@@ -171,6 +182,11 @@ export default {
 	},
 
 	computed: {
+		menu() {
+
+			return this.$root.$data.menu;
+
+		},
 		appStyle() {
 
 			return this.serviceNoticeHeight === null ? {} : {
@@ -315,12 +331,6 @@ nav.navbar {
 
 .docs-link {
   background-color: rgb(250 250 250 / 1);
-}
-
-nav.navbar .dashboard-link-disabled {
-  color: #7a7a7a;
-  cursor: not-allowed;
-  opacity: 0.45;
 }
 
 @media screen and (max-width: 768px) {
