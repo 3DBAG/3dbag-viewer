@@ -14,7 +14,7 @@
     "node": ">=26.0.0 <27.0.0"
   },
   "dependencies": {
-    "@bertt/3dtilesrenderer-styling-plugin": "file:../3dtilesrenderer-styling-plugin",
+    "@bertt/3dtilesrenderer-styling-plugin": "0.1.0",
     "@geo-frontend/nlmaps-maplibre": "1.0.1",
     "@mdi/font": "^5.7.55",
     "@vuedoc/md": "^3.0.0",
