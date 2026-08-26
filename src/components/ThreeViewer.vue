@@ -70,6 +70,8 @@ const STYLED_MESH_COLOR = '#ffffff';
 const BUILDING_ERROR_TARGET = 48;
 const BUILDING_MIN_ZOOM = 13;
 const MAX_MAP_PITCH = 60;
+const MAP_NEAR_Z = 1;
+const MAP_FAR_Z = 100000;
 const BUILDING_TILE_PRIORITY = 2;
 const TERRAIN_SOURCE_ID = 'mapterhorn-dem';
 const HILLSHADE_SOURCE_ID = 'mapterhorn-hillshade-dem';
@@ -280,6 +282,10 @@ export default {
 				attributionControl: false,
 				canvasContextAttributes: { antialias: true }
 			} );
+			// The automatically fitted MapLibre far plane is too tight for the
+			// rebased nationwide 3D Tiles scene. Override it at the map level so the
+			// basemap, Three.js, and TilesRenderer all receive the same projection.
+			this.map.transform.overrideNearFarZ( MAP_NEAR_Z, MAP_FAR_Z );
 			this.refreshAttributionControl();
 			this.map.on( 'style.load', this.onStyleLoad );
 			this.map.on( 'move', this.onMapMove );
@@ -537,6 +543,11 @@ export default {
 			}
 			this.scene.fog = this.enableFog ? this.fog : null;
 			this.renderer.resetState();
+			// MapLibre renders terrain into the shared depth buffer before custom 3D
+			// layers. Do not let that surface mask the independently georeferenced
+			// building tiles; the Three.js render immediately repopulates depth for
+			// correct building-to-building occlusion.
+			this.renderer.clearDepth();
 			this.renderer.render( this.scene, this.camera );
 			this.renderer.resetState();
 
