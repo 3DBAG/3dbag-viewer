@@ -145,12 +145,8 @@ export default {
 			},
 			camRotationZ: 0,
 
-			basemapPreset: 'openfreemap',
+			basemapPreset: 'standaard',
 			basemaps: {
-				openfreemap: {
-					name: "OpenFreeMap",
-					icon: "map"
-				},
 				standaard: {
 					name: "BRT Achtergrondkaart",
 					icon: "map"
@@ -161,6 +157,10 @@ export default {
 				},
 				luchtfoto: {
 					name: "Luchtfoto Actueel",
+					icon: "map"
+				},
+				openfreemap: {
+					name: "OpenFreeMap",
 					icon: "map"
 				}
 			},

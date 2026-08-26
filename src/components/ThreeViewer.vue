@@ -120,7 +120,7 @@ export default {
 		},
 		basemapPreset: {
 			type: String,
-			default: 'openfreemap',
+			default: 'standaard',
 			validator: value => [ 'openfreemap', 'standaard', 'grijs', 'luchtfoto' ].includes( value )
 		},
 		colormap: {
@@ -270,6 +270,7 @@ export default {
 				zoom: 7,
 				pitch: 45,
 				aroundCenter: false,
+				doubleClickZoom: false,
 				reduceMotion: true,
 				maxPitch: MAX_MAP_PITCH,
 				attributionControl: false,
@@ -341,6 +342,15 @@ export default {
 			}
 			this.setTerrainVisibility( this.showTerrain );
 			if ( ! this.map.getLayer( THREE_LAYER_ID ) ) this.map.addLayer( this.customLayer, beforeId );
+			if ( this.basemapPreset === 'openfreemap' ) {
+
+				layers.filter( layer => {
+
+					return layer.type === 'symbol' && layer[ 'source-layer' ] === 'transportation_name';
+
+				} ).forEach( layer => this.map.moveLayer( layer.id, THREE_LAYER_ID ) );
+
+			}
 			this.queueMarkerHeightCorrection();
 			this.requestRender();
 
