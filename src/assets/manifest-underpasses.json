@@ -18,6 +18,13 @@
   "versions": {
     "underpasses-25.08.2026": {
       "release-type": "preview",
+      "visible_attributes": [
+        "identificatie",
+        "b3_pw_bron",
+        "b3_h_maaiveld",
+        "oorspronkelijkbouwjaar",
+        "status"
+      ],
       "Cesium3DTilesets": {
         "lod22": "http://127.0.0.1:9010/tileset.json"
       },

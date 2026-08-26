@@ -8,6 +8,7 @@ import {
 	getLodOptions,
 	getTileFormats,
 	getTilesetSources,
+	getVisibleAttributes,
 	getViewerLocations,
 	getWebServiceRows,
 	isDefinedUrl,
@@ -72,6 +73,17 @@ describe( 'manifest configuration', () => {
 		expect( getViewerLocations( { locations: [ valid, { rdx: 1 } ] } ) ).toEqual( [ valid ] );
 		expect( getViewerLocations( { locations: { example: valid } } ) ).toEqual( [ valid ] );
 		expect( getViewerLocations() ).toEqual( [] );
+
+	} );
+
+	it( 'normalizes a per-version visible attribute allowlist', () => {
+
+		expect( getVisibleAttributes() ).toBeNull();
+		expect( getVisibleAttributes( { visible_attributes: null } ) ).toBeNull();
+		expect( getVisibleAttributes( {
+			visible_attributes: [ ' identificatie ', 'status', 'status', '', null ]
+		} ) ).toEqual( [ 'identificatie', 'status' ] );
+		expect( getVisibleAttributes( { visible_attributes: [] } ) ).toEqual( [] );
 
 	} );
 

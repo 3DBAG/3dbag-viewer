@@ -109,6 +109,20 @@ export function getViewerLocations( manifest = {} ) {
 
 }
 
+export function getVisibleAttributes( versionData = {} ) {
+
+	const configured = asRecord( versionData ).visible_attributes;
+	if ( ! Array.isArray( configured ) ) return null;
+	return configured.reduce( ( attributes, value ) => {
+
+		const attribute = typeof value === 'string' ? value.trim() : '';
+		if ( attribute && ! attributes.includes( attribute ) ) attributes.push( attribute );
+		return attributes;
+
+	}, [] );
+
+}
+
 function isColormapValue( value ) {
 
 	return typeof value === 'string' || typeof value === 'boolean' ||

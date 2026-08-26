@@ -47,6 +47,7 @@
     <BuildingInformation
       :building="pickedBuilding"
       :show="showBuildingInfo"
+      :visible-attributes="visibleAttributes"
       :documentation-enabled="menu.documentation"
       :feedback-enabled="menu.feedback"
       @close-info="showBuildingInfo = false"
@@ -111,7 +112,8 @@ import {
 	getColormapConfig,
 	getDefaultLod,
 	getLodOptions,
-	getTilesetSources
+	getTilesetSources,
+	getVisibleAttributes
 } from '@/utils/manifest';
 
 const NO_COLORMAP = '__none__';
@@ -172,6 +174,7 @@ export default {
 			tileset: getDefaultLod( versionData ),
 			lods: getLodOptions( versionData ),
 			locations: this.$root.$data.viewerLocations,
+			visibleAttributes: getVisibleAttributes( versionData ),
 
 			pickedBuilding: {
 

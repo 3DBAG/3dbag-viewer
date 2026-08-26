@@ -74,6 +74,10 @@ links can use:
   "versions": {
     "experiment": {
       "release-type": "experimental",
+      "visible_attributes": [
+        "identificatie",
+        "status"
+      ],
       "Cesium3DTilesets": {
         "lod22": "https://example.test/experiment/tileset.json"
       }
@@ -89,6 +93,12 @@ local east/up/south camera offset (`ox`, `oy`, `oz`). If no valid locations are
 configured, the viewer targets the center of the root 3D Tiles bounding sphere
 from a capped 100-500 metre viewing distance. This keeps nationwide tilesets
 close enough to show buildings rather than fitting their complete extent.
+
+Each version may define `visible_attributes` as an ordered array of structural
+metadata property names shown in the building attribute panel. If the property
+is omitted or is not an array, all attributes available on the selected feature
+are shown. An empty array hides all metadata rows; the tile number remains
+visible when available.
 
 The optional download sources are `TILE_INDEX`, `CityJSON`, `OBJ`, `GPKG`,
 `IFC`, `WMS`, `WFS`, `OGCAPI`, `GPKG_DUMP`, `metadata`, and

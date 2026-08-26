@@ -61,7 +61,7 @@
                 </td>
               </tr>
               <tr
-                v-for="name in attr_names"
+                v-for="name in attrNames"
                 :key="name"
               >
                 <td>
@@ -133,6 +133,10 @@ export default {
 			type: Boolean,
 			default: true
 		},
+		visibleAttributes: {
+			type: Array,
+			default: null
+		},
 		show: {
 			type: Boolean,
 			default: false
@@ -157,54 +161,20 @@ export default {
 
 		return {
 			config: appConfig,
-			attr_names: [ 'identificatie',
-				'status',
-				'oorspronkelijkbouwjaar',
-				'b3_bouwlagen',
-				'b3_kwaliteitsindicator',
-				'b3_h_maaiveld',
-				'b3_volume_lod12',
-				'b3_volume_lod13',
-				'b3_volume_lod22',
-				'b3_dak_type',
-				'b3_is_glas_dak',
-				'b3_kas_warenhuis',
-				'b3_extrusie',
-				'b3_n_vlakken',
-				'b3_h_nok',
-				'b3_n_nok',
-				'b3_pw_onvoldoende',
-				'b3_pw_datum',
-				'b3_pw_bron',
-				'b3_pw_selectie_reden',
-				'b3_rmse_lod12',
-				'b3_rmse_lod13',
-				'b3_rmse_lod22',
-				'b3_mutatie_ahn3_ahn4',
-				'b3_mutatie_ahn4_ahn5',
-				'b3_nodata_fractie_ahn3',
-				'b3_nodata_fractie_ahn4',
-				'b3_nodata_fractie_ahn5',
-				'b3_nodata_radius_ahn3',
-				'b3_nodata_radius_ahn4',
-				'b3_nodata_radius_ahn5',
-				'b3_puntdichtheid_ahn3',
-				'b3_puntdichtheid_ahn4',
-				'b3_puntdichtheid_ahn5',
-				'b3_val3dity_lod12',
-				'b3_val3dity_lod13',
-				'b3_val3dity_lod22',
-				'b3_opp_buitenmuur',
-				'b3_opp_dak_plat',
-				'b3_opp_dak_schuin',
-				'b3_opp_grond',
-				'b3_opp_scheidingsmuur' ],
 			showAttributes: false
 		};
 
 	},
 
 	computed: {
+		attrNames() {
+
+			const attributes = this.building && this.building.attributes || {};
+			const names = Object.keys( attributes );
+			if ( this.visibleAttributes === null ) return names;
+			return this.visibleAttributes.filter( name => Object.prototype.hasOwnProperty.call( attributes, name ) );
+
+		},
 
 		h_clicked: function () {
 

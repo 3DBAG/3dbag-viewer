@@ -38,6 +38,8 @@ Buildings can be colored from named `colormaps` in a version entry in `manifest.
 
 With `toolbar: true`, the Color dropdown lets users select any valid map or disable color coding. With `toolbar: false` (the default), no control is shown and the configured default map is always active. If `default` is missing or invalid, the first valid map is used. Names, titles, and labels accept either strings or localized objects.
 
+The building attribute panel can be limited per version with an ordered `visible_attributes` array. Without this setting, all structural-metadata properties on the selected feature are shown. An empty array hides all metadata properties without affecting picking, styling, or issue reporting.
+
 ## Props
 
 | Name | Type | Description |
