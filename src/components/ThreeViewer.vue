@@ -203,6 +203,8 @@ export default {
 		this.markerName = 'geocoding-marker';
 		this.selectionGeneration = 0;
 		this.locationTimer = null;
+		this.startupLocationVisible = false;
+		this.zoomNoticeVisible = false;
 		this.routeUpdateTimer = null;
 		this.ignoreRouteCameraUpdate = false;
 		this.applyingRouteCamera = false;
@@ -1013,10 +1015,12 @@ export default {
 
 				this.$parent.$data.locationBoxText = location.name;
 				this.$parent.$data.showLocationBox = true;
+				this.startupLocationVisible = true;
 
 			}
 			this.setCameraPosFromRoute( location );
 
+			if ( ! this.startupLocationVisible ) return;
 			const started = Date.now();
 			this.locationTimer = window.setInterval( () => {
 
@@ -1025,8 +1029,10 @@ export default {
 				if ( stop ) {
 
 					this.$parent.$data.showLocationBox = false;
+					this.startupLocationVisible = false;
 					window.clearInterval( this.locationTimer );
 					this.locationTimer = null;
+					this.updateZoomNotice( ! this.buildingsVisible );
 
 				}
 
@@ -1496,6 +1502,14 @@ export default {
 			this.requestRender();
 
 		},
+		updateZoomNotice( visible ) {
+
+			this.zoomNoticeVisible = visible;
+			if ( this.startupLocationVisible ) return;
+			this.$parent.$data.showLocationBox = visible;
+			if ( visible ) this.$parent.$data.locationBoxText = this.$t( 'viewer.zoomInForBuildings' );
+
+		},
 		updateBuildingVisibility() {
 
 			if ( ! this.tiles || ! this.map || ! this.cameraReady ) return this.buildingsVisible;
@@ -1514,6 +1528,7 @@ export default {
 					this.$emit( 'object-picked', undefined );
 
 				}
+				this.updateZoomNotice( ! shouldShow );
 				this.queueMarkerHeightCorrection();
 
 			}

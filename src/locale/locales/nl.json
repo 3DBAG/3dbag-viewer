@@ -38,6 +38,7 @@
     "baselayer2": "Basislaag",
     "threeDUnavailable": "3D-weergave niet beschikbaar",
     "threeDUnavailableDescription": "De 3D-gegevens voor deze versie konden niet worden geladen.",
+    "zoomInForBuildings": "Zoom in om de 3D-gebouwen zichtbaar te maken.",
     "colormap": "Kleur",
     "colormapNone": "Geen kleurcodering",
     "colormapOther": "Overig"
