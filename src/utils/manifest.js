@@ -1,3 +1,5 @@
+import { DEFAULT_OTHER_COLOR, normalizeHexColor } from '@/utils/attributeStyles';
+
 const MENU_DEFAULTS = Object.freeze( {
 	documentation: true,
 	dashboard: false,
@@ -86,6 +88,60 @@ export function getDefaultLod( versionData = {} ) {
 	const options = getLodOptions( versionData );
 	if ( options.lod22 ) return 'lod22';
 	return Object.keys( options )[ 0 ] || null;
+
+}
+
+function parseColormapEntry( value, key ) {
+
+	if ( typeof value === 'string' ) {
+
+		const color = normalizeHexColor( value );
+		return color ? { value: key, color, label: key } : null;
+
+	}
+	if ( ! value || typeof value !== 'object' || Array.isArray( value ) ) return null;
+	const color = normalizeHexColor( value.color );
+	if ( ! color ) return null;
+	const label = typeof value.label === 'string' && value.label.trim() ? value.label.trim() : key;
+	return { value: key, color, label };
+
+}
+
+function normalizeColormapTitle( value, fallback ) {
+
+	if ( typeof value === 'string' && value.trim() ) return value.trim();
+	if ( value && typeof value === 'object' && ! Array.isArray( value ) ) {
+
+		const localized = Object.keys( value ).reduce( ( title, locale ) => {
+
+			if ( typeof value[ locale ] === 'string' && value[ locale ].trim() ) title[ locale ] = value[ locale ].trim();
+			return title;
+
+		}, {} );
+		if ( Object.keys( localized ).length > 0 ) return localized;
+
+	}
+	return fallback;
+
+}
+
+export function getColormap( versionData = {} ) {
+
+	const configured = asRecord( asRecord( versionData ).colormap );
+	const attribute = typeof configured.attribute === 'string' ? configured.attribute.trim() : '';
+	if ( ! attribute ) return null;
+	const rawValues = asRecord( configured.values );
+	const values = Object.keys( rawValues )
+		.map( key => parseColormapEntry( rawValues[ key ], key ) )
+		.filter( Boolean );
+	if ( values.length === 0 ) return null;
+
+	return {
+		attribute,
+		title: normalizeColormapTitle( configured.title, attribute ),
+		other: normalizeHexColor( configured.other ) || DEFAULT_OTHER_COLOR,
+		values
+	};
 
 }
 

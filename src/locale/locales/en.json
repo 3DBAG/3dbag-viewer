@@ -30,7 +30,9 @@
     "baselayer1": "Baselayer from",
     "baselayer2": "Baselayer",
     "threeDUnavailable": "3D view unavailable",
-    "threeDUnavailableDescription": "The 3D data for this version could not be loaded."
+    "threeDUnavailableDescription": "The 3D data for this version could not be loaded.",
+    "colormap": "Color",
+    "colormapOther": "Other"
   },
   "BuildingInfo": {
     "attr1": "Attribute descriptions you can find in the ",

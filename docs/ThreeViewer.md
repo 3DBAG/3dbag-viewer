@@ -4,12 +4,28 @@
 
 The ECEF tileset is dynamically rebased into a local east/up/south frame around the map center. This keeps Three.js coordinates precise while the MapLibre camera moves through the nationwide tileset.
 
+Buildings can be colored from a version `colormap` in `manifest.json`: an attribute name plus a value-to-color map, applied through `CesiumStylingPlugin`. The toolbar Color button toggles that style. Click-to-select still applies the amber semantic highlight on top of the current mesh colors.
+
+```json
+"colormap": {
+  "attribute": "b3_pw_bron",
+  "title": { "en": "Point cloud source", "nl": "Puntwolkbron" },
+  "other": "#c4c8cf",
+  "values": {
+    "ahn3": { "color": "#0072B2", "label": "AHN3" },
+    "ahn4": "#E69F00"
+  }
+}
+```
+
 ## Props
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `tiles-url` | `String` | URL of the 3D Tiles tileset. The default points to the current LoD 2.2 Cesium 3D Tiles feed. |
 | `basemap-preset` | `String` | `openfreemap`, `standaard`, `grijs`, or `luchtfoto`. The three Dutch presets are supplied by NLMaps. |
+| `colormap` | `Object` | Normalized colormap from the version manifest, or `null` when none is configured. |
+| `colormap-enabled` | `Boolean` | When true, applies the colormap vertex colors. Pick highlighting stays active either way. |
 
 ## Configuration
 

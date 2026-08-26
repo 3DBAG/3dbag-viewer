@@ -16,6 +16,19 @@
         title="LoD"
         :options="lods"
       />
+      <div
+        v-if="colormap"
+        class="control"
+      >
+        <b-button
+          :class="{ 'is-primary': colormapEnabled }"
+          icon-left="palette"
+          :title="$t( 'viewer.colormap' )"
+          @click="colormapEnabled = ! colormapEnabled"
+        >
+          <span class="is-hidden-mobile">{{ $t( 'viewer.colormap' ) }}</span>
+        </b-button>
+      </div>
       <search-bar
         @select-place="moveToPlace"
       />
@@ -48,6 +61,8 @@
       ref="threeviewer"
       :tiles-url="tilesUrl"
       :basemap-preset="basemapPreset"
+      :colormap="colormap"
+      :colormap-enabled="colormapEnabled"
       @object-picked="objectPicked"
       @cam-offset="onCamOffset"
       @cam-rotation-z="onCamRotationZ"
@@ -73,6 +88,24 @@
         <span v-else>© 3DBAG by tudelft3d and 3DGI</span>
       </p>
     </div>
+    <div
+      v-if="tilesUrl && colormapEnabled && colormap"
+      id="attribute-legend"
+      class="box"
+    >
+      <h4>{{ colormapTitle }}</h4>
+      <div
+        v-for="entry in colormapLegend"
+        :key="entry.value"
+        class="legend-row"
+      >
+        <span
+          class="legend-swatch"
+          :style="{ backgroundColor: entry.color }"
+        />
+        <span>{{ entry.value === 'other' ? $t( 'viewer.colormapOther' ) : entry.label }}</span>
+      </div>
+    </div>
     <div id="debug-panel" />
   </div>
 </template>
@@ -84,7 +117,8 @@ import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
 import Compass from '@/components/Compass.vue';
 import { appConfig } from '@/config';
-import { getDefaultLod, getLodOptions, getTilesetSources } from '@/utils/manifest';
+import { getAttributeLegend, resolveColormapTitle } from '@/utils/attributeStyles';
+import { getColormap, getDefaultLod, getLodOptions, getTilesetSources } from '@/utils/manifest';
 
 export default {
 
@@ -149,6 +183,10 @@ export default {
 			},
 
 			showBuildingInfo: false,
+			colormap: getColormap( versionData ),
+			colormapEnabled: Boolean( getColormap( versionData ) ),
+
+
 
 		};
 
@@ -157,6 +195,18 @@ export default {
 		availableLodCount() {
 
 			return Object.keys( this.lods ).length;
+
+		},
+
+		colormapTitle() {
+
+			return resolveColormapTitle( this.colormap, this.$i18n.locale );
+
+		},
+
+		colormapLegend() {
+
+			return getAttributeLegend( this.colormap );
 
 		},
 
@@ -368,5 +418,36 @@ export default {
 	left: 0;
 	bottom: 0;
 	opacity: 0.8;
+}
+#attribute-legend {
+	position: absolute;
+	z-index: 2;
+	right: 0.5rem;
+	bottom: 0.5rem;
+	min-width: 10rem;
+	padding: 0.65rem 0.85rem;
+	margin: 0;
+}
+#attribute-legend h4 {
+	margin: 0 0 0.35rem 0;
+	color: #333;
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+.legend-row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.15rem;
+	color: #333;
+	font-size: 0.75rem;
+	line-height: 1.4;
+}
+.legend-swatch {
+	flex: 0 0 auto;
+	width: 0.9rem;
+	height: 0.75rem;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	border-radius: 2px;
 }
 </style>

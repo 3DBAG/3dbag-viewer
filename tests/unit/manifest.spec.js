@@ -1,6 +1,7 @@
 import {
 	getArchivedVersions,
 	getAuxiliaryFiles,
+	getColormap,
 	getDefaultLod,
 	getGpkgDump,
 	getLodOptions,
@@ -195,6 +196,33 @@ describe( 'manifest configuration', () => {
 				tileIndex: 'https://example.test/index.fgb',
 			},
 		] );
+
+	} );
+
+	it( 'normalizes a value-to-color colormap and ignores invalid entries', () => {
+
+		expect( getColormap() ).toBe( null );
+		expect( getColormap( {
+			colormap: {
+				attribute: 'b3_pw_bron',
+				title: { en: 'Point cloud source', nl: 'Puntwolkbron' },
+				other: '#ccc',
+				values: {
+					ahn3: '#0072B2',
+					ahn4: { color: '#E69F00', label: 'AHN4' },
+					bad: 'blue',
+					empty: { label: 'missing' }
+				}
+			}
+		} ) ).toEqual( {
+			attribute: 'b3_pw_bron',
+			title: { en: 'Point cloud source', nl: 'Puntwolkbron' },
+			other: '#cccccc',
+			values: [
+				{ value: 'ahn3', color: '#0072B2', label: 'ahn3' },
+				{ value: 'ahn4', color: '#E69F00', label: 'AHN4' }
+			]
+		} );
 
 	} );
 } );

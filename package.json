@@ -14,12 +14,13 @@
     "node": ">=26.0.0 <27.0.0"
   },
   "dependencies": {
+    "@bertt/3dtilesrenderer-styling-plugin": "file:../3dtilesrenderer-styling-plugin",
     "@geo-frontend/nlmaps-maplibre": "1.0.1",
     "@mdi/font": "^5.7.55",
     "@vuedoc/md": "^3.0.0",
     "@vuedoc/parser": "^3.0.0",
     "3d-tiles-renderer": "0.5.2",
-    "buefy": "^0.9.3",
+    "buefy": "^0.9.29",
     "core-js": "^3.6.5",
     "debounce": "^1.2.0",
     "flatgeobuf": "3.19.0",

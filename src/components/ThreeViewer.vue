@@ -14,6 +14,7 @@
 <script>
 import {
 	AmbientLight,
+	BufferAttribute,
 	Color,
 	CylinderGeometry,
 	DirectionalLight,
@@ -40,6 +41,7 @@ import {
 } from 'three';
 import { TilesRenderer, WGS84_ELLIPSOID } from '3d-tiles-renderer/three';
 import { GLTFExtensionsPlugin } from '3d-tiles-renderer/three/plugins';
+import { CesiumStylingPlugin } from '@bertt/3dtilesrenderer-styling-plugin';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { Map as MapLibreMap, MercatorCoordinate } from 'maplibre-gl';
 import { bgLayer } from '@geo-frontend/nlmaps-maplibre';
@@ -60,9 +62,11 @@ import {
 	getPreferredHighlightAttribute,
 	getSemanticFeature
 } from '@/utils/semanticFeatures';
+import { getAttributeStyle } from '@/utils/attributeStyles';
 
 const Tweakpane = require( 'tweakpane' );
 const HIGHLIGHT_COLOR = 0xFFC107;
+const STYLED_MESH_COLOR = '#ffffff';
 const BUILDING_ERROR_TARGET = 48;
 const BUILDING_MIN_ZOOM = 13;
 const MAX_MAP_PITCH = 60;
@@ -116,6 +120,14 @@ export default {
 			type: String,
 			default: 'openfreemap',
 			validator: value => [ 'openfreemap', 'standaard', 'grijs', 'luchtfoto' ].includes( value )
+		},
+		colormap: {
+			type: Object,
+			default: null
+		},
+		colormapEnabled: {
+			type: Boolean,
+			default: false
 		}
 	},
 	data() {
@@ -139,6 +151,16 @@ export default {
 		$route( to ) {
 
 			if ( ! this.ignoreRouteCameraUpdate ) this.setCameraPosFromRoute( to.query );
+
+		},
+		colormapEnabled() {
+
+			this.applyColormapState();
+
+		},
+		colormap() {
+
+			this.applyColormapState();
 
 		}
 	},
@@ -192,6 +214,7 @@ export default {
 		this.showTerrain = true;
 		this.pane = null;
 		this.lruCacheSize = 0;
+		this.stylingPlugin = null;
 
 	},
 	mounted() {
@@ -572,6 +595,40 @@ export default {
 		},
 		setMeshColor( color ) {
 
+			this.meshColor = color;
+			if ( this.usesColormap() ) return;
+			this.setLoadedMeshAppearance( false, color );
+
+		},
+		usesColormap() {
+
+			return Boolean( this.colormapEnabled && this.colormap );
+
+		},
+		getActiveColormapStyle() {
+
+			return this.usesColormap() ? getAttributeStyle( this.colormap ) : {};
+
+		},
+		loadedMeshesNeedStyle() {
+
+			if ( ! this.tiles ) return false;
+			let needed = false;
+			this.tiles.forEachLoadedModel( scene => {
+
+				scene.traverse( child => {
+
+					if ( ! child.isMesh || ! child.geometry ) return;
+					if ( child.userData.meshFeatures && ! child.geometry.getAttribute( 'color' ) ) needed = true;
+
+				} );
+
+			} );
+			return needed;
+
+		},
+		setLoadedMeshAppearance( vertexColors, color ) {
+
 			if ( ! this.tiles ) return;
 			this.tiles.forEachLoadedModel( scene => {
 
@@ -581,6 +638,12 @@ export default {
 					materials.filter( Boolean ).forEach( material => {
 
 						if ( material.color ) material.color.set( color );
+						if ( material.vertexColors !== vertexColors ) {
+
+							material.vertexColors = vertexColors;
+							material.needsUpdate = true;
+
+						}
 
 					} );
 
@@ -588,6 +651,23 @@ export default {
 
 			} );
 			this.requestRender();
+
+		},
+		applyColormapState() {
+
+			if ( ! this.tiles || ! this.stylingPlugin ) return;
+			if ( this.usesColormap() ) {
+
+				this.stylingPlugin.style = this.getActiveColormapStyle();
+				if ( this.loadedMeshesNeedStyle() ) this.stylingPlugin.applyToTiles();
+				this.setLoadedMeshAppearance( true, STYLED_MESH_COLOR );
+
+			} else {
+
+				this.stylingPlugin.style = {};
+				this.setLoadedMeshAppearance( false, this.meshColor );
+
+			}
 
 		},
 		setTerrainVisibility( visible ) {
@@ -901,15 +981,18 @@ export default {
 				console.warn( 'Unable to prepare semantic highlighting.', error );
 
 			}
-			const material = new MeshLambertMaterial( { color: this.meshColor } );
+			const hasVertexColors = Boolean( object.geometry.getAttribute( 'color' ) );
+			const material = new MeshLambertMaterial( {
+				color: this.usesColormap() || hasVertexColors ? STYLED_MESH_COLOR : this.meshColor,
+				vertexColors: hasVertexColors
+			} );
 			if ( ! highlightAttribute || ! object.geometry.getAttribute( highlightAttribute ) ) return material;
 
-			const highlightedFeatureId = { value: - 1 };
-			material.userData.highlightedFeatureId = highlightedFeatureId;
+			material.userData.highlightedFeatureId = { value: - 1 };
 			material.userData.highlightAttribute = highlightAttribute;
-			material.onBeforeCompile = shader => {
+			material.onBeforeCompile = function ( shader ) {
 
-				shader.uniforms.highlightedFeatureId = highlightedFeatureId;
+				shader.uniforms.highlightedFeatureId = this.userData.highlightedFeatureId;
 				shader.uniforms.highlightColor = { value: new Color( HIGHLIGHT_COLOR ) };
 				shader.vertexShader = `
 					attribute float ${ highlightAttribute };
@@ -928,6 +1011,11 @@ export default {
 					`vec4 diffuseColor =
 						abs( semanticFeatureId - highlightedFeatureId ) < 0.5 ?
 						vec4( highlightColor, opacity ) : vec4( diffuse, opacity );`
+				).replace(
+					'#include <color_fragment>',
+					`if ( abs( semanticFeatureId - highlightedFeatureId ) >= 0.5 ) {
+						#include <color_fragment>
+					}`
 				);
 
 			};
@@ -1016,13 +1104,24 @@ export default {
 				metadata: true,
 				meshoptDecoder: MeshoptDecoder
 			} ) );
+			this.stylingPlugin = this.colormap ? new CesiumStylingPlugin( {
+				THREE: { Color, BufferAttribute },
+				style: this.getActiveColormapStyle()
+			} ) : null;
+			if ( this.stylingPlugin ) tiles.registerPlugin( this.stylingPlugin );
 			tiles.setCamera( this.camera );
 			const invalidate = () => this.requestRender();
 			tiles.addEventListener( 'needs-update', invalidate );
 			tiles.addEventListener( 'needs-render', invalidate );
 			tiles.addEventListener( 'load-model', event => {
 
-				if ( this.tiles === tiles ) this.handleLoadModel( event );
+				// CesiumStylingPlugin styles asynchronously and clones materials.
+				// Wait one tick so highlight materials are created after that clone.
+				Promise.resolve().then( () => {
+
+					if ( this.tiles === tiles ) this.handleLoadModel( event );
+
+				} );
 
 			} );
 			tiles.addEventListener( 'dispose-model', event => {

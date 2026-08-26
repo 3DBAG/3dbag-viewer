@@ -1,5 +1,8 @@
 module.exports = {
 	publicPath: '/',
+	transpileDependencies: [
+		'@bertt/3dtilesrenderer-styling-plugin'
+	],
 	css: {
 		loaderOptions: {
 			scss: {
