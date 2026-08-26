@@ -198,8 +198,6 @@ export default {
 		this.viewportWidth = 0;
 		this.viewportHeight = 0;
 		this.basemapGeneration = 0;
-		this.restoreCenterClampingAfterZoom = false;
-		this.centerClampingTimer = null;
 		this.destroying = false;
 
 		this.pointIntensity = 0.4;
@@ -256,8 +254,6 @@ export default {
 			this.map.on( 'style.load', this.onStyleLoad );
 			this.map.on( 'move', this.onMapMove );
 			this.map.on( 'moveend', this.onMapMoveEnd );
-			this.map.on( 'zoomstart', this.onMapZoomStart );
-			this.map.on( 'zoomend', this.onMapZoomEnd );
 			this.map.on( 'sourcedata', this.onSourceData );
 			this.map.on( 'error', this.onMapError );
 
@@ -381,9 +377,6 @@ export default {
 			// A custom layer cannot safely survive a style's projection teardown. Remove it
 			// synchronously and let onStyleLoad attach it to the replacement style.
 			if ( this.map.getLayer( THREE_LAYER_ID ) ) this.map.removeLayer( THREE_LAYER_ID );
-			if ( this.centerClampingTimer !== null ) window.clearTimeout( this.centerClampingTimer );
-			this.centerClampingTimer = null;
-			this.restoreCenterClampingAfterZoom = false;
 			this.map.setCenterClampedToGround( true );
 			this.map.setStyle( this.getBasemapStyle(), {
 				transformStyle: ( previousStyle, nextStyle ) => this.transformBasemapStyle( previousStyle, nextStyle )
@@ -409,35 +402,6 @@ export default {
 		onMapMoveEnd() {
 
 			if ( this.initialCameraSet && ! this.applyingRouteCamera ) this.scheduleRouteUpdate();
-
-		},
-		onMapZoomStart() {
-
-			if ( this.centerClampingTimer !== null ) {
-
-				window.clearTimeout( this.centerClampingTimer );
-				this.centerClampingTimer = null;
-
-			}
-			if ( ! this.map || ! this.map.getTerrain() || ! this.map.getCenterClampedToGround() ) return;
-			// Terrain clamping recalculates center and zoom when a zoom gesture ends.
-			// At a near-horizontal pitch that correction can move the target far ahead.
-			this.restoreCenterClampingAfterZoom = true;
-			this.map.setCenterClampedToGround( false );
-
-		},
-		onMapZoomEnd() {
-
-			if ( ! this.map || ! this.restoreCenterClampingAfterZoom ) return;
-			// MapLibre performs its terrain-center correction immediately after emitting
-			// zoomend, so restore clamping on the following task.
-			this.centerClampingTimer = window.setTimeout( () => {
-
-				this.centerClampingTimer = null;
-				this.restoreCenterClampingAfterZoom = false;
-				if ( this.map ) this.map.setCenterClampedToGround( true );
-
-			}, 0 );
 
 		},
 		onThreeLayerAdd( map, gl ) {
@@ -1344,7 +1308,6 @@ export default {
 			this.destroying = true;
 			if ( this.locationTimer !== null ) window.clearInterval( this.locationTimer );
 			if ( this.routeUpdateTimer !== null ) window.clearTimeout( this.routeUpdateTimer );
-			if ( this.centerClampingTimer !== null ) window.clearTimeout( this.centerClampingTimer );
 			if ( this.resizeObserver ) this.resizeObserver.disconnect();
 			if ( this.map ) {
 
