@@ -1,5 +1,5 @@
 import Proj4 from 'proj4';
-import { MathUtils, Vector3 } from 'three';
+import { MathUtils, Matrix4, Vector3 } from 'three';
 
 const RD_CRS = 'EPSG:28992';
 const WGS84_CRS = 'EPSG:4326';
@@ -45,6 +45,27 @@ export function getWorldFrame( ellipsoid, ellipsoidGroup, lat, lon, height = 0 )
 	up.transformDirection( ellipsoidGroup.matrixWorld );
 
 	return { position, east, north, up };
+
+}
+
+export function setEcefToLocalFrame( ellipsoid, ellipsoidGroup, lat, lon, height = 0 ) {
+
+	const origin = ellipsoid.getCartographicToPosition( lat, lon, height, new Vector3() );
+	const sinLon = Math.sin( lon );
+	const cosLon = Math.cos( lon );
+	const sinLat = Math.sin( lat );
+	const cosLat = Math.cos( lat );
+	const rotation = new Matrix4().set(
+		- sinLon, cosLon, 0, 0,
+		cosLat * cosLon, cosLat * sinLon, sinLat, 0,
+		sinLat * cosLon, sinLat * sinLon, - cosLat, 0,
+		0, 0, 0, 1
+	);
+	const translation = new Matrix4().makeTranslation( - origin.x, - origin.y, - origin.z );
+	ellipsoidGroup.matrix.copy( rotation.multiply( translation ) );
+	ellipsoidGroup.matrixAutoUpdate = false;
+	ellipsoidGroup.updateMatrixWorld( true );
+	return ellipsoidGroup.matrix;
 
 }
 

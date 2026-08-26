@@ -14,14 +14,14 @@
 <script>
 import {
 	AmbientLight,
-	Clock,
 	Color,
 	CylinderGeometry,
 	DirectionalLight,
 	FogExp2,
-	Group,
 	LinearToneMapping,
+	MathUtils,
 	Matrix3,
+	Matrix4,
 	Mesh,
 	MeshBasicMaterial,
 	MeshLambertMaterial,
@@ -38,28 +38,21 @@ import {
 	Vector3,
 	WebGLRenderer
 } from 'three';
-import {
-	GlobeControls,
-	TilesRenderer,
-	WGS84_ELLIPSOID
-} from '3d-tiles-renderer/three';
-import {
-	GLTFExtensionsPlugin,
-	ImageOverlayPlugin,
-	QuantizedMeshPlugin,
-	WMTSCapabilitiesLoader,
-	WMTSTilesOverlay
-} from '3d-tiles-renderer/three/plugins';
+import { TilesRenderer, WGS84_ELLIPSOID } from '3d-tiles-renderer/three';
+import { GLTFExtensionsPlugin } from '3d-tiles-renderer/three/plugins';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { Map as MapLibreMap, MercatorCoordinate } from 'maplibre-gl';
+import { bgLayer } from '@geo-frontend/nlmaps-maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import markerSprite from '@/assets/locationmarker.png';
 import { appConfig } from '@/config';
 import {
 	cameraFrameToRoute,
-	getCompassRotation,
-	getNorthFacingCameraPosition,
 	getSurfacePoint,
 	getWorldFrame,
+	rdToCartographic,
 	routeToCameraFrame,
+	setEcefToLocalFrame,
 	worldToCartographic
 } from '@/utils/globeCoordinates';
 import {
@@ -69,15 +62,15 @@ import {
 } from '@/utils/semanticFeatures';
 
 const Tweakpane = require( 'tweakpane' );
-const TWEEN = require( '@tweenjs/tween.js' );
 const HIGHLIGHT_COLOR = 0xFFC107;
 const BUILDING_ERROR_TARGET = 48;
-const BUILDING_MAX_VIEW_DISTANCE = 1750;
+const BUILDING_MIN_ZOOM = 13;
+const MAX_MAP_PITCH = 60;
 const BUILDING_TILE_PRIORITY = 2;
-const TERRAIN_ERROR_TARGET = 8;
-const TERRAIN_TILE_PRIORITY = 1;
-const WMTS_TEXTURE_RESOLUTION = 768;
-const WMTS_MAX_ZOOM_LEVEL = 18;
+const TERRAIN_SOURCE_ID = 'mapterhorn-dem';
+const HILLSHADE_SOURCE_ID = 'mapterhorn-hillshade-dem';
+const HILLSHADE_LAYER_ID = 'mapterhorn-hillshade';
+const THREE_LAYER_ID = '3dbag-buildings';
 const PICKER_LOCAL_NORMAL = new Vector3( 0, 0, 1 );
 const pickerNormalMatrix = new Matrix3();
 
@@ -92,9 +85,6 @@ class TileRequestPriorityPlugin {
 
 	preprocessNode( tile ) {
 
-		// The shared renderer queues dispatch larger priority values first. WMTS
-		// requests use negative priorities, so the resulting order is buildings,
-		// terrain, then imagery.
 		tile.priority = this.tilePriority;
 
 	}
@@ -115,14 +105,6 @@ function disposeMaterial( material ) {
 
 }
 
-function getCapabilitiesUrl( url ) {
-
-	const serviceUrl = url.replace( /[?&]+$/, '' );
-	const separator = serviceUrl.includes( '?' ) ? '&' : '?';
-	return `${ serviceUrl }${ separator }service=WMTS&request=GetCapabilities&version=1.0.0`;
-
-}
-
 export default {
 	name: 'ThreeViewer',
 	props: {
@@ -130,22 +112,10 @@ export default {
 			type: String,
 			default: appConfig.dataUrl + '/v20250903/cesium3dtiles/lod22/tileset.json'
 		},
-		basemapOptions: {
-			type: Object,
-			default: () => {
-
-				return {
-					type: 'wmts',
-					options: {
-						url: appConfig.brtUrl,
-						layer: 'standaard',
-						style: 'default',
-						tileMatrixSet: 'EPSG:3857',
-						format: 'image/png'
-					}
-				};
-
-			}
+		basemapPreset: {
+			type: String,
+			default: 'openfreemap',
+			validator: value => [ 'openfreemap', 'standaard', 'grijs', 'luchtfoto' ].includes( value )
 		}
 	},
 	data() {
@@ -158,10 +128,10 @@ export default {
 	watch: {
 		tilesUrl() {
 
-			this.reinitTiles();
+			if ( this.scene ) this.reinitTiles();
 
 		},
-		basemapOptions() {
+		basemapPreset() {
 
 			this.reinitBasemap();
 
@@ -174,44 +144,39 @@ export default {
 	},
 	beforeCreate() {
 
+		this.map = null;
+		this.customLayer = null;
 		this.renderer = null;
 		this.scene = null;
-		this.contentGroup = null;
-		this.controlsSurface = null;
 		this.camera = null;
-		this.controls = null;
 		this.tiles = null;
-		this.terrainTiles = null;
-		this.terrainOverlayPlugin = null;
-		this.basemapOverlay = null;
-		this.wmtsCapabilitiesCache = new Map();
-		this.raycaster = null;
-		this.markerHeightRaycaster = null;
-		this.mouse = null;
+		this.localTransform = new Matrix4();
+		this.projectionMatrix = new Matrix4();
+		this.viewMatrix = new Matrix4();
+		this.mouse = new Vector2();
+		this.raycaster = new Raycaster();
+		this.markerHeightRaycaster = new Raycaster();
 		this.rayIntersect = null;
 		this.selectedObject = null;
 		this.modelRoots = new WeakMap();
-		this.viewPivot = new Vector3();
-		this.viewPivotValid = false;
-		this.viewPivotDirty = true;
-		this.compassNeedsUpdate = true;
 		this.buildingsVisible = true;
-		this.needsRerender = 0;
-		this.animationFrame = null;
-		this.resizeObserver = null;
-		this.viewportWidth = 0;
-		this.viewportHeight = 0;
-		this.viewportPixelRatio = 0;
-		this.viewportReady = false;
-		this.clock = new Clock();
-		this.basemapGeneration = 0;
+		this.cameraReady = false;
+		this.initialCameraSet = false;
+		this.markerHeightNeedsUpdate = false;
+		this.markerName = 'geocoding-marker';
 		this.selectionGeneration = 0;
 		this.locationTimer = null;
 		this.routeUpdateTimer = null;
 		this.ignoreRouteCameraUpdate = false;
-		this.markerName = 'geocoding-marker';
-		this.markerHeightNeedsUpdate = false;
+		this.applyingRouteCamera = false;
+		this.resizeObserver = null;
 		this.pointerCaster = { startClientX: 0, startClientY: 0 };
+		this.viewportWidth = 0;
+		this.viewportHeight = 0;
+		this.basemapGeneration = 0;
+		this.restoreCenterClampingAfterZoom = false;
+		this.centerClampingTimer = null;
+		this.destroying = false;
 
 		this.pointIntensity = 0.6;
 		this.directionalIntensity = 1.15;
@@ -232,8 +197,7 @@ export default {
 	},
 	mounted() {
 
-		this.initScene();
-		if ( process.env.NODE_ENV === 'development' ) this.initTweakPane();
+		this.initMap();
 
 	},
 	beforeDestroy() {
@@ -242,10 +206,345 @@ export default {
 
 	},
 	methods: {
+		getBasemapStyle() {
+
+			if ( this.basemapPreset === 'openfreemap' ) return appConfig.mapStyleUrl;
+			return bgLayer( this.basemapPreset );
+
+		},
+		initMap() {
+
+			this.customLayer = {
+				id: THREE_LAYER_ID,
+				type: 'custom',
+				renderingMode: '3d',
+				onAdd: ( map, gl ) => this.onThreeLayerAdd( map, gl ),
+				render: ( gl, args ) => this.renderThreeLayer( gl, args ),
+				onRemove: () => {}
+			};
+			this.map = new MapLibreMap( {
+				container: this.$el,
+				style: this.getBasemapStyle(),
+				center: [ 5.3876389, 52.1561606 ],
+				zoom: 7,
+				pitch: 45,
+				maxPitch: MAX_MAP_PITCH,
+				canvasContextAttributes: { antialias: true }
+			} );
+			this.map.on( 'style.load', this.onStyleLoad );
+			this.map.on( 'move', this.onMapMove );
+			this.map.on( 'moveend', this.onMapMoveEnd );
+			this.map.on( 'movestart', this.onMapMoveStart );
+			this.map.on( 'zoomstart', this.onMapZoomStart );
+			this.map.on( 'zoomend', this.onMapZoomEnd );
+			this.map.on( 'sourcedata', this.onSourceData );
+			this.map.on( 'error', this.onMapError );
+
+			const canvas = this.map.getCanvas();
+			canvas.addEventListener( 'pointermove', this.onPointerMove, false );
+			canvas.addEventListener( 'pointerdown', this.onPointerDown, false );
+			canvas.addEventListener( 'pointerup', this.onPointerUp, false );
+			canvas.addEventListener( 'pointerleave', this.onPointerLeave, false );
+			if ( window.ResizeObserver ) {
+
+				this.resizeObserver = new window.ResizeObserver( () => this.map && this.map.resize() );
+				this.resizeObserver.observe( this.$el );
+
+			}
+
+		},
+		onStyleLoad() {
+
+			if ( ! this.map || this.destroying ) return;
+			const layers = this.map.getStyle().layers || [];
+			layers.filter( layer => {
+
+				return layer.type === 'fill-extrusion' || layer.id.toLowerCase().includes( 'building' );
+
+			} ).forEach( layer => this.map.setLayoutProperty( layer.id, 'visibility', 'none' ) );
+
+			if ( ! this.map.getSource( TERRAIN_SOURCE_ID ) ) {
+
+				this.map.addSource( TERRAIN_SOURCE_ID, {
+					type: 'raster-dem',
+					url: appConfig.terrainTileJsonUrl
+				} );
+
+			}
+			if ( ! this.map.getSource( HILLSHADE_SOURCE_ID ) ) {
+
+				this.map.addSource( HILLSHADE_SOURCE_ID, {
+					type: 'raster-dem',
+					url: appConfig.terrainTileJsonUrl
+				} );
+
+			}
+			const labelLayer = layers.find( layer => layer.type === 'symbol' );
+			const beforeId = labelLayer && labelLayer.id;
+			if ( ! this.map.getLayer( HILLSHADE_LAYER_ID ) ) {
+
+				this.map.addLayer( {
+					id: HILLSHADE_LAYER_ID,
+					type: 'hillshade',
+					source: HILLSHADE_SOURCE_ID,
+					paint: {
+						'hillshade-shadow-color': '#473B24',
+						'hillshade-exaggeration': 0.5
+					}
+				}, beforeId );
+
+			}
+			this.setTerrainVisibility( this.showTerrain );
+			if ( ! this.map.getLayer( THREE_LAYER_ID ) ) this.map.addLayer( this.customLayer, beforeId );
+			this.queueMarkerHeightCorrection();
+			this.requestRender();
+
+		},
+		transformBasemapStyle( previousStyle, nextStyle ) {
+
+			const previousSources = previousStyle && previousStyle.sources || {};
+			const terrainSource = previousSources[ TERRAIN_SOURCE_ID ] || {
+				type: 'raster-dem',
+				url: appConfig.terrainTileJsonUrl
+			};
+			const hillshadeSource = previousSources[ HILLSHADE_SOURCE_ID ] || terrainSource;
+			const previousLayers = previousStyle && previousStyle.layers || [];
+			const hillshadeLayer = previousLayers.find( layer => layer.id === HILLSHADE_LAYER_ID ) || {
+				id: HILLSHADE_LAYER_ID,
+				type: 'hillshade',
+				source: HILLSHADE_SOURCE_ID,
+				paint: {
+					'hillshade-shadow-color': '#473B24',
+					'hillshade-exaggeration': 0.5
+				}
+			};
+			const layers = ( nextStyle.layers || [] ).filter( layer => layer.id !== HILLSHADE_LAYER_ID );
+			const labelIndex = layers.findIndex( layer => layer.type === 'symbol' );
+			layers.splice( labelIndex === - 1 ? layers.length : labelIndex, 0, hillshadeLayer );
+			const style = Object.assign( {}, nextStyle, {
+				sources: Object.assign( {}, nextStyle.sources, {
+					[ TERRAIN_SOURCE_ID ]: terrainSource,
+					[ HILLSHADE_SOURCE_ID ]: hillshadeSource
+				} ),
+				layers
+			} );
+			if ( this.showTerrain ) {
+
+				style.terrain = previousStyle && previousStyle.terrain || {
+					source: TERRAIN_SOURCE_ID,
+					exaggeration: 1
+				};
+
+			} else {
+
+				delete style.terrain;
+
+			}
+			return style;
+
+		},
+		reinitBasemap() {
+
+			if ( ! this.map ) return;
+			const generation = ++ this.basemapGeneration;
+			if ( ! this.map.getStyle() ) {
+
+				this.map.once( 'style.load', () => {
+
+					if ( this.map && ! this.destroying && generation === this.basemapGeneration ) this.reinitBasemap();
+
+				} );
+				return;
+
+			}
+			// A custom layer cannot safely survive a style's projection teardown. Remove it
+			// synchronously and let onStyleLoad attach it to the replacement style.
+			if ( this.map.getLayer( THREE_LAYER_ID ) ) this.map.removeLayer( THREE_LAYER_ID );
+			if ( this.centerClampingTimer !== null ) window.clearTimeout( this.centerClampingTimer );
+			this.centerClampingTimer = null;
+			this.restoreCenterClampingAfterZoom = false;
+			this.map.setCenterClampedToGround( true );
+			this.map.setStyle( this.getBasemapStyle(), {
+				transformStyle: ( previousStyle, nextStyle ) => this.transformBasemapStyle( previousStyle, nextStyle )
+			} );
+
+		},
+		onMapError( event ) {
+
+			if ( event && event.error ) console.warn( 'MapLibre source or rendering error.', event.error );
+
+		},
+		onSourceData( event ) {
+
+			if ( event.sourceId === TERRAIN_SOURCE_ID && event.isSourceLoaded ) this.queueMarkerHeightCorrection();
+
+		},
+		onMapMoveStart() {
+
+			if ( this.rayIntersect ) this.rayIntersect.visible = false;
+
+		},
+		onMapMove() {
+
+			this.emitCompassRotation();
+			this.requestRender();
+
+		},
+		onMapMoveEnd() {
+
+			if ( this.initialCameraSet && ! this.applyingRouteCamera ) this.scheduleRouteUpdate();
+
+		},
+		onMapZoomStart() {
+
+			if ( this.centerClampingTimer !== null ) {
+
+				window.clearTimeout( this.centerClampingTimer );
+				this.centerClampingTimer = null;
+
+			}
+			if ( ! this.map || ! this.map.getTerrain() || ! this.map.getCenterClampedToGround() ) return;
+			// Terrain clamping recalculates center and zoom when a zoom gesture ends.
+			// At a near-horizontal pitch that correction can move the target far ahead.
+			this.restoreCenterClampingAfterZoom = true;
+			this.map.setCenterClampedToGround( false );
+
+		},
+		onMapZoomEnd() {
+
+			if ( ! this.map || ! this.restoreCenterClampingAfterZoom ) return;
+			// MapLibre performs its terrain-center correction immediately after emitting
+			// zoomend, so restore clamping on the following task.
+			this.centerClampingTimer = window.setTimeout( () => {
+
+				this.centerClampingTimer = null;
+				this.restoreCenterClampingAfterZoom = false;
+				if ( this.map ) this.map.setCenterClampedToGround( true );
+
+			}, 0 );
+
+		},
+		onThreeLayerAdd( map, gl ) {
+
+			if ( this.renderer ) return;
+			this.renderer = new WebGLRenderer( {
+				canvas: map.getCanvas(),
+				context: gl,
+				antialias: true
+			} );
+			this.renderer.autoClear = false;
+			this.renderer.outputColorSpace = SRGBColorSpace;
+			this.renderer.toneMapping = LinearToneMapping;
+			this.renderer.toneMappingExposure = this.exposure;
+
+			this.scene = new Scene();
+			this.fog = new FogExp2( this.fogColor, this.fogDensity );
+			this.camera = new PerspectiveCamera();
+			this.camera.matrixAutoUpdate = false;
+			this.camera.matrixWorldAutoUpdate = false;
+
+			this.pLight = new PointLight( 0xffffff, this.pointIntensity, 0, 1 );
+			this.scene.add( this.pLight );
+			this.dirLight = new DirectionalLight( 0xffffff, this.directionalIntensity );
+			this.dirLight.position.set( this.dirX, this.dirY, this.dirZ );
+			this.scene.add( this.dirLight );
+			this.ambLight = new AmbientLight( 0xffffff, this.ambientIntensity );
+			this.scene.add( this.ambLight );
+
+			this.rayIntersect = new Mesh();
+			const rayIntersectMaterial = new MeshBasicMaterial( { color: 0xe91e63 } );
+			const rayMesh = new Mesh( new CylinderGeometry( 0.25, 0.25, 6 ), rayIntersectMaterial );
+			rayMesh.rotation.x = Math.PI / 2;
+			rayMesh.position.z += 3;
+			this.rayIntersect.add( rayMesh );
+			const rayRing = new Mesh( new TorusGeometry( 1.5, 0.2, 16, 100 ), rayIntersectMaterial );
+			rayRing.position.z = 0.05;
+			this.rayIntersect.add( rayRing );
+			this.rayIntersect.visible = false;
+			this.scene.add( this.rayIntersect );
+
+			this.reinitTiles( true );
+			if ( process.env.NODE_ENV === 'development' ) this.initTweakPane();
+
+		},
+		updateLocalFrame( lngLat = null ) {
+
+			if ( ! this.map || ! this.tiles ) return false;
+			lngLat = lngLat || this.map.getCenter();
+			const lng = Number( lngLat.lng );
+			const lat = Number( lngLat.lat );
+			if ( ! Number.isFinite( lng ) || ! Number.isFinite( lat ) ) return false;
+			setEcefToLocalFrame(
+				this.tiles.ellipsoid || WGS84_ELLIPSOID,
+				this.tiles.group,
+				MathUtils.degToRad( lat ),
+				MathUtils.degToRad( lng )
+			);
+			const mercator = MercatorCoordinate.fromLngLat( [ lng, lat ], 0 );
+			const scale = mercator.meterInMercatorCoordinateUnits();
+			this.localTransform.makeTranslation( mercator.x, mercator.y, mercator.z )
+				.scale( new Vector3( scale, - scale, scale ) )
+				.multiply( new Matrix4().makeRotationX( Math.PI / 2 ) );
+			this.updateMarkerPosition();
+			return true;
+
+		},
+		renderThreeLayer( gl, args ) {
+
+			if ( ! this.renderer || ! this.scene || ! this.camera || ! this.tiles ) return;
+			if ( ! this.updateLocalFrame() ) return;
+			const modelViewProjection = new Matrix4()
+				.fromArray( args.defaultProjectionData.mainMatrix )
+				.multiply( this.localTransform );
+			this.projectionMatrix.fromArray( args.projectionMatrix );
+			this.viewMatrix.copy( this.projectionMatrix ).invert().multiply( modelViewProjection );
+			this.camera.projectionMatrix.copy( this.projectionMatrix );
+			this.camera.projectionMatrixInverse.copy( this.projectionMatrix ).invert();
+			this.camera.matrixWorldInverse.copy( this.viewMatrix );
+			this.camera.matrixWorld.copy( this.viewMatrix ).invert();
+			this.camera.position.setFromMatrixPosition( this.camera.matrixWorld );
+			this.pLight.position.copy( this.camera.position );
+			this.cameraReady = true;
+			this.syncTileResolution();
+
+			const buildingsVisible = this.updateBuildingVisibility();
+			if ( buildingsVisible && ! this.tilesError ) this.tiles.update();
+			if ( this.markerHeightNeedsUpdate ) {
+
+				this.markerHeightNeedsUpdate = false;
+				this.correctMarkerHeight();
+
+			}
+			if ( this.tiles.lruCache && this.tiles.lruCache.itemSet ) {
+
+				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
+
+			}
+			this.scene.fog = this.enableFog ? this.fog : null;
+			this.renderer.resetState();
+			this.renderer.render( this.scene, this.camera );
+			this.renderer.resetState();
+
+		},
+		syncTileResolution() {
+
+			if ( ! this.tiles || ! this.map ) return;
+			const canvas = this.map.getCanvas();
+			if ( canvas.width === this.viewportWidth && canvas.height === this.viewportHeight ) return;
+			this.viewportWidth = canvas.width;
+			this.viewportHeight = canvas.height;
+			this.tiles.setResolution( this.camera, canvas.width, canvas.height );
+
+		},
+		requestRender() {
+
+			if ( this.map ) this.map.triggerRepaint();
+
+		},
 		initTweakPane() {
 
 			const el = document.getElementById( 'debug-panel' );
-			if ( ! el || ! this.tiles ) return;
+			if ( ! el || ! this.tiles || this.pane ) return;
 			el.setAttribute( 'style', 'position: absolute; top: 0.5rem;right: 0.5rem;' );
 			el.setAttribute( 'class', 'is-hidden-mobile' );
 			this.pane = new Tweakpane( { title: 'debug', expanded: false, container: el } );
@@ -294,98 +593,59 @@ export default {
 		},
 		setTerrainVisibility( visible ) {
 
-			if ( ! this.terrainTiles ) return;
+			if ( ! this.map || ! this.map.getSource( TERRAIN_SOURCE_ID ) ) return;
+			this.showTerrain = visible;
+			const terrain = this.map.getTerrain();
 			if ( visible ) {
 
-				this.contentGroup.add( this.terrainTiles.group );
-				this.setNavigationSurface( this.terrainTiles.group );
-				this.queueMarkerHeightCorrection();
+				if ( ! terrain || terrain.source !== TERRAIN_SOURCE_ID || terrain.exaggeration !== 1 ) {
 
-			} else {
+					this.map.setTerrain( { source: TERRAIN_SOURCE_ID, exaggeration: 1 } );
 
-				this.contentGroup.remove( this.terrainTiles.group );
-				this.setNavigationSurface();
+				}
+
+			} else if ( terrain ) {
+
+				this.map.setTerrain( null );
 
 			}
+			if ( this.map.getLayer( HILLSHADE_LAYER_ID ) ) {
+
+				this.map.setLayoutProperty( HILLSHADE_LAYER_ID, 'visibility', visible ? 'visible' : 'none' );
+
+			}
+			this.queueMarkerHeightCorrection();
 			this.requestRender();
-
-		},
-		setNavigationSurface( surface = null ) {
-
-			if ( ! this.controls ) return;
-			this.controls.setScene( surface || this.controlsSurface );
-			this.viewPivotDirty = true;
-			this.compassNeedsUpdate = true;
-
-		},
-		requestRender( frames = 2 ) {
-
-			this.needsRerender = Math.max( this.needsRerender, frames );
-
-		},
-		syncViewportSize() {
-
-			if ( ! this.renderer || ! this.camera ) return false;
-			const width = Math.round( this.$el.clientWidth );
-			const height = Math.round( this.$el.clientHeight );
-			if ( width <= 0 || height <= 0 ) {
-
-				this.viewportReady = false;
-				return false;
-
-			}
-
-			const pixelRatio = window.devicePixelRatio || 1;
-			const wasReady = this.viewportReady;
-			const changed = ! wasReady ||
-				width !== this.viewportWidth ||
-				height !== this.viewportHeight ||
-				pixelRatio !== this.viewportPixelRatio;
-			this.viewportReady = true;
-			if ( ! changed ) return false;
-
-			this.viewportWidth = width;
-			this.viewportHeight = height;
-			this.viewportPixelRatio = pixelRatio;
-			this.camera.aspect = width / height;
-			this.camera.updateProjectionMatrix();
-			this.renderer.setPixelRatio( pixelRatio );
-			this.renderer.setSize( width, height );
-			if ( this.tiles ) this.tiles.setResolutionFromRenderer( this.camera, this.renderer );
-			if ( this.terrainTiles ) this.terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
-			this.requestRender( 3 );
-			return true;
 
 		},
 		getTilesFrame() {
 
-			if ( ! this.tiles || ! this.tiles.root ) return null;
+			if ( ! this.tiles ) return null;
 			return {
-				ellipsoid: this.tiles.ellipsoid,
+				ellipsoid: this.tiles.ellipsoid || WGS84_ELLIPSOID,
 				group: this.tiles.group
 			};
 
 		},
-		updateViewPivot() {
+		getTerrainElevation( lng, lat ) {
 
-			if ( ! this.controls ) return null;
-			const pivot = this.controls.getPivotPoint( this.viewPivot );
-			this.viewPivotValid = pivot !== null;
-			this.viewPivotDirty = false;
-			return pivot;
+			if ( ! this.map || ! this.showTerrain ) return 0;
+			return this.map.queryTerrainElevation( [ lng, lat ] ) || 0;
 
 		},
 		getViewPivot() {
 
-			if ( this.viewPivotDirty || ! this.viewPivotValid ) return this.updateViewPivot();
-			return this.viewPivot;
-
-		},
-		setViewPivot( pivot ) {
-
-			this.viewPivot.copy( pivot );
-			this.viewPivotValid = true;
-			this.viewPivotDirty = false;
+			const tilesFrame = this.getTilesFrame();
+			if ( ! tilesFrame || ! this.map ) return null;
+			const center = this.map.getCenter();
+			const elevation = this.getTerrainElevation( center.lng, center.lat );
+			return getWorldFrame(
+				tilesFrame.ellipsoid,
+				tilesFrame.group,
+				MathUtils.degToRad( center.lat ),
+				MathUtils.degToRad( center.lng ),
+				elevation
+			).position;
 
 		},
 		setCameraPosFromRoute( query ) {
@@ -397,38 +657,58 @@ export default {
 
 			}
 			const tilesFrame = this.getTilesFrame();
-			if ( ! tilesFrame || ! this.controls ) return;
+			if ( ! tilesFrame || ! this.map ) return;
+			const rdx = Number.parseFloat( query.rdx );
+			const rdy = Number.parseFloat( query.rdy );
+			if ( ! Number.isFinite( rdx ) || ! Number.isFinite( rdy ) ) return;
+			const targetCartographic = rdToCartographic( rdx, rdy );
+			this.updateLocalFrame( {
+				lng: MathUtils.radToDeg( targetCartographic.lon ),
+				lat: MathUtils.radToDeg( targetCartographic.lat )
+			} );
 			const frame = routeToCameraFrame( tilesFrame.ellipsoid, tilesFrame.group, query );
 			if ( ! frame ) return;
+			const cameraCartographic = worldToCartographic(
+				tilesFrame.ellipsoid,
+				tilesFrame.group,
+				frame.cameraPosition
+			);
+			const targetLng = MathUtils.radToDeg( frame.lon );
+			const targetLat = MathUtils.radToDeg( frame.lat );
+			const targetElevation = this.getTerrainElevation( targetLng, targetLat );
+			const options = this.map.calculateCameraOptionsFromTo(
+				[ MathUtils.radToDeg( cameraCartographic.lon ), MathUtils.radToDeg( cameraCartographic.lat ) ],
+				cameraCartographic.height + targetElevation,
+				[ targetLng, targetLat ],
+				targetElevation
+			);
+			this.applyingRouteCamera = true;
+			this.map.jumpTo( options );
+			window.setTimeout( () => {
 
-			this.camera.position.copy( frame.cameraPosition );
-			this.camera.up.copy( frame.up );
-			this.camera.lookAt( frame.target );
-			this.camera.updateMatrixWorld();
-			this.controls.resetState();
-			this.controls.update( 0 );
-			this.setViewPivot( frame.target );
-			this.compassNeedsUpdate = false;
+				this.applyingRouteCamera = false;
+				this.scheduleRouteUpdate();
 
-			if ( query.placeMarker === 'true' ) this.placeMarkerOnPoint( frame.target, frame.up );
-			this.emitCompassRotation( frame.target );
+			}, 0 );
+			if ( query.placeMarker === 'true' ) this.placeMarkerAtCartographic( frame.lat, frame.lon );
+			this.emitCompassRotation();
 			this.requestRender();
 
 		},
 		setRouteFromCameraPos() {
 
 			const tilesFrame = this.getTilesFrame();
-			if ( ! tilesFrame || ! this.controls ) return;
+			if ( ! tilesFrame || ! this.map || ! this.cameraReady || ! this.initialCameraSet ) return;
 			const target = this.getViewPivot();
 			if ( ! target ) return;
+			const cameraPosition = new Vector3().setFromMatrixPosition( this.camera.matrixWorld );
 			const route = cameraFrameToRoute(
 				tilesFrame.ellipsoid,
 				tilesFrame.group,
-				this.camera.position,
+				cameraPosition,
 				target
 			);
-			const cameraOffset = { x: route.ox, y: route.oy, z: route.oz };
-			this.$emit( 'cam-offset', cameraOffset );
+			this.$emit( 'cam-offset', { x: route.ox, y: route.oy, z: route.oz } );
 
 			const query = Object.assign( {}, this.$router.currentRoute.query, route );
 			delete query.placeMarker;
@@ -457,7 +737,42 @@ export default {
 			}, 250 );
 
 		},
-		placeMarkerOnPoint( position, up ) {
+		initializeCameraPosition() {
+
+			if ( this.initialCameraSet ) return;
+			this.initialCameraSet = true;
+			const query = this.$router.currentRoute.query;
+			if ( [ 'rdx', 'rdy', 'ox', 'oy', 'oz' ].every( key => key in query ) ) {
+
+				this.setCameraPosFromRoute( query );
+				return;
+
+			}
+
+			const landmarks = this.$root.$data.landmarkLocations;
+			const keys = Object.keys( landmarks );
+			const landmark = landmarks[ keys[ keys.length * Math.random() << 0 ] ];
+			this.$parent.$data.locationBoxText = landmark.name;
+			this.$parent.$data.showLocationBox = true;
+			this.setCameraPosFromRoute( landmark );
+
+			const started = Date.now();
+			this.locationTimer = window.setInterval( () => {
+
+				const elapsed = Date.now() - started;
+				const stop = ( this.tiles.stats.downloading <= 2 && elapsed >= 10000 ) || elapsed > 25000;
+				if ( stop ) {
+
+					this.$parent.$data.showLocationBox = false;
+					window.clearInterval( this.locationTimer );
+					this.locationTimer = null;
+
+				}
+
+			}, 2000 );
+
+		},
+		placeMarkerAtCartographic( lat, lon ) {
 
 			this.removeMarker();
 			const map = new TextureLoader().load( markerSprite, () => this.requestRender() );
@@ -468,14 +783,29 @@ export default {
 				sizeAttenuation: false
 			} );
 			const sprite = new Sprite( material );
-			sprite.position.copy( position );
-			sprite.userData.surfaceAnchor = position.clone();
-			sprite.userData.surfaceUp = up.clone();
+			sprite.userData.lat = lat;
+			sprite.userData.lon = lon;
+			sprite.userData.height = 0;
 			sprite.scale.set( 0.04, 0.10, 1 );
 			sprite.name = this.markerName;
 			this.scene.add( sprite );
+			this.updateMarkerPosition();
 			this.queueMarkerHeightCorrection();
 			this.requestRender();
+
+		},
+		updateMarkerPosition() {
+
+			const marker = this.scene && this.scene.getObjectByName( this.markerName );
+			const tilesFrame = this.getTilesFrame();
+			if ( ! marker || ! tilesFrame ) return;
+			marker.position.copy( getWorldFrame(
+				tilesFrame.ellipsoid,
+				tilesFrame.group,
+				marker.userData.lat,
+				marker.userData.lon,
+				marker.userData.height
+			).position );
 
 		},
 		queueMarkerHeightCorrection() {
@@ -488,21 +818,38 @@ export default {
 		correctMarkerHeight() {
 
 			const marker = this.scene && this.scene.getObjectByName( this.markerName );
-			if ( ! marker || ! this.markerHeightRaycaster ) return false;
-			const { surfaceAnchor, surfaceUp } = marker.userData;
-			if ( ! surfaceAnchor || ! surfaceUp ) return false;
-			const surfaces = [];
-			if ( this.tiles && ! this.tilesError && this.buildingsVisible ) surfaces.push( this.tiles.group );
-			if ( this.terrainTiles ) surfaces.push( this.terrainTiles.group );
+			const tilesFrame = this.getTilesFrame();
+			if ( ! marker || ! tilesFrame ) return false;
+			const { lat, lon } = marker.userData;
+			const frame = getWorldFrame( tilesFrame.ellipsoid, tilesFrame.group, lat, lon );
+			let surfacePoint = null;
+			if ( this.tiles && ! this.tilesError && this.buildingsVisible ) {
 
-			const surfacePoint = getSurfacePoint(
-				surfaces,
-				surfaceAnchor,
-				surfaceUp,
-				this.markerHeightRaycaster
-			);
-			if ( ! surfacePoint ) return false;
-			marker.position.copy( surfacePoint );
+				surfacePoint = getSurfacePoint(
+					this.tiles.group,
+					frame.position,
+					frame.up,
+					this.markerHeightRaycaster
+				);
+
+			}
+			if ( surfacePoint ) {
+
+				marker.userData.height = worldToCartographic(
+					tilesFrame.ellipsoid,
+					tilesFrame.group,
+					surfacePoint
+				).height;
+
+			} else {
+
+				marker.userData.height = this.getTerrainElevation(
+					MathUtils.radToDeg( lon ),
+					MathUtils.radToDeg( lat )
+				);
+
+			}
+			this.updateMarkerPosition();
 			this.requestRender();
 			return true;
 
@@ -520,60 +867,12 @@ export default {
 		},
 		pointCameraToNorth() {
 
-			const tilesFrame = this.getTilesFrame();
-			if ( ! tilesFrame || ! this.controls ) return;
-			const target = this.getViewPivot();
-			if ( ! target ) return;
-			const newPosition = getNorthFacingCameraPosition(
-				tilesFrame.ellipsoid,
-				tilesFrame.group,
-				this.camera.position,
-				target
-			);
-			const cartographic = worldToCartographic( tilesFrame.ellipsoid, tilesFrame.group, target );
-			const up = getWorldFrame(
-				tilesFrame.ellipsoid,
-				tilesFrame.group,
-				cartographic.lat,
-				cartographic.lon
-			).up;
-			const tweenPosition = this.camera.position.clone();
-			this.controls.enabled = false;
-			new TWEEN.Tween( tweenPosition )
-				.to( newPosition, 600 )
-				.easing( TWEEN.Easing.Quadratic.Out )
-				.onUpdate( () => {
-
-					this.camera.position.copy( tweenPosition );
-					this.camera.up.copy( up );
-					this.camera.lookAt( target );
-					this.requestRender();
-
-				} )
-				.onComplete( () => {
-
-					this.controls.enabled = true;
-					this.controls.resetState();
-					this.emitCompassRotation( target );
-					this.setRouteFromCameraPos();
-
-				} )
-				.start();
+			if ( this.map ) this.map.easeTo( { bearing: 0, duration: 600 } );
 
 		},
-		emitCompassRotation( target = null ) {
+		emitCompassRotation() {
 
-			const tilesFrame = this.getTilesFrame();
-			if ( ! tilesFrame || ! this.controls ) return;
-			target = target || this.getViewPivot();
-			if ( ! target ) return;
-			const rotation = getCompassRotation(
-				tilesFrame.ellipsoid,
-				tilesFrame.group,
-				this.camera,
-				target
-			);
-			this.$emit( 'cam-rotation-z', rotation );
+			if ( this.map ) this.$emit( 'cam-rotation-z', - MathUtils.degToRad( this.map.getBearing() ) );
 
 		},
 		createFeatureMaterial( object ) {
@@ -646,11 +945,7 @@ export default {
 				this.selectedObject.material : [ this.selectedObject.material ];
 			materials.filter( Boolean ).forEach( material => {
 
-				if ( material.userData.highlightedFeatureId ) {
-
-					material.userData.highlightedFeatureId.value = - 1;
-
-				}
+				if ( material.userData.highlightedFeatureId ) material.userData.highlightedFeatureId.value = - 1;
 
 			} );
 			this.selectedObject = null;
@@ -678,22 +973,22 @@ export default {
 		},
 		reinitTiles( initializeCamera = false ) {
 
+			if ( ! this.scene || ! this.camera ) return;
 			this.clearSelection();
 			this.selectionGeneration ++;
 			if ( this.tiles ) {
 
-				this.contentGroup.remove( this.tiles.group );
+				this.scene.remove( this.tiles.group );
 				this.tiles.dispose();
 
 			}
 
 			this.tilesError = null;
-			this.viewPivotValid = false;
-			this.viewPivotDirty = true;
-			this.compassNeedsUpdate = true;
 			this.buildingsVisible = true;
 			const tiles = new TilesRenderer( this.tilesUrl );
 			this.tiles = tiles;
+			this.viewportWidth = 0;
+			this.viewportHeight = 0;
 			tiles.errorTarget = BUILDING_ERROR_TARGET;
 			tiles.loadAncestors = false;
 			tiles.loadSiblings = false;
@@ -706,24 +1001,18 @@ export default {
 				meshoptDecoder: MeshoptDecoder
 			} ) );
 			tiles.setCamera( this.camera );
-			if ( this.viewportReady ) tiles.setResolutionFromRenderer( this.camera, this.renderer );
 			const invalidate = () => this.requestRender();
 			tiles.addEventListener( 'needs-update', invalidate );
 			tiles.addEventListener( 'needs-render', invalidate );
 			tiles.addEventListener( 'load-model', event => {
 
-				if ( this.tiles !== tiles ) return;
-				this.handleLoadModel( event );
+				if ( this.tiles === tiles ) this.handleLoadModel( event );
 
 			} );
 			tiles.addEventListener( 'dispose-model', event => {
 
 				if ( this.tiles !== tiles ) return;
-				if ( this.selectedObject && event.scene.getObjectById( this.selectedObject.id ) ) {
-
-					this.clearSelection();
-
-				}
+				if ( this.selectedObject && event.scene.getObjectById( this.selectedObject.id ) ) this.clearSelection();
 				this.queueMarkerHeightCorrection();
 
 			} );
@@ -741,270 +1030,22 @@ export default {
 
 				}
 				this.queueMarkerHeightCorrection();
-				this.requestRender( 3 );
+				this.requestRender();
 
 			} );
 			tiles.addEventListener( 'load-root-tileset', () => {
 
 				if ( this.tiles !== tiles ) return;
-				this.controls.setEllipsoid( tiles.ellipsoid, tiles.group );
-				this.viewPivotDirty = true;
-				this.compassNeedsUpdate = true;
+				this.updateLocalFrame();
 				if ( initializeCamera ) this.initializeCameraPosition();
 				this.requestRender();
 
 			} );
-			this.contentGroup.add( tiles.group );
+			tiles.group.matrixAutoUpdate = false;
+			this.scene.add( tiles.group );
+			this.syncTileResolution();
 			this.queueMarkerHeightCorrection();
 			this.requestRender();
-
-		},
-		initializeCameraPosition() {
-
-			const query = this.$router.currentRoute.query;
-			if ( [ 'rdx', 'rdy', 'ox', 'oy', 'oz' ].every( key => key in query ) ) {
-
-				this.setCameraPosFromRoute( query );
-				return;
-
-			}
-
-			const landmarks = this.$root.$data.landmarkLocations;
-			const keys = Object.keys( landmarks );
-			const landmark = landmarks[ keys[ keys.length * Math.random() << 0 ] ];
-			this.$parent.$data.locationBoxText = landmark.name;
-			this.$parent.$data.showLocationBox = true;
-			this.setCameraPosFromRoute( landmark );
-
-			const started = Date.now();
-			this.locationTimer = window.setInterval( () => {
-
-				const elapsed = Date.now() - started;
-				const stop = ( this.tiles.stats.downloading <= 2 && elapsed >= 10000 ) || elapsed > 25000;
-				if ( stop ) {
-
-					this.$parent.$data.showLocationBox = false;
-					window.clearInterval( this.locationTimer );
-					this.locationTimer = null;
-
-				}
-
-			}, 2000 );
-
-		},
-		async createBasemapOverlay() {
-
-			if ( this.basemapOptions.type !== 'wmts' ) return null;
-			const options = this.basemapOptions.options;
-			const capabilitiesUrl = getCapabilitiesUrl( options.url );
-			let capabilitiesPromise = this.wmtsCapabilitiesCache.get( capabilitiesUrl );
-			if ( ! capabilitiesPromise ) {
-
-				capabilitiesPromise = new WMTSCapabilitiesLoader().loadAsync( capabilitiesUrl ).catch( error => {
-
-					if ( this.wmtsCapabilitiesCache.get( capabilitiesUrl ) === capabilitiesPromise ) {
-
-						this.wmtsCapabilitiesCache.delete( capabilitiesUrl );
-
-					}
-					throw error;
-
-				} );
-				this.wmtsCapabilitiesCache.set( capabilitiesUrl, capabilitiesPromise );
-
-			}
-			const capabilities = await capabilitiesPromise;
-			const layer = capabilities.layers.find( item => item.identifier === options.layer );
-			if ( ! layer ) throw new Error( `WMTS layer "${ options.layer }" was not found.` );
-			const tileMatrixSet = layer.tileMatrixSets.find( item => {
-
-				return item && ( item.identifier === options.tileMatrixSet || /:3857$/i.test( item.supportedCRS ) );
-
-			} );
-			if ( ! tileMatrixSet ) throw new Error( `WMTS layer "${ options.layer }" has no EPSG:3857 matrix set.` );
-
-			return new WMTSTilesOverlay( {
-				url: options.url.replace( /[?&]+$/, '' ),
-				layer: options.layer,
-				tileMatrixSet: tileMatrixSet.identifier,
-				style: options.style || 'default',
-				format: options.format || layer.format,
-				tileMatrices: tileMatrixSet.tileMatrices.slice( 0, WMTS_MAX_ZOOM_LEVEL + 1 ),
-				projection: 'EPSG:3857',
-				contentBoundingBox: layer.boundingBox && layer.boundingBox.bounds
-			} );
-
-		},
-		async reinitBasemap() {
-
-			const generation = ++ this.basemapGeneration;
-			this.installTerrainRenderer();
-
-			let overlay = null;
-			try {
-
-				overlay = await this.createBasemapOverlay();
-
-			} catch ( error ) {
-
-				if ( generation !== this.basemapGeneration ) return;
-				console.warn( 'Unable to load the selected basemap; using untextured terrain.', error );
-
-			}
-			if ( generation !== this.basemapGeneration ) return;
-			this.setBasemapOverlay( overlay );
-
-		},
-		setBasemapOverlay( overlay ) {
-
-			const plugin = this.terrainOverlayPlugin;
-			if ( ! plugin || overlay === this.basemapOverlay ) return;
-			if ( this.basemapOverlay ) plugin.deleteOverlay( this.basemapOverlay );
-			this.basemapOverlay = overlay;
-			if ( overlay ) plugin.addOverlay( overlay );
-			this.requestRender();
-
-		},
-		installTerrainRenderer() {
-
-			if ( this.terrainTiles ) return;
-			const terrainTiles = new TilesRenderer( `${ appConfig.terrainUrl }/` );
-			terrainTiles.errorTarget = TERRAIN_ERROR_TARGET;
-			terrainTiles.registerPlugin( new TileRequestPriorityPlugin(
-				'TERRAIN_TILE_REQUEST_PRIORITY',
-				TERRAIN_TILE_PRIORITY
-			) );
-			terrainTiles.registerPlugin( new QuantizedMeshPlugin( {
-				useRecommendedSettings: false
-			} ) );
-			const overlayPlugin = new ImageOverlayPlugin( {
-				overlays: [],
-				resolution: WMTS_TEXTURE_RESOLUTION,
-				enableTileSplitting: true
-			} );
-			terrainTiles.registerPlugin( overlayPlugin );
-			terrainTiles.setCamera( this.camera );
-			if ( this.viewportReady ) terrainTiles.setResolutionFromRenderer( this.camera, this.renderer );
-			const invalidate = () => this.requestRender();
-			terrainTiles.addEventListener( 'needs-update', invalidate );
-			terrainTiles.addEventListener( 'needs-render', invalidate );
-			terrainTiles.addEventListener( 'load-model', () => {
-
-				if ( this.terrainTiles === terrainTiles ) this.queueMarkerHeightCorrection();
-
-			} );
-			terrainTiles.addEventListener( 'load-root-tileset', () => {
-
-				if ( this.terrainTiles === terrainTiles ) this.requestRender( 3 );
-
-			} );
-			terrainTiles.addEventListener( 'load-error', event => {
-
-				if ( this.terrainTiles !== terrainTiles ) return;
-				const source = event.overlay ? 'basemap imagery' : 'quantized-mesh terrain';
-				console.warn( `Failed to load ${ source }: ${ event.url || appConfig.terrainUrl }`, event.error );
-
-			} );
-			this.terrainTiles = terrainTiles;
-			this.terrainOverlayPlugin = overlayPlugin;
-			if ( this.showTerrain ) {
-
-				this.contentGroup.add( terrainTiles.group );
-				this.setNavigationSurface( terrainTiles.group );
-
-			}
-			this.requestRender();
-
-		},
-		initScene() {
-
-			this.scene = new Scene();
-			this.scene.background = new Color( '#d9eefc' );
-			this.fog = new FogExp2( this.fogColor, this.fogDensity );
-			this.contentGroup = new Group();
-			this.scene.add( this.contentGroup );
-			// Start with an empty navigation surface so controls can fall back to the
-			// ellipsoid. Once terrain is installed this is replaced by the terrain-only
-			// tiles group, keeping dense building meshes out of navigation raycasts.
-			this.controlsSurface = new Group();
-			const canvas = this.$el;
-			this.renderer = new WebGLRenderer( { antialias: window.devicePixelRatio <= 1 } );
-			this.renderer.outputColorSpace = SRGBColorSpace;
-			this.renderer.toneMapping = LinearToneMapping;
-			this.renderer.toneMappingExposure = this.exposure;
-			this.renderer.domElement.style.display = 'block';
-			canvas.appendChild( this.renderer.domElement );
-
-			this.camera = new PerspectiveCamera( 50, 1, 1, 30000000 );
-			const initial = WGS84_ELLIPSOID.getCartographicToPosition( 0.91, 0.09, 250000, new Vector3() );
-			this.camera.position.copy( initial );
-			this.camera.lookAt( new Vector3() );
-			this.camera.updateMatrixWorld();
-			this.syncViewportSize();
-
-			this.controls = new GlobeControls( this.controlsSurface, this.camera, this.renderer.domElement );
-			this.controls.setEllipsoid( WGS84_ELLIPSOID, this.contentGroup );
-			this.controls.enableDamping = true;
-			this.controls.dampingFactor = 0.15;
-			this.controls.minDistance = 10;
-			this.controls.maxDistance = 1000000;
-			this.controls.adjustHeight = false;
-			this.onControlsChange = () => {
-
-				this.viewPivotDirty = true;
-				this.compassNeedsUpdate = true;
-				this.scheduleRouteUpdate();
-				this.requestRender();
-
-			};
-			this.controls.addEventListener( 'change', this.onControlsChange );
-
-			this.raycaster = new Raycaster();
-			this.markerHeightRaycaster = new Raycaster();
-			this.mouse = new Vector2();
-			this.renderer.domElement.addEventListener( 'pointermove', this.onPointerMove, false );
-			this.renderer.domElement.addEventListener( 'pointerdown', this.onPointerDown, false );
-			this.renderer.domElement.addEventListener( 'pointerup', this.onPointerUp, false );
-			this.renderer.domElement.addEventListener( 'pointerleave', this.onPointerLeave, false );
-
-			this.pLight = new PointLight( 0xffffff, this.pointIntensity, 0, 1 );
-			this.camera.add( this.pLight );
-			this.scene.add( this.camera );
-			this.dirLight = new DirectionalLight( 0xffffff, this.directionalIntensity );
-			this.dirLight.position.set( this.dirX, this.dirY, this.dirZ );
-			this.scene.add( this.dirLight );
-			this.ambLight = new AmbientLight( 0xffffff, this.ambientIntensity );
-			this.scene.add( this.ambLight );
-
-			this.rayIntersect = new Mesh();
-			const rayIntersectMaterial = new MeshBasicMaterial( { color: 0xe91e63 } );
-			const rayMesh = new Mesh( new CylinderGeometry( 0.25, 0.25, 6 ), rayIntersectMaterial );
-			rayMesh.rotation.x = Math.PI / 2;
-			rayMesh.position.z += 3;
-			this.rayIntersect.add( rayMesh );
-			const rayRing = new Mesh( new TorusGeometry( 1.5, 0.2, 16, 100 ), rayIntersectMaterial );
-			rayRing.position.z = 0.05;
-			this.rayIntersect.add( rayRing );
-			this.rayIntersect.visible = false;
-			this.scene.add( this.rayIntersect );
-
-			this.reinitTiles( true );
-			this.reinitBasemap();
-			this.requestRender();
-			this.renderScene();
-			window.addEventListener( 'resize', this.onWindowResize, false );
-			if ( window.ResizeObserver ) {
-
-				this.resizeObserver = new window.ResizeObserver( () => this.syncViewportSize() );
-				this.resizeObserver.observe( canvas );
-
-			}
-			this.$nextTick( () => this.syncViewportSize() );
-
-		},
-		onWindowResize() {
-
-			this.syncViewportSize();
 
 		},
 		onPointerMove( event ) {
@@ -1026,23 +1067,20 @@ export default {
 			if (
 				this.pointerCaster.startClientX === event.clientX &&
 				this.pointerCaster.startClientY === event.clientY
-			) {
-
-				this.castRay( event.clientX, event.clientY );
-
-			}
+			) this.castRay( event.clientX, event.clientY );
 
 		},
 		onPointerLeave() {
 
-			this.rayIntersect.visible = false;
+			if ( this.rayIntersect ) this.rayIntersect.visible = false;
 			this.requestRender();
 
 		},
 		async castRay( clientX, clientY, snapTolerance = 0 ) {
 
+			if ( ! this.cameraReady || ! this.tiles ) return;
 			const generation = ++ this.selectionGeneration;
-			const rect = this.renderer.domElement.getBoundingClientRect();
+			const rect = this.map.getCanvas().getBoundingClientRect();
 			this.mouse.x = ( ( clientX - rect.left ) / rect.width ) * 2 - 1;
 			this.mouse.y = - ( ( clientY - rect.top ) / rect.height ) * 2 + 1;
 			this.raycaster.setFromCamera( this.mouse, this.camera );
@@ -1151,107 +1189,49 @@ export default {
 			this.requestRender();
 
 		},
-		updateBuildingVisibility( pivot ) {
+		updateBuildingVisibility() {
 
-			if ( ! this.tiles || ! this.controls ) return false;
+			if ( ! this.tiles || ! this.map || ! this.cameraReady ) return this.buildingsVisible;
 			if ( ! this.tiles.root ) return true;
-			if ( ! pivot ) return this.buildingsVisible;
-			const shouldShow = this.camera.position.distanceTo( pivot ) <= BUILDING_MAX_VIEW_DISTANCE;
+			// Zoom is stable across pitch changes. Camera-to-center distance is not, and
+			// caused the tiles to blink out when moving into an exact top-down view.
+			const shouldShow = this.map.getZoom() >= BUILDING_MIN_ZOOM;
 			if ( shouldShow !== this.buildingsVisible ) {
 
 				this.buildingsVisible = shouldShow;
-				if ( shouldShow ) {
+				this.tiles.group.visible = shouldShow;
+				if ( ! shouldShow ) {
 
-					this.contentGroup.add( this.tiles.group );
-
-				} else {
-
-					this.contentGroup.remove( this.tiles.group );
 					this.clearSelection();
 					this.rayIntersect.visible = false;
 					this.$emit( 'object-picked', undefined );
 
 				}
 				this.queueMarkerHeightCorrection();
-				this.requestRender();
 
 			}
 			return shouldShow;
 
 		},
-		renderScene( time = 0 ) {
-
-			this.animationFrame = requestAnimationFrame( this.renderScene );
-			if ( ! this.viewportReady ) this.syncViewportSize();
-			const delta = Math.min( this.clock.getDelta(), 0.1 );
-			TWEEN.update( time );
-			if ( this.controls ) this.controls.update( delta );
-
-			if ( this.viewportReady && this.needsRerender > 0 ) {
-
-				this.needsRerender --;
-				const pivot = this.getViewPivot();
-				if ( this.compassNeedsUpdate ) {
-
-					this.emitCompassRotation( pivot );
-					this.compassNeedsUpdate = false;
-
-				}
-				const buildingsVisible = this.updateBuildingVisibility( pivot );
-				if ( buildingsVisible && ! this.tilesError && this.tiles ) this.tiles.update();
-				if ( this.terrainTiles && this.showTerrain ) this.terrainTiles.update();
-				if ( this.markerHeightNeedsUpdate ) {
-
-					this.markerHeightNeedsUpdate = false;
-					this.correctMarkerHeight();
-
-				}
-				if ( this.tiles && this.tiles.lruCache && this.tiles.lruCache.itemSet ) {
-
-					this.lruCacheSize = this.tiles.lruCache.itemSet.size;
-
-				}
-				this.renderer.render( this.scene, this.camera );
-
-			}
-
-		},
 		disposeScene() {
 
-			this.basemapGeneration ++;
-			if ( this.animationFrame !== null ) cancelAnimationFrame( this.animationFrame );
+			this.destroying = true;
 			if ( this.locationTimer !== null ) window.clearInterval( this.locationTimer );
 			if ( this.routeUpdateTimer !== null ) window.clearTimeout( this.routeUpdateTimer );
-			window.removeEventListener( 'resize', this.onWindowResize, false );
-			if ( this.resizeObserver ) {
+			if ( this.centerClampingTimer !== null ) window.clearTimeout( this.centerClampingTimer );
+			if ( this.resizeObserver ) this.resizeObserver.disconnect();
+			if ( this.map ) {
 
-				this.resizeObserver.disconnect();
-				this.resizeObserver = null;
-
-			}
-			if ( this.renderer ) {
-
-				const element = this.renderer.domElement;
-				element.removeEventListener( 'pointermove', this.onPointerMove, false );
-				element.removeEventListener( 'pointerdown', this.onPointerDown, false );
-				element.removeEventListener( 'pointerup', this.onPointerUp, false );
-				element.removeEventListener( 'pointerleave', this.onPointerLeave, false );
+				const canvas = this.map.getCanvas();
+				canvas.removeEventListener( 'pointermove', this.onPointerMove, false );
+				canvas.removeEventListener( 'pointerdown', this.onPointerDown, false );
+				canvas.removeEventListener( 'pointerup', this.onPointerUp, false );
+				canvas.removeEventListener( 'pointerleave', this.onPointerLeave, false );
 
 			}
 			this.removeMarker();
 			this.clearSelection();
-			if ( this.controls ) {
-
-				this.controls.removeEventListener( 'change', this.onControlsChange );
-				this.controls.dispose();
-
-			}
 			if ( this.tiles ) this.tiles.dispose();
-			if ( this.terrainTiles ) this.terrainTiles.dispose();
-			this.terrainTiles = null;
-			this.terrainOverlayPlugin = null;
-			this.basemapOverlay = null;
-			this.wmtsCapabilitiesCache.clear();
 			if ( this.rayIntersect ) {
 
 				this.rayIntersect.traverse( child => {
@@ -1263,12 +1243,12 @@ export default {
 
 			}
 			if ( this.pane ) this.pane.dispose();
-			if ( this.renderer ) {
-
-				this.renderer.dispose();
-				if ( this.renderer.domElement.parentNode ) this.renderer.domElement.parentNode.removeChild( this.renderer.domElement );
-
-			}
+			if ( this.renderer ) this.renderer.dispose();
+			if ( this.map ) this.map.remove();
+			this.map = null;
+			this.renderer = null;
+			this.scene = null;
+			this.tiles = null;
 
 		}
 	}
@@ -1285,7 +1265,7 @@ export default {
 
 .tiles-error {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   top: 50%;
   left: 50%;
   display: flex;

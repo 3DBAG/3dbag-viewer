@@ -3,7 +3,8 @@ import {
 	cameraFrameToRoute,
 	getNorthFacingCameraPosition,
 	getSurfacePoint,
-	routeToCameraFrame
+	routeToCameraFrame,
+	setEcefToLocalFrame
 } from '@/utils/globeCoordinates';
 
 const radius = 6378137;
@@ -51,6 +52,32 @@ describe( 'globe coordinate adapter', () => {
 		expect( roundTrip.ox ).toBeCloseTo( query.ox, 6 );
 		expect( roundTrip.oy ).toBeCloseTo( query.oy, 6 );
 		expect( roundTrip.oz ).toBeCloseTo( query.oz, 6 );
+
+	} );
+
+	it( 'rebases ECEF coordinates into a local east/up/south frame', () => {
+
+		const localGroup = new Group();
+		const lat = 52 * Math.PI / 180;
+		const lon = 5 * Math.PI / 180;
+		setEcefToLocalFrame( sphericalEllipsoid, localGroup, lat, lon );
+		const frame = routeToCameraFrame( sphericalEllipsoid, localGroup, {
+			rdx: 155000,
+			rdy: 463000,
+			ox: 25,
+			oy: 40,
+			oz: 15
+		} );
+		const roundTrip = cameraFrameToRoute(
+			sphericalEllipsoid,
+			localGroup,
+			frame.cameraPosition,
+			frame.target
+		);
+
+		expect( roundTrip.ox ).toBeCloseTo( 25, 6 );
+		expect( roundTrip.oy ).toBeCloseTo( 40, 6 );
+		expect( roundTrip.oz ).toBeCloseTo( 15, 6 );
 
 	} );
 

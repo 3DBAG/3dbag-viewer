@@ -47,7 +47,7 @@
       v-if="tilesUrl"
       ref="threeviewer"
       :tiles-url="tilesUrl"
-      :basemap-options="basemapOptions"
+      :basemap-preset="basemapPreset"
       @object-picked="objectPicked"
       @cam-offset="onCamOffset"
       @cam-rotation-z="onCamRotationZ"
@@ -66,18 +66,6 @@
       class="has-background-white has-text-grey"
     >
       <p>
-        <span v-if="basemapOptions.attribution">
-          {{ $t("viewer.baselayer1") }}
-          <a
-            v-if="basemapOptions.attributionURL"
-            :href="config.pdokUrl"
-          >
-            {{ basemapOptions.attribution }}
-          </a>
-          <span v-else>
-            {{ basemapOptions.attribution }}
-          </span> |
-        </span>
         <a
           v-if="menu.documentation"
           :href="config.docsUrl + '/' + $route.params.locale + '/copyright' "
@@ -127,17 +115,21 @@ export default {
 			},
 			camRotationZ: 0,
 
-			basemapPreset: 'brtachtergrondkaart',
+			basemapPreset: 'openfreemap',
 			basemaps: {
-				brtachtergrondkaart: {
+				openfreemap: {
+					name: "OpenFreeMap",
+					icon: "map"
+				},
+				standaard: {
 					name: "BRT Achtergrondkaart",
 					icon: "map"
 				},
-				brtachtergrondkaartgrijs: {
+				grijs: {
 					name: "BRT Achtergrondkaart (Grijs)",
 					icon: "map"
 				},
-				luchtfotoWMTS: {
+				luchtfoto: {
 					name: "Luchtfoto Actueel",
 					icon: "map"
 				}
@@ -184,92 +176,6 @@ export default {
 		tilesUrl: function () {
 
 			return getTilesetSources( this.BAG3DVersionData )[ this.tileset ] || null;
-
-		},
-
-		basemapOptions: function () {
-
-			const sources = {
-
-				top10nl: {
-
-					type: "wms",
-					attribution: "PDOK",
-					attributionURL: appConfig.pdokUrl,
-					options: {
-						url: appConfig.top10nlUrl,
-						layer: 'top10nlv2',
-						style: '',
-						imageFormat: 'image/png'
-					}
-
-				},
-
-				luchtfoto2018: {
-					type: "wms",
-					attribution: "PDOK",
-					attributionURL: appConfig.pdokUrl,
-					options: {
-						url: appConfig.luchtfoto2018Url,
-						layer: '2018_ortho25',
-						style: 'default',
-						imageFormat: 'image/png'
-					}
-				},
-
-				brtachtergrondkaart: {
-					type: "wmts",
-					attribution: "PDOK",
-					attributionURL: appConfig.pdokUrl,
-					options: {
-						url: appConfig.brtUrl,
-						layer: 'standaard',
-						style: 'default',
-						tileMatrixSet: "EPSG:3857",
-						service: "WMTS",
-						request: "GetTile",
-						version: "1.0.0",
-						format: "image/png"
-					}
-				},
-
-				brtachtergrondkaartgrijs: {
-					type: "wmts",
-					attribution: "PDOK",
-					attributionURL: appConfig.pdokUrl,
-					options: {
-						url: appConfig.brtUrl,
-						layer: 'grijs',
-						style: 'default',
-						tileMatrixSet: "EPSG:3857",
-						service: "WMTS",
-						request: "GetTile",
-						version: "1.0.0",
-						format: "image/png"
-					}
-				},
-
-				luchtfotoWMTS: {
-					type: "wmts",
-					attribution: "PDOK",
-					attributionURL: appConfig.pdokUrl,
-					options: {
-						url: appConfig.luchtfotoUrl,
-						layer: 'Actueel_ortho25',
-						style: 'default',
-						tileMatrixSet: "EPSG:3857",
-						service: "WMTS",
-						request: "GetTile",
-						version: "1.0.0",
-						format: "image/png"
-					}
-				},
-
-
-
-			};
-
-			return sources[ this.basemapPreset ];
 
 		},
 
@@ -459,7 +365,7 @@ export default {
 	padding: 0 0.1rem;
 	font-size: 13px;
 	line-height: 15px;
-	right: 0;
+	left: 0;
 	bottom: 0;
 	opacity: 0.8;
 }
