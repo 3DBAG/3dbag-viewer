@@ -43,7 +43,7 @@ import { TilesRenderer, WGS84_ELLIPSOID } from '3d-tiles-renderer/three';
 import { GLTFExtensionsPlugin } from '3d-tiles-renderer/three/plugins';
 import { CesiumStylingPlugin } from '@bertt/3dtilesrenderer-styling-plugin';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-import { Map as MapLibreMap, MercatorCoordinate } from 'maplibre-gl';
+import { AttributionControl, Map as MapLibreMap, MercatorCoordinate } from 'maplibre-gl';
 import { bgLayer } from '@geo-frontend/nlmaps-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import markerSprite from '@/assets/locationmarker.png';
@@ -128,6 +128,10 @@ export default {
 		colormapEnabled: {
 			type: Boolean,
 			default: false
+		},
+		documentationEnabled: {
+			type: Boolean,
+			default: false
 		}
 	},
 	data() {
@@ -148,9 +152,10 @@ export default {
 			this.reinitBasemap();
 
 		},
-		$route( to ) {
+		$route( to, from ) {
 
 			if ( ! this.ignoreRouteCameraUpdate ) this.setCameraPosFromRoute( to.query );
+			if ( to.params.locale !== from.params.locale ) this.refreshAttributionControl();
 
 		},
 		colormapEnabled() {
@@ -162,11 +167,17 @@ export default {
 
 			this.applyColormapState();
 
+		},
+		documentationEnabled() {
+
+			this.refreshAttributionControl();
+
 		}
 	},
 	beforeCreate() {
 
 		this.map = null;
+		this.attributionControl = null;
 		this.customLayer = null;
 		this.renderer = null;
 		this.scene = null;
@@ -226,6 +237,23 @@ export default {
 
 	},
 	methods: {
+		createAttributionControl() {
+
+			const label = '© 3DBAG by tudelft3d and 3DGI';
+			const attribution = this.documentationEnabled ?
+				`<a href="${ appConfig.docsUrl }/${ this.$route.params.locale }/copyright">${ label }</a>` :
+				label;
+			return new AttributionControl( { customAttribution: attribution } );
+
+		},
+		refreshAttributionControl() {
+
+			if ( ! this.map ) return;
+			if ( this.attributionControl ) this.map.removeControl( this.attributionControl );
+			this.attributionControl = this.createAttributionControl();
+			this.map.addControl( this.attributionControl );
+
+		},
 		getBasemapStyle() {
 
 			if ( this.basemapPreset === 'openfreemap' ) return appConfig.mapStyleUrl;
@@ -249,8 +277,10 @@ export default {
 				zoom: 7,
 				pitch: 45,
 				maxPitch: MAX_MAP_PITCH,
+				attributionControl: false,
 				canvasContextAttributes: { antialias: true }
 			} );
+			this.refreshAttributionControl();
 			this.map.on( 'style.load', this.onStyleLoad );
 			this.map.on( 'move', this.onMapMove );
 			this.map.on( 'moveend', this.onMapMoveEnd );

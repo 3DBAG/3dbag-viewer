@@ -1,5 +1,8 @@
 <template>
-  <div id="viewer">
+  <div
+    id="viewer"
+    :style="viewerStyle"
+  >
     <section
       v-if="tilesUrl"
       id="map-options"
@@ -63,6 +66,7 @@
       :basemap-preset="basemapPreset"
       :colormap="colormap"
       :colormap-enabled="colormapEnabled"
+      :documentation-enabled="menu.documentation"
       @object-picked="objectPicked"
       @cam-offset="onCamOffset"
       @cam-rotation-z="onCamRotationZ"
@@ -74,19 +78,6 @@
     >
       <strong>{{ $t( 'viewer.threeDUnavailable' ) }}</strong>
       <span>{{ $t( 'viewer.threeDUnavailableDescription' ) }}</span>
-    </div>
-    <div
-      v-if="tilesUrl"
-      id="attribution"
-      class="has-background-white has-text-grey"
-    >
-      <p>
-        <a
-          v-if="menu.documentation"
-          :href="config.docsUrl + '/' + $route.params.locale + '/copyright' "
-        >© 3DBAG by tudelft3d and 3DGI</a>
-        <span v-else>© 3DBAG by tudelft3d and 3DGI</span>
-      </p>
     </div>
     <div
       v-if="tilesUrl && colormapEnabled && colormap"
@@ -185,6 +176,7 @@ export default {
 			showBuildingInfo: false,
 			colormap: getColormap( versionData ),
 			colormapEnabled: Boolean( getColormap( versionData ) ),
+			attributionClearance: null,
 
 
 
@@ -192,6 +184,13 @@ export default {
 
 	},
 	computed: {
+		viewerStyle() {
+
+			return this.attributionClearance === null ? {} : {
+				'--attribution-clearance': `${ this.attributionClearance }px`
+			};
+
+		},
 		availableLodCount() {
 
 			return Object.keys( this.lods ).length;
@@ -275,9 +274,53 @@ export default {
 			this.tileset = this.$router.currentRoute.query.lod;
 
 		}
+		this.initAttributionClearanceObserver();
+
+	},
+	beforeDestroy() {
+
+		if ( this.attributionResizeObserver ) this.attributionResizeObserver.disconnect();
+		if ( this.attributionMutationObserver ) this.attributionMutationObserver.disconnect();
 
 	},
 	methods: {
+		initAttributionClearanceObserver() {
+
+			if ( ! window.ResizeObserver ) return;
+			this.attributionElement = null;
+			this.attributionResizeObserver = new window.ResizeObserver( this.updateAttributionClearance );
+			this.observeAttributionControl();
+			if ( window.MutationObserver ) {
+
+				this.attributionMutationObserver = new window.MutationObserver( this.observeAttributionControl );
+				this.attributionMutationObserver.observe( this.$el, { childList: true, subtree: true } );
+
+			}
+
+		},
+		observeAttributionControl() {
+
+			const attributionElement = this.$el.querySelector( '.maplibregl-ctrl-attrib' );
+			if ( attributionElement === this.attributionElement ) return;
+			this.attributionResizeObserver.disconnect();
+			this.attributionElement = attributionElement;
+			if ( attributionElement ) {
+
+				this.attributionResizeObserver.observe( attributionElement );
+				this.updateAttributionClearance();
+
+			}
+
+		},
+		updateAttributionClearance() {
+
+			if ( ! this.attributionElement ) return;
+			const viewerBounds = this.$el.getBoundingClientRect();
+			const attributionBounds = this.attributionElement.getBoundingClientRect();
+			if ( attributionBounds.height === 0 ) return;
+			this.attributionClearance = Math.ceil( viewerBounds.bottom - attributionBounds.top + 8 );
+
+		},
 
 		onCamOffset: function ( event ) {
 
@@ -352,8 +395,9 @@ export default {
 <style>
 #building-info {
 	position: absolute;
-	bottom: 0.5rem;
-	margin: 0 0.5rem;
+	left: 0.5rem;
+	bottom: var(--attribution-clearance, 3rem);
+	margin: 0;
 }
 .table-value {
 	overflow-x: auto;
@@ -410,20 +454,11 @@ export default {
 	margin-right: auto;
 	width: fit-content;
 }
-#attribution {
-	position: absolute;
-	padding: 0 0.1rem;
-	font-size: 13px;
-	line-height: 15px;
-	left: 0;
-	bottom: 0;
-	opacity: 0.8;
-}
 #attribute-legend {
 	position: absolute;
 	z-index: 2;
 	right: 0.5rem;
-	bottom: 0.5rem;
+	bottom: var(--attribution-clearance, 3rem);
 	min-width: 10rem;
 	padding: 0.65rem 0.85rem;
 	margin: 0;
