@@ -14,6 +14,7 @@
 <script>
 import {
 	AmbientLight,
+	Box3,
 	BufferAttribute,
 	Color,
 	CylinderGeometry,
@@ -78,6 +79,9 @@ const TERRAIN_SOURCE_ID = 'mapterhorn-dem';
 const HILLSHADE_SOURCE_ID = 'mapterhorn-hillshade-dem';
 const HILLSHADE_LAYER_ID = 'mapterhorn-hillshade';
 const THREE_LAYER_ID = '3dbag-buildings';
+const TILESET_BOUNDARY_SOURCE_ID = '3dbag-tileset-boundary-source';
+const TILESET_MASK_LAYER_ID = '3dbag-tileset-mask';
+const TILESET_BOUNDARY_LAYER_ID = '3dbag-tileset-boundary';
 const PICKER_LOCAL_NORMAL = new Vector3( 0, 0, 1 );
 const pickerNormalMatrix = new Matrix3();
 
@@ -207,6 +211,7 @@ export default {
 		this.viewportWidth = 0;
 		this.viewportHeight = 0;
 		this.basemapGeneration = 0;
+		this.tilesetBoundary = null;
 		this.destroying = false;
 
 		this.pointIntensity = 0.4;
@@ -347,6 +352,7 @@ export default {
 			}
 			this.setTerrainVisibility( this.showTerrain );
 			if ( ! this.map.getLayer( THREE_LAYER_ID ) ) this.map.addLayer( this.customLayer, beforeId );
+			this.updateTilesetBoundaryLayer();
 			if ( this.basemapPreset === 'openfreemap' ) {
 
 				layers.filter( layer => {
@@ -853,6 +859,135 @@ export default {
 			return true;
 
 		},
+		updateTilesetBoundary() {
+
+			if ( ! this.tiles ) return;
+			const box = new Box3();
+			const transform = new Matrix4();
+			if ( ! this.tiles.getOrientedBoundingBox( box, transform ) ) return;
+			const ellipsoid = this.tiles.ellipsoid || WGS84_ELLIPSOID;
+			const longitudes = [];
+			const latitudes = [];
+			for ( const x of [ box.min.x, box.max.x ] ) {
+
+				for ( const y of [ box.min.y, box.max.y ] ) {
+
+					for ( const z of [ box.min.z, box.max.z ] ) {
+
+						const point = new Vector3( x, y, z ).applyMatrix4( transform );
+						const cartographic = ellipsoid.getPositionToCartographic( point, {} );
+						longitudes.push( MathUtils.radToDeg( cartographic.lon ) );
+						latitudes.push( MathUtils.radToDeg( cartographic.lat ) );
+
+					}
+
+				}
+
+			}
+			const reference = longitudes[ 0 ];
+			const unwrappedLongitudes = longitudes.map( longitude => {
+
+				while ( longitude - reference > 180 ) longitude -= 360;
+				while ( longitude - reference < - 180 ) longitude += 360;
+				return longitude;
+
+			} );
+			const west = Math.min( ...unwrappedLongitudes );
+			const east = Math.max( ...unwrappedLongitudes );
+			const south = Math.min( ...latitudes );
+			const north = Math.max( ...latitudes );
+			if ( [ west, east, south, north ].some( value => ! Number.isFinite( value ) ) ) return;
+			const centerLongitude = ( west + east ) / 2;
+			const worldWest = centerLongitude - 180;
+			const worldEast = centerLongitude + 180;
+			this.tilesetBoundary = {
+				type: 'FeatureCollection',
+				features: [ {
+					type: 'Feature',
+					properties: { kind: 'mask' },
+					geometry: {
+						type: 'Polygon',
+						coordinates: [[
+							[ worldWest, - 85.051129 ],
+							[ worldEast, - 85.051129 ],
+							[ worldEast, 85.051129 ],
+							[ worldWest, 85.051129 ],
+							[ worldWest, - 85.051129 ]
+						], [
+							[ west, south ],
+							[ west, north ],
+							[ east, north ],
+							[ east, south ],
+							[ west, south ]
+						]]
+					}
+				}, {
+					type: 'Feature',
+					properties: { kind: 'boundary' },
+					geometry: {
+						type: 'LineString',
+						coordinates: [
+							[ west, south ],
+							[ east, south ],
+							[ east, north ],
+							[ west, north ],
+							[ west, south ]
+						]
+					}
+				} ]
+			};
+			this.updateTilesetBoundaryLayer();
+
+		},
+		updateTilesetBoundaryLayer() {
+
+			if ( ! this.map || ! this.map.getStyle() || ! this.tilesetBoundary ) return;
+			const source = this.map.getSource( TILESET_BOUNDARY_SOURCE_ID );
+			if ( source ) {
+
+				source.setData( this.tilesetBoundary );
+
+			} else {
+
+				this.map.addSource( TILESET_BOUNDARY_SOURCE_ID, {
+					type: 'geojson',
+					data: this.tilesetBoundary
+				} );
+
+			}
+			const beforeId = this.map.getLayer( THREE_LAYER_ID ) ? THREE_LAYER_ID : undefined;
+			if ( ! this.map.getLayer( TILESET_MASK_LAYER_ID ) ) {
+
+				this.map.addLayer( {
+					id: TILESET_MASK_LAYER_ID,
+					type: 'fill',
+					source: TILESET_BOUNDARY_SOURCE_ID,
+					filter: [ '==', [ 'get', 'kind' ], 'mask' ],
+					paint: {
+						'fill-color': '#17212b',
+						'fill-opacity': 0.35
+					}
+				}, beforeId );
+
+			}
+			if ( ! this.map.getLayer( TILESET_BOUNDARY_LAYER_ID ) ) {
+
+				this.map.addLayer( {
+					id: TILESET_BOUNDARY_LAYER_ID,
+					type: 'line',
+					source: TILESET_BOUNDARY_SOURCE_ID,
+					filter: [ '==', [ 'get', 'kind' ], 'boundary' ],
+					paint: {
+						'line-color': '#2c3e50',
+						'line-dasharray': [ 2, 2 ],
+						'line-opacity': 0.9,
+						'line-width': 3
+					}
+				}, beforeId );
+
+			}
+
+		},
 		initializeCameraPosition() {
 
 			if ( this.initialCameraSet ) return;
@@ -1126,6 +1261,9 @@ export default {
 
 			if ( ! this.scene || ! this.camera ) return;
 			this.clearSelection();
+			this.tilesetBoundary = null;
+			const boundarySource = this.map && this.map.getSource( TILESET_BOUNDARY_SOURCE_ID );
+			if ( boundarySource ) boundarySource.setData( { type: 'FeatureCollection', features: [] } );
 			this.selectionGeneration ++;
 			if ( this.tiles ) {
 
@@ -1200,6 +1338,7 @@ export default {
 
 				if ( this.tiles !== tiles ) return;
 				this.updateLocalFrame();
+				this.updateTilesetBoundary();
 				if ( initializeCamera ) this.initializeCameraPosition();
 				this.requestRender();
 

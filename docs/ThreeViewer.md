@@ -4,6 +4,8 @@
 
 The ECEF tileset is dynamically rebased into a local east/up/south frame around the map center. This keeps Three.js coordinates precise while the MapLibre camera moves through the nationwide tileset.
 
+After the root tileset loads, its oriented bounding box is projected to a geographic extent and shown as a primary-blue dashed line draped over the terrain. A translucent mask darkens the map outside that extent. The boundary updates when the tileset or basemap changes.
+
 Buildings can be colored from named `colormaps` in a version entry in `manifest.json`. Each map targets a structural-metadata property and preserves the configured value type, so numeric metadata must use numeric values. Click-to-select still applies the amber semantic highlight on top of the active vertex colors.
 
 ```json

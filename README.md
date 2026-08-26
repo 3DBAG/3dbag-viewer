@@ -92,7 +92,9 @@ at random. Each location uses the route-compatible RD target (`rdx`, `rdy`) and
 local east/up/south camera offset (`ox`, `oy`, `oz`). If no valid locations are
 configured, the viewer targets the center of the root 3D Tiles bounding sphere
 from a capped 100-500 metre viewing distance. This keeps nationwide tilesets
-close enough to show buildings rather than fitting their complete extent.
+close enough to show buildings rather than fitting their complete extent. The
+root tileset extent is also shown as a primary-blue dashed boundary, with the map
+outside it darkened by a translucent mask.
 
 Each version may define `visible_attributes` as an ordered array of structural
 metadata property names shown in the building attribute panel. If the property
