@@ -153,6 +153,7 @@ export default {
 		this.localTransform = new Matrix4();
 		this.projectionMatrix = new Matrix4();
 		this.viewMatrix = new Matrix4();
+		this.cameraLightDirection = new Vector3();
 		this.mouse = new Vector2();
 		this.raycaster = new Raycaster();
 		this.markerHeightRaycaster = new Raycaster();
@@ -178,13 +179,10 @@ export default {
 		this.centerClampingTimer = null;
 		this.destroying = false;
 
-		this.pointIntensity = 0.6;
-		this.directionalIntensity = 1.15;
-		this.ambientIntensity = 1.5;
-		this.exposure = 1.15;
-		this.dirX = 1;
-		this.dirY = - 0.5;
-		this.dirZ = 1.5;
+		this.pointIntensity = 0.3;
+		this.directionalIntensity = 2;
+		this.ambientIntensity = 0.7;
+		this.exposure = 1.1;
 		this.meshColor = '#c4c8cf';
 		this.enableFog = false;
 		this.fogDensity = 0.0000004;
@@ -446,8 +444,8 @@ export default {
 			this.pLight = new PointLight( 0xffffff, this.pointIntensity, 0, 1 );
 			this.scene.add( this.pLight );
 			this.dirLight = new DirectionalLight( 0xffffff, this.directionalIntensity );
-			this.dirLight.position.set( this.dirX, this.dirY, this.dirZ );
 			this.scene.add( this.dirLight );
+			this.scene.add( this.dirLight.target );
 			this.ambLight = new AmbientLight( 0xffffff, this.ambientIntensity );
 			this.scene.add( this.ambLight );
 
@@ -504,6 +502,11 @@ export default {
 			this.camera.matrixWorld.copy( this.viewMatrix ).invert();
 			this.camera.position.setFromMatrixPosition( this.camera.matrixWorld );
 			this.pLight.position.copy( this.camera.position );
+			// Use a camera-mounted key light so visible facades retain shape at every bearing.
+			this.camera.getWorldDirection( this.cameraLightDirection );
+			this.dirLight.position.copy( this.camera.position );
+			this.dirLight.target.position.copy( this.camera.position ).add( this.cameraLightDirection );
+			this.dirLight.target.updateMatrixWorld();
 			this.cameraReady = true;
 			this.syncTileResolution();
 
