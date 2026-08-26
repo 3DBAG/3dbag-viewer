@@ -158,6 +158,7 @@ export default {
 		this.raycaster = new Raycaster();
 		this.markerHeightRaycaster = new Raycaster();
 		this.rayIntersect = null;
+		this.pickerData = null;
 		this.selectedObject = null;
 		this.modelRoots = new WeakMap();
 		this.buildingsVisible = true;
@@ -179,9 +180,9 @@ export default {
 		this.centerClampingTimer = null;
 		this.destroying = false;
 
-		this.pointIntensity = 0.3;
+		this.pointIntensity = 0.4;
 		this.directionalIntensity = 2;
-		this.ambientIntensity = 0.7;
+		this.ambientIntensity = 0.9;
 		this.exposure = 1.1;
 		this.meshColor = '#c4c8cf';
 		this.enableFog = false;
@@ -232,7 +233,6 @@ export default {
 			this.map.on( 'style.load', this.onStyleLoad );
 			this.map.on( 'move', this.onMapMove );
 			this.map.on( 'moveend', this.onMapMoveEnd );
-			this.map.on( 'movestart', this.onMapMoveStart );
 			this.map.on( 'zoomstart', this.onMapZoomStart );
 			this.map.on( 'zoomend', this.onMapZoomEnd );
 			this.map.on( 'sourcedata', this.onSourceData );
@@ -377,11 +377,6 @@ export default {
 			if ( event.sourceId === TERRAIN_SOURCE_ID && event.isSourceLoaded ) this.queueMarkerHeightCorrection();
 
 		},
-		onMapMoveStart() {
-
-			if ( this.rayIntersect ) this.rayIntersect.visible = false;
-
-		},
 		onMapMove() {
 
 			this.emitCompassRotation();
@@ -518,6 +513,7 @@ export default {
 				this.correctMarkerHeight();
 
 			}
+			this.updatePickerPosition();
 			if ( this.tiles.lruCache && this.tiles.lruCache.itemSet ) {
 
 				this.lruCacheSize = this.tiles.lruCache.itemSet.size;
@@ -868,6 +864,21 @@ export default {
 			marker.material.dispose();
 
 		},
+		updatePickerPosition() {
+
+			if ( ! this.pickerData || ! this.rayIntersect || ! this.rayIntersect.visible ) return;
+			const tilesFrame = this.getTilesFrame();
+			if ( ! tilesFrame ) return;
+			const { lat, lon, height, east, north, up } = this.pickerData;
+			const frame = getWorldFrame( tilesFrame.ellipsoid, tilesFrame.group, lat, lon, height );
+			this.rayIntersect.position.copy( frame.position );
+			const normal = frame.east.multiplyScalar( east )
+				.addScaledVector( frame.north, north )
+				.addScaledVector( frame.up, up )
+				.normalize();
+			this.rayIntersect.quaternion.setFromUnitVectors( PICKER_LOCAL_NORMAL, normal );
+
+		},
 		pointCameraToNorth() {
 
 			if ( this.map ) this.map.easeTo( { bearing: 0, duration: 600 } );
@@ -952,6 +963,8 @@ export default {
 
 			} );
 			this.selectedObject = null;
+			this.pickerData = null;
+			if ( this.rayIntersect ) this.rayIntersect.visible = false;
 
 		},
 		highlightFeature( object, semanticFeature ) {
@@ -1156,18 +1169,29 @@ export default {
 			const normal = face.normal.clone().applyNormalMatrix(
 				pickerNormalMatrix.getNormalMatrix( object.matrixWorld )
 			);
-			this.rayIntersect.position.copy( closestPoint );
-			this.rayIntersect.quaternion.setFromUnitVectors( PICKER_LOCAL_NORMAL, normal );
-			this.rayIntersect.visible = true;
 			const tilesFrame = this.getTilesFrame();
 			const cartographic = worldToCartographic( tilesFrame.ellipsoid, tilesFrame.group, closestPoint );
-			const surfaceUp = getWorldFrame(
+			const surfaceFrame = getWorldFrame(
 				tilesFrame.ellipsoid,
 				tilesFrame.group,
 				cartographic.lat,
 				cartographic.lon,
 				cartographic.height
-			).up;
+			);
+			// Store the pick in cartographic coordinates plus the surface normal
+			// projected onto the local east/north/up axes, so the picker can be
+			// re-anchored every frame as the map's local frame moves.
+			this.pickerData = {
+				lat: cartographic.lat,
+				lon: cartographic.lon,
+				height: cartographic.height,
+				east: normal.dot( surfaceFrame.east ),
+				north: normal.dot( surfaceFrame.north ),
+				up: normal.dot( surfaceFrame.up )
+			};
+			this.updatePickerPosition();
+			this.rayIntersect.visible = true;
+			const surfaceUp = surfaceFrame.up;
 			const azimuthAngle = Math.acos( Math.min( 1, Math.max( - 1, normal.dot( surfaceUp ) ) ) ) * 180 / Math.PI;
 			const featureHeight = getHeightAboveFeatureBase(
 				this.modelRoots.get( object ) || object,
