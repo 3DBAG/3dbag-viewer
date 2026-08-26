@@ -278,6 +278,8 @@ export default {
 				center: [ 5.3876389, 52.1561606 ],
 				zoom: 7,
 				pitch: 45,
+				aroundCenter: false,
+				reduceMotion: true,
 				maxPitch: MAX_MAP_PITCH,
 				attributionControl: false,
 				canvasContextAttributes: { antialias: true }
