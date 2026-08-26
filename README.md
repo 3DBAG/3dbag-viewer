@@ -43,6 +43,13 @@ the download page, and optional navigation links. Sources that are omitted from
 the active version are omitted from the interface. The viewer supports the
 `lod12`, `lod13`, and `lod22` entries in `Cesium3DTilesets` or `3DTilesets`.
 
+Set `MANIFEST_PATH` to use another manifest without modifying the bundled file.
+Relative paths are resolved from the repository root; absolute paths also work.
+
+```sh
+MANIFEST_PATH=../data/manifest.json npm run serve
+```
+
 For example, a deployment with one experimental tileset and no external project
 links can use:
 

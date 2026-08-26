@@ -1,3 +1,7 @@
+const path = require( 'path' );
+
+const manifestPath = path.resolve( __dirname, process.env.MANIFEST_PATH || 'src/assets/manifest.json' );
+
 module.exports = {
 	publicPath: '/',
 	transpileDependencies: [
@@ -25,7 +29,12 @@ module.exports = {
 		}
 	},
 	configureWebpack: {
-		devtool: 'source-map'
+		devtool: 'source-map',
+		resolve: {
+			alias: {
+				'@manifest': manifestPath
+			}
+		}
 	},
 	runtimeCompiler: true
 };

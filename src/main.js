@@ -7,7 +7,7 @@ import Buefy from 'buefy';
 import '@/styles/bulma.scss';
 import { InlineSvgPlugin } from 'vue-inline-svg';
 
-import manifest from '@/assets/manifest.json';
+import manifest from '@manifest';
 import landmarkLocations from '@/assets/landmark_locations.json';
 import { appConfig, resolveVersionManifest } from '@/config';
 import { normalizeMenu } from '@/utils/manifest';

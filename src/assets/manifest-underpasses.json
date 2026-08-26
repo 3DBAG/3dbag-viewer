@@ -1,0 +1,50 @@
+{
+  "menu": {
+    "documentation": false,
+    "dashboard": false,
+    "feedback": false
+  },
+  "latest": "underpasses-25.08.2026",
+  "versions": {
+    "underpasses-25.08.2026": {
+      "release-type": "preview",
+      "Cesium3DTilesets": {
+        "lod22": "http://127.0.0.1:9010/tileset.json"
+      },
+      "colormaps": {
+        "toolbar": false,
+        "default": "underpasses",
+        "maps": {
+          "underpasses": {
+            "attribute": "add_underpass_success",
+            "name": {
+              "en": "Underpasses",
+              "nl": "Onderdoorgangen"
+            },
+            "title": {
+              "en": "Underpasses",
+              "nl": "Onderdoorgangen"
+            },
+            "other": {
+              "color": "#c4c8cf",
+              "label": {
+                "en": "No underpass",
+                "nl": "Geen onderdoorgang"
+              }
+            },
+            "values": [
+              {
+                "value": 1,
+                "color": "#009E73",
+                "label": {
+                  "en": "Contains underpass",
+                  "nl": "Bevat onderdoorgang"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
