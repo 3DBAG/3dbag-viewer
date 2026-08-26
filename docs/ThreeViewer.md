@@ -74,7 +74,7 @@ Without route camera parameters, a configured manifest location is selected at r
 
 Address markers snap to a building roof when the address ray intersects loaded 3D Tiles geometry. Otherwise they use `Map.queryTerrainElevation()` and are corrected as building or terrain tiles load.
 
-Map pitch is capped at 60 degrees from nadir. This keeps close-range panning clear of MapLibre's near-horizontal terrain collision correction.
+Map pitch is capped at 80 degrees from nadir. This keeps close-range panning clear of MapLibre's near-horizontal terrain collision correction.
 
 ## Public methods
 
