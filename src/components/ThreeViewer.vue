@@ -41,7 +41,6 @@ import {
 } from 'three';
 import { TilesRenderer, WGS84_ELLIPSOID } from '3d-tiles-renderer/three';
 import { GLTFExtensionsPlugin } from '3d-tiles-renderer/three/plugins';
-import { CesiumStylingPlugin } from '@bertt/3dtilesrenderer-styling-plugin';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { AttributionControl, Map as MapLibreMap, MercatorCoordinate } from 'maplibre-gl';
 import { bgLayer } from '@geo-frontend/nlmaps-maplibre';
@@ -63,6 +62,7 @@ import {
 	getSemanticFeature
 } from '@/utils/semanticFeatures';
 import { getAttributeStyle } from '@/utils/attributeStyles';
+import { SemanticStylingPlugin } from '@/utils/SemanticStylingPlugin';
 
 const Tweakpane = require( 'tweakpane' );
 const HIGHLIGHT_COLOR = 0xFFC107;
@@ -127,10 +127,6 @@ export default {
 			type: Object,
 			default: null
 		},
-		colormapEnabled: {
-			type: Boolean,
-			default: false
-		},
 		documentationEnabled: {
 			type: Boolean,
 			default: false
@@ -158,11 +154,6 @@ export default {
 
 			if ( ! this.ignoreRouteCameraUpdate ) this.setCameraPosFromRoute( to.query );
 			if ( to.params.locale !== from.params.locale ) this.refreshAttributionControl();
-
-		},
-		colormapEnabled() {
-
-			this.applyColormapState();
 
 		},
 		colormap() {
@@ -608,29 +599,12 @@ export default {
 		},
 		usesColormap() {
 
-			return Boolean( this.colormapEnabled && this.colormap );
+			return Boolean( this.colormap );
 
 		},
 		getActiveColormapStyle() {
 
 			return this.usesColormap() ? getAttributeStyle( this.colormap ) : {};
-
-		},
-		loadedMeshesNeedStyle() {
-
-			if ( ! this.tiles ) return false;
-			let needed = false;
-			this.tiles.forEachLoadedModel( scene => {
-
-				scene.traverse( child => {
-
-					if ( ! child.isMesh || ! child.geometry ) return;
-					if ( child.userData.meshFeatures && ! child.geometry.getAttribute( 'color' ) ) needed = true;
-
-				} );
-
-			} );
-			return needed;
 
 		},
 		setLoadedMeshAppearance( vertexColors, color ) {
@@ -664,12 +638,14 @@ export default {
 			if ( ! this.tiles || ! this.stylingPlugin ) return;
 			if ( this.usesColormap() ) {
 
+				this.stylingPlugin.attribute = this.colormap.attribute;
 				this.stylingPlugin.style = this.getActiveColormapStyle();
-				if ( this.loadedMeshesNeedStyle() ) this.stylingPlugin.applyToTiles();
+				this.stylingPlugin.applyToTiles();
 				this.setLoadedMeshAppearance( true, STYLED_MESH_COLOR );
 
 			} else {
 
+				this.stylingPlugin.attribute = null;
 				this.stylingPlugin.style = {};
 				this.setLoadedMeshAppearance( false, this.meshColor );
 
@@ -1110,19 +1086,20 @@ export default {
 				metadata: true,
 				meshoptDecoder: MeshoptDecoder
 			} ) );
-			this.stylingPlugin = this.colormap ? new CesiumStylingPlugin( {
+			this.stylingPlugin = new SemanticStylingPlugin( {
 				THREE: { Color, BufferAttribute },
+				attribute: this.colormap ? this.colormap.attribute : null,
 				style: this.getActiveColormapStyle()
-			} ) : null;
-			if ( this.stylingPlugin ) tiles.registerPlugin( this.stylingPlugin );
+			} );
+			tiles.registerPlugin( this.stylingPlugin );
 			tiles.setCamera( this.camera );
 			const invalidate = () => this.requestRender();
 			tiles.addEventListener( 'needs-update', invalidate );
 			tiles.addEventListener( 'needs-render', invalidate );
 			tiles.addEventListener( 'load-model', event => {
 
-				// CesiumStylingPlugin styles asynchronously and clones materials.
-				// Wait one tick so highlight materials are created after that clone.
+				// Styling runs asynchronously. Wait until the color attribute exists before
+				// creating the viewer-owned materials that consume it.
 				Promise.resolve().then( () => {
 
 					if ( this.tiles === tiles ) this.handleLoadModel( event );

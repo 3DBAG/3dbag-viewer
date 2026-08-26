@@ -32,6 +32,7 @@
     "threeDUnavailable": "3D view unavailable",
     "threeDUnavailableDescription": "The 3D data for this version could not be loaded.",
     "colormap": "Color",
+    "colormapNone": "No color coding",
     "colormapOther": "Other"
   },
   "BuildingInfo": {

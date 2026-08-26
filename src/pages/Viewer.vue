@@ -19,19 +19,12 @@
         title="LoD"
         :options="lods"
       />
-      <div
-        v-if="colormap"
-        class="control"
-      >
-        <b-button
-          :class="{ 'is-primary': colormapEnabled }"
-          icon-left="palette"
-          :title="$t( 'viewer.colormap' )"
-          @click="colormapEnabled = ! colormapEnabled"
-        >
-          <span class="is-hidden-mobile">{{ $t( 'viewer.colormap' ) }}</span>
-        </b-button>
-      </div>
+      <DropDownSelector
+        v-if="showColormapSelector"
+        v-model="selectedColormap"
+        :title="$t( 'viewer.colormap' )"
+        :options="colormapSelectorOptions"
+      />
       <search-bar
         @select-place="moveToPlace"
       />
@@ -65,7 +58,6 @@
       :tiles-url="tilesUrl"
       :basemap-preset="basemapPreset"
       :colormap="colormap"
-      :colormap-enabled="colormapEnabled"
       :documentation-enabled="menu.documentation"
       @object-picked="objectPicked"
       @cam-offset="onCamOffset"
@@ -80,7 +72,7 @@
       <span>{{ $t( 'viewer.threeDUnavailableDescription' ) }}</span>
     </div>
     <div
-      v-if="tilesUrl && colormapEnabled && colormap"
+      v-if="tilesUrl && colormap"
       id="attribute-legend"
       class="box"
     >
@@ -94,7 +86,7 @@
           class="legend-swatch"
           :style="{ backgroundColor: entry.color }"
         />
-        <span>{{ entry.value === 'other' ? $t( 'viewer.colormapOther' ) : entry.label }}</span>
+        <span>{{ entry.value === 'other' && entry.label === 'other' ? $t( 'viewer.colormapOther' ) : entry.label }}</span>
       </div>
     </div>
     <div id="debug-panel" />
@@ -108,8 +100,20 @@ import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
 import Compass from '@/components/Compass.vue';
 import { appConfig } from '@/config';
-import { getAttributeLegend, resolveColormapTitle } from '@/utils/attributeStyles';
-import { getColormap, getDefaultLod, getLodOptions, getTilesetSources } from '@/utils/manifest';
+import {
+	getAttributeLegend,
+	resolveColormapTitle,
+	resolveLocalizedText
+} from '@/utils/attributeStyles';
+import {
+	getActiveColormap,
+	getColormapConfig,
+	getDefaultLod,
+	getLodOptions,
+	getTilesetSources
+} from '@/utils/manifest';
+
+const NO_COLORMAP = '__none__';
 
 export default {
 
@@ -126,6 +130,7 @@ export default {
 	data() {
 
 		const versionData = this.$root.$data[ 'version_data' ] || {};
+		const colormapConfig = getColormapConfig( versionData );
 
 		return {
 
@@ -174,8 +179,8 @@ export default {
 			},
 
 			showBuildingInfo: false,
-			colormap: getColormap( versionData ),
-			colormapEnabled: Boolean( getColormap( versionData ) ),
+			colormapConfig,
+			selectedColormap: colormapConfig ? colormapConfig.default : null,
 			attributionClearance: null,
 
 
@@ -197,6 +202,40 @@ export default {
 
 		},
 
+		showColormapSelector() {
+
+			return Boolean( this.colormapConfig && this.colormapConfig.toolbar );
+
+		},
+
+		colormapSelectorOptions() {
+
+			if ( ! this.colormapConfig ) return {};
+			const options = {
+				[ NO_COLORMAP ]: {
+					name: this.$t( 'viewer.colormapNone' ),
+					icon: 'palette-off'
+				}
+			};
+			return Object.keys( this.colormapConfig.maps ).reduce( ( result, id ) => {
+
+				const colormap = this.colormapConfig.maps[ id ];
+				result[ id ] = {
+					name: resolveLocalizedText( colormap.name, this.$i18n.locale, id ),
+					icon: colormap.icon
+				};
+				return result;
+
+			}, options );
+
+		},
+
+		colormap() {
+
+			return getActiveColormap( this.colormapConfig, this.selectedColormap );
+
+		},
+
 		colormapTitle() {
 
 			return resolveColormapTitle( this.colormap, this.$i18n.locale );
@@ -205,7 +244,7 @@ export default {
 
 		colormapLegend() {
 
-			return getAttributeLegend( this.colormap );
+			return getAttributeLegend( this.colormap, this.$i18n.locale );
 
 		},
 

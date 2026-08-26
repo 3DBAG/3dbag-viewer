@@ -1,4 +1,8 @@
-import { DEFAULT_OTHER_COLOR, normalizeHexColor } from '@/utils/attributeStyles';
+import {
+	DEFAULT_OTHER_COLOR,
+	normalizeHexColor,
+	normalizeLocalizedText
+} from '@/utils/attributeStyles';
 
 const MENU_DEFAULTS = Object.freeze( {
 	documentation: true,
@@ -91,57 +95,100 @@ export function getDefaultLod( versionData = {} ) {
 
 }
 
+function isColormapValue( value ) {
+
+	return typeof value === 'string' || typeof value === 'boolean' ||
+		( typeof value === 'number' && Number.isFinite( value ) );
+
+}
+
 function parseColormapEntry( value, key ) {
 
 	if ( typeof value === 'string' ) {
 
 		const color = normalizeHexColor( value );
-		return color ? { value: key, color, label: key } : null;
+		return color && isColormapValue( key ) ? { value: key, color, label: String( key ) } : null;
 
 	}
 	if ( ! value || typeof value !== 'object' || Array.isArray( value ) ) return null;
 	const color = normalizeHexColor( value.color );
 	if ( ! color ) return null;
-	const label = typeof value.label === 'string' && value.label.trim() ? value.label.trim() : key;
-	return { value: key, color, label };
+	const entryValue = Object.prototype.hasOwnProperty.call( value, 'value' ) ? value.value : key;
+	if ( ! isColormapValue( entryValue ) ) return null;
+	const label = normalizeLocalizedText( value.label ) || String( entryValue );
+	return { value: entryValue, color, label };
 
 }
 
-function normalizeColormapTitle( value, fallback ) {
+function parseOtherColormapEntry( value ) {
 
-	if ( typeof value === 'string' && value.trim() ) return value.trim();
-	if ( value && typeof value === 'object' && ! Array.isArray( value ) ) {
+	if ( typeof value === 'string' ) {
 
-		const localized = Object.keys( value ).reduce( ( title, locale ) => {
-
-			if ( typeof value[ locale ] === 'string' && value[ locale ].trim() ) title[ locale ] = value[ locale ].trim();
-			return title;
-
-		}, {} );
-		if ( Object.keys( localized ).length > 0 ) return localized;
+		return { color: normalizeHexColor( value ) || DEFAULT_OTHER_COLOR, label: 'other' };
 
 	}
-	return fallback;
+	const configured = asRecord( value );
+	return {
+		color: normalizeHexColor( configured.color ) || DEFAULT_OTHER_COLOR,
+		label: normalizeLocalizedText( configured.label ) || 'other'
+	};
+
 
 }
 
-export function getColormap( versionData = {} ) {
+function parseColormap( value, id ) {
 
-	const configured = asRecord( asRecord( versionData ).colormap );
+	const configured = asRecord( value );
 	const attribute = typeof configured.attribute === 'string' ? configured.attribute.trim() : '';
 	if ( ! attribute ) return null;
-	const rawValues = asRecord( configured.values );
-	const values = Object.keys( rawValues )
-		.map( key => parseColormapEntry( rawValues[ key ], key ) )
+	const rawValues = configured.values;
+	const values = ( Array.isArray( rawValues ) ?
+		rawValues.map( entry => parseColormapEntry( entry ) ) :
+		Object.keys( asRecord( rawValues ) ).map( key => parseColormapEntry( rawValues[ key ], key ) ) )
 		.filter( Boolean );
 	if ( values.length === 0 ) return null;
+	const other = parseOtherColormapEntry( configured.other );
 
 	return {
 		attribute,
-		title: normalizeColormapTitle( configured.title, attribute ),
-		other: normalizeHexColor( configured.other ) || DEFAULT_OTHER_COLOR,
+		name: normalizeLocalizedText( configured.name ) || id,
+		title: normalizeLocalizedText( configured.title ) || attribute,
+		icon: typeof configured.icon === 'string' && configured.icon.trim() ? configured.icon.trim() : 'palette',
+		other: other.color,
+		otherLabel: other.label,
 		values
 	};
+
+}
+
+export function getColormapConfig( versionData = {} ) {
+
+	const configured = asRecord( asRecord( versionData ).colormaps );
+	const rawMaps = asRecord( configured.maps );
+	const maps = Object.keys( rawMaps ).reduce( ( result, id ) => {
+
+		const colormap = parseColormap( rawMaps[ id ], id );
+		if ( colormap ) result[ id ] = colormap;
+		return result;
+
+	}, {} );
+	const ids = Object.keys( maps );
+	if ( ids.length === 0 ) return null;
+	const configuredDefault = typeof configured.default === 'string' ? configured.default : '';
+
+	return {
+		toolbar: configured.toolbar === true,
+		default: maps[ configuredDefault ] ? configuredDefault : ids[ 0 ],
+		maps
+	};
+
+}
+
+export function getActiveColormap( config, selectedId = null ) {
+
+	if ( ! config ) return null;
+	const id = config.toolbar ? selectedId : config.default;
+	return config.maps[ id ] || null;
 
 }
 

@@ -39,6 +39,7 @@
     "threeDUnavailable": "3D-weergave niet beschikbaar",
     "threeDUnavailableDescription": "De 3D-gegevens voor deze versie konden niet worden geladen.",
     "colormap": "Kleur",
+    "colormapNone": "Geen kleurcodering",
     "colormapOther": "Overig"
   },
   "BuildingInfo": {

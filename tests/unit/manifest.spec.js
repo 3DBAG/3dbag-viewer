@@ -1,7 +1,8 @@
 import {
 	getArchivedVersions,
+	getActiveColormap,
 	getAuxiliaryFiles,
-	getColormap,
+	getColormapConfig,
 	getDefaultLod,
 	getGpkgDump,
 	getLodOptions,
@@ -199,30 +200,89 @@ describe( 'manifest configuration', () => {
 
 	} );
 
-	it( 'normalizes a value-to-color colormap and ignores invalid entries', () => {
+	it( 'normalizes multiple named colormaps and ignores invalid maps and values', () => {
 
-		expect( getColormap() ).toBe( null );
-		expect( getColormap( {
-			colormap: {
-				attribute: 'b3_pw_bron',
-				title: { en: 'Point cloud source', nl: 'Puntwolkbron' },
-				other: '#ccc',
-				values: {
-					ahn3: '#0072B2',
-					ahn4: { color: '#E69F00', label: 'AHN4' },
-					bad: 'blue',
-					empty: { label: 'missing' }
+		expect( getColormapConfig() ).toBeNull();
+		expect( getColormapConfig( {
+			colormaps: {
+				toolbar: true,
+				default: 'underpasses',
+				maps: {
+					source: {
+						attribute: 'b3_pw_bron',
+						name: 'Point cloud source',
+						title: { en: 'Point cloud source', nl: 'Puntwolkbron' },
+						other: '#ccc',
+						values: {
+							ahn3: '#0072B2',
+							ahn4: { color: '#E69F00', label: 'AHN4' },
+							bad: 'blue'
+						}
+					},
+					underpasses: {
+						attribute: 'add_underpass_success',
+						name: { en: 'Underpasses', nl: 'Onderdoorgangen' },
+						other: { color: '#ccc', label: { en: 'Missing', nl: 'Ontbreekt' } },
+						values: [
+							{ value: 1, color: '#009E73', label: 'yes' },
+							{ value: 0, color: '#0072B2', label: 'no' }
+						]
+					},
+					invalid: { attribute: 'missing-values' }
 				}
 			}
 		} ) ).toEqual( {
-			attribute: 'b3_pw_bron',
-			title: { en: 'Point cloud source', nl: 'Puntwolkbron' },
-			other: '#cccccc',
-			values: [
-				{ value: 'ahn3', color: '#0072B2', label: 'ahn3' },
-				{ value: 'ahn4', color: '#E69F00', label: 'AHN4' }
-			]
+			toolbar: true,
+			default: 'underpasses',
+			maps: {
+				source: {
+					attribute: 'b3_pw_bron',
+					name: 'Point cloud source',
+					title: { en: 'Point cloud source', nl: 'Puntwolkbron' },
+					icon: 'palette',
+					other: '#cccccc',
+					otherLabel: 'other',
+					values: [
+						{ value: 'ahn3', color: '#0072B2', label: 'ahn3' },
+						{ value: 'ahn4', color: '#E69F00', label: 'AHN4' }
+					]
+				},
+				underpasses: {
+					attribute: 'add_underpass_success',
+					name: { en: 'Underpasses', nl: 'Onderdoorgangen' },
+					title: 'add_underpass_success',
+					icon: 'palette',
+					other: '#cccccc',
+					otherLabel: { en: 'Missing', nl: 'Ontbreekt' },
+					values: [
+						{ value: 1, color: '#009E73', label: 'yes' },
+						{ value: 0, color: '#0072B2', label: 'no' }
+					]
+				}
+			}
 		} );
+
+	} );
+
+	it( 'defaults to an always-on first colormap when toolbar settings are absent or invalid', () => {
+
+		const config = getColormapConfig( {
+			colormaps: {
+				default: 'unknown',
+				maps: {
+					first: {
+						attribute: 'height',
+						values: { tall: '#0072B2' }
+					}
+				}
+			}
+		} );
+
+		expect( config.toolbar ).toBe( false );
+		expect( config.default ).toBe( 'first' );
+		expect( Object.keys( config.maps ) ).toEqual( [ 'first' ] );
+		expect( getActiveColormap( config, '__none__' ) ).toBe( config.maps.first );
+		expect( getActiveColormap( { ...config, toolbar: true }, '__none__' ) ).toBeNull();
 
 	} );
 } );

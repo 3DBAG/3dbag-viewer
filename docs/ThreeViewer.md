@@ -4,19 +4,39 @@
 
 The ECEF tileset is dynamically rebased into a local east/up/south frame around the map center. This keeps Three.js coordinates precise while the MapLibre camera moves through the nationwide tileset.
 
-Buildings can be colored from a version `colormap` in `manifest.json`: an attribute name plus a value-to-color map, applied through `CesiumStylingPlugin`. The toolbar Color button toggles that style. Click-to-select still applies the amber semantic highlight on top of the current mesh colors.
+Buildings can be colored from named `colormaps` in a version entry in `manifest.json`. Each map targets a structural-metadata property and preserves the configured value type, so numeric metadata must use numeric values. Click-to-select still applies the amber semantic highlight on top of the active vertex colors.
 
 ```json
-"colormap": {
-  "attribute": "b3_pw_bron",
-  "title": { "en": "Point cloud source", "nl": "Puntwolkbron" },
-  "other": "#c4c8cf",
-  "values": {
-    "ahn3": { "color": "#0072B2", "label": "AHN3" },
-    "ahn4": "#E69F00"
+"colormaps": {
+  "toolbar": true,
+  "default": "underpasses",
+  "maps": {
+    "underpasses": {
+      "attribute": "add_underpass_success",
+      "name": { "en": "Underpasses", "nl": "Onderdoorgangen" },
+      "title": { "en": "Underpasses", "nl": "Onderdoorgangen" },
+      "other": {
+        "color": "#c4c8cf",
+        "label": { "en": "No underpass", "nl": "Geen onderdoorgang" }
+      },
+      "values": [
+        { "value": 1, "color": "#009E73", "label": "true" },
+        { "value": 0, "color": "#0072B2", "label": "false" }
+      ]
+    },
+    "point-cloud-source": {
+      "attribute": "b3_pw_bron",
+      "name": "Point cloud source",
+      "values": {
+        "ahn3": "#0072B2",
+        "ahn4": { "color": "#E69F00", "label": "AHN4" }
+      }
+    }
   }
 }
 ```
+
+With `toolbar: true`, the Color dropdown lets users select any valid map or disable color coding. With `toolbar: false` (the default), no control is shown and the configured default map is always active. If `default` is missing or invalid, the first valid map is used. Names, titles, and labels accept either strings or localized objects.
 
 ## Props
 
@@ -25,7 +45,6 @@ Buildings can be colored from a version `colormap` in `manifest.json`: an attrib
 | `tiles-url` | `String` | URL of the 3D Tiles tileset. The default points to the current LoD 2.2 Cesium 3D Tiles feed. |
 | `basemap-preset` | `String` | `openfreemap`, `standaard`, `grijs`, or `luchtfoto`. The three Dutch presets are supplied by NLMaps. |
 | `colormap` | `Object` | Normalized colormap from the version manifest, or `null` when none is configured. |
-| `colormap-enabled` | `Boolean` | When true, applies the colormap vertex colors. Pick highlighting stays active either way. |
 
 ## Configuration
 

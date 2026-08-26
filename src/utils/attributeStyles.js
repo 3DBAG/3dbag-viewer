@@ -15,9 +15,42 @@ export function normalizeHexColor( value ) {
 
 }
 
+export function normalizeLocalizedText( value ) {
+
+	if ( typeof value === 'string' && value.trim() ) return value.trim();
+	if ( ! value || typeof value !== 'object' || Array.isArray( value ) ) return null;
+	const localized = Object.keys( value ).reduce( ( result, locale ) => {
+
+		if ( typeof value[ locale ] === 'string' && value[ locale ].trim() ) {
+
+			result[ locale ] = value[ locale ].trim();
+
+		}
+		return result;
+
+	}, {} );
+	return Object.keys( localized ).length > 0 ? localized : null;
+
+}
+
+export function resolveLocalizedText( value, locale = 'en', fallback = '' ) {
+
+	if ( typeof value === 'string' ) return value;
+	if ( value && typeof value === 'object' ) return value[ locale ] || value.en || fallback;
+	return fallback;
+
+}
+
 function escapeStyleValue( value ) {
 
 	return String( value ).replace( /\\/g, '\\\\' ).replace( /'/g, "\\'" );
+
+}
+
+function formatStyleValue( value ) {
+
+	if ( typeof value === 'string' ) return `'${ escapeStyleValue( value ) }'`;
+	return String( value );
 
 }
 
@@ -28,7 +61,7 @@ export function getAttributeStyle( colormap ) {
 	const conditions = colormap.values.map( entry => {
 
 		return [
-			`\${feature['${ colormap.attribute }']} === '${ escapeStyleValue( entry.value ) }'`,
+			`\${feature['${ colormap.attribute }']} === ${ formatStyleValue( entry.value ) }`,
 			`color('${ entry.color }')`
 		];
 
@@ -41,27 +74,24 @@ export function getAttributeStyle( colormap ) {
 
 }
 
-export function getAttributeLegend( colormap ) {
+export function getAttributeLegend( colormap, locale = 'en' ) {
 
 	if ( ! colormap || ! Array.isArray( colormap.values ) ) return [];
 
 	return colormap.values.concat( {
 		value: 'other',
 		color: colormap.other || DEFAULT_OTHER_COLOR,
-		label: 'other'
-	} );
+		label: colormap.otherLabel || 'other'
+	} ).map( entry => ( {
+		...entry,
+		label: resolveLocalizedText( entry.label, locale, String( entry.value ) )
+	} ) );
 
 }
 
 export function resolveColormapTitle( colormap, locale = 'en' ) {
 
 	if ( ! colormap ) return '';
-	if ( typeof colormap.title === 'string' ) return colormap.title;
-	if ( colormap.title && typeof colormap.title === 'object' ) {
-
-		return colormap.title[ locale ] || colormap.title.en || colormap.attribute;
-
-	}
-	return colormap.attribute || '';
+	return resolveLocalizedText( colormap.title, locale, colormap.attribute || '' );
 
 }

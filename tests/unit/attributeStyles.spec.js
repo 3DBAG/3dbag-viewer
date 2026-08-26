@@ -3,7 +3,9 @@ import {
 	getAttributeLegend,
 	getAttributeStyle,
 	normalizeHexColor,
-	resolveColormapTitle
+	normalizeLocalizedText,
+	resolveColormapTitle,
+	resolveLocalizedText
 } from '@/utils/attributeStyles';
 
 const colormap = {
@@ -47,6 +49,28 @@ describe( 'attribute colormap styles', () => {
 
 	} );
 
+	it( 'emits unquoted conditions for typed Boolean and INT32 values', () => {
+
+		const { conditions } = getAttributeStyle( {
+			attribute: 'add_underpass_success',
+			values: [
+				{ value: true, color: '#0072B2' },
+				{ value: false, color: '#009E73' },
+				{ value: 1, color: '#E69F00' },
+				{ value: 0, color: '#CC79A7' }
+			]
+		} ).color;
+
+		expect( conditions.map( entry => entry[ 0 ] ) ).toEqual( [
+			"${feature['add_underpass_success']} === true",
+			"${feature['add_underpass_success']} === false",
+			"${feature['add_underpass_success']} === 1",
+			"${feature['add_underpass_success']} === 0",
+			'true'
+		] );
+
+	} );
+
 	it( 'exposes a legend including the fallback color', () => {
 
 		expect( getAttributeLegend( colormap ) ).toEqual( [
@@ -55,6 +79,31 @@ describe( 'attribute colormap styles', () => {
 			{ value: 'ahn5', color: '#009E73', label: 'AHN5' },
 			{ value: 'other', color: DEFAULT_OTHER_COLOR, label: 'other' }
 		] );
+
+	} );
+
+	it( 'uses a configured label for the fallback legend entry', () => {
+
+		expect( getAttributeLegend( { ...colormap, otherLabel: 'missing' } )[ 3 ] ).toEqual( {
+			value: 'other',
+			color: DEFAULT_OTHER_COLOR,
+			label: 'missing'
+		} );
+
+	} );
+
+	it( 'normalizes and resolves localized names and legend labels', () => {
+
+		expect( normalizeLocalizedText( { en: ' Underpasses ', nl: ' Onderdoorgangen ' } ) ).toEqual( {
+			en: 'Underpasses',
+			nl: 'Onderdoorgangen'
+		} );
+		expect( resolveLocalizedText( { en: 'Underpasses', nl: 'Onderdoorgangen' }, 'nl' ) )
+			.toBe( 'Onderdoorgangen' );
+		expect( getAttributeLegend( {
+			...colormap,
+			otherLabel: { en: 'Missing', nl: 'Ontbreekt' }
+		}, 'nl' )[ 3 ].label ).toBe( 'Ontbreekt' );
 
 	} );
 
