@@ -967,7 +967,7 @@ export default {
 					filter: [ '==', [ 'get', 'kind' ], 'mask' ],
 					paint: {
 						'fill-color': '#17212b',
-						'fill-opacity': 0.35
+						'fill-opacity': 0.75
 					}
 				}, beforeId );
 
