@@ -261,7 +261,6 @@ export default {
 			canvas.addEventListener( 'pointermove', this.onPointerMove, false );
 			canvas.addEventListener( 'pointerdown', this.onPointerDown, false );
 			canvas.addEventListener( 'pointerup', this.onPointerUp, false );
-			canvas.addEventListener( 'pointerleave', this.onPointerLeave, false );
 			if ( window.ResizeObserver ) {
 
 				this.resizeObserver = new window.ResizeObserver( () => this.map && this.map.resize() );
@@ -1149,12 +1148,6 @@ export default {
 			) this.castRay( event.clientX, event.clientY );
 
 		},
-		onPointerLeave() {
-
-			if ( this.rayIntersect ) this.rayIntersect.visible = false;
-			this.requestRender();
-
-		},
 		async castRay( clientX, clientY, snapTolerance = 0 ) {
 
 			if ( ! this.cameraReady || ! this.tiles ) return;
@@ -1315,7 +1308,6 @@ export default {
 				canvas.removeEventListener( 'pointermove', this.onPointerMove, false );
 				canvas.removeEventListener( 'pointerdown', this.onPointerDown, false );
 				canvas.removeEventListener( 'pointerup', this.onPointerUp, false );
-				canvas.removeEventListener( 'pointerleave', this.onPointerLeave, false );
 
 			}
 			this.removeMarker();
