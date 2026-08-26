@@ -8,6 +8,7 @@ import {
 	getLodOptions,
 	getTileFormats,
 	getTilesetSources,
+	getViewerLocations,
 	getWebServiceRows,
 	isDefinedUrl,
 	normalizeMenu
@@ -62,6 +63,15 @@ describe( 'manifest configuration', () => {
 		expect( getDefaultLod( version ) ).toBe( 'lod22' );
 		expect( getWebServiceRows( version ).map( row => row.key ) ).toEqual( [ '3dtiles-lod22' ] );
 		expect( getTileFormats( version ) ).toEqual( [] );
+
+	} );
+
+	it( 'accepts valid viewer locations from arrays or named objects', () => {
+
+		const valid = { name: 'Example', rdx: '1', rdy: 2, ox: 3, oy: 4, oz: 5 };
+		expect( getViewerLocations( { locations: [ valid, { rdx: 1 } ] } ) ).toEqual( [ valid ] );
+		expect( getViewerLocations( { locations: { example: valid } } ) ).toEqual( [ valid ] );
+		expect( getViewerLocations() ).toEqual( [] );
 
 	} );
 

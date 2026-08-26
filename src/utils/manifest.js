@@ -95,6 +95,20 @@ export function getDefaultLod( versionData = {} ) {
 
 }
 
+export function getViewerLocations( manifest = {} ) {
+
+	const configured = asRecord( manifest ).locations;
+	const locations = Array.isArray( configured ) ? configured : Object.values( asRecord( configured ) );
+	return locations.filter( location => {
+
+		const values = [ 'rdx', 'rdy', 'ox', 'oy', 'oz' ]
+			.map( key => Number.parseFloat( asRecord( location )[ key ] ) );
+		return values.every( Number.isFinite );
+
+	} );
+
+}
+
 function isColormapValue( value ) {
 
 	return typeof value === 'string' || typeof value === 'boolean' ||

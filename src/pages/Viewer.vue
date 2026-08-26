@@ -58,6 +58,7 @@
       :tiles-url="tilesUrl"
       :basemap-preset="basemapPreset"
       :colormap="colormap"
+      :locations="locations"
       :documentation-enabled="menu.documentation"
       @object-picked="objectPicked"
       @cam-offset="onCamOffset"
@@ -170,6 +171,7 @@ export default {
 
 			tileset: getDefaultLod( versionData ),
 			lods: getLodOptions( versionData ),
+			locations: this.$root.$data.viewerLocations,
 
 			pickedBuilding: {
 

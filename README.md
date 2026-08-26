@@ -60,6 +60,16 @@ links can use:
     "dashboard": false,
     "feedback": false
   },
+  "locations": {
+    "example": {
+      "name": "Example building",
+      "rdx": 155000,
+      "rdy": 463000,
+      "ox": 200,
+      "oy": 250,
+      "oz": 200
+    }
+  },
   "latest": "experiment",
   "versions": {
     "experiment": {
@@ -71,6 +81,14 @@ links can use:
   }
 }
 ```
+
+Root-level `locations` may be a named object as above or an array. On an initial visit
+without camera coordinates in the route, the viewer chooses one valid location
+at random. Each location uses the route-compatible RD target (`rdx`, `rdy`) and
+local east/up/south camera offset (`ox`, `oy`, `oz`). If no valid locations are
+configured, the viewer targets the center of the root 3D Tiles bounding sphere
+from a capped 100-500 metre viewing distance. This keeps nationwide tilesets
+close enough to show buildings rather than fitting their complete extent.
 
 The optional download sources are `TILE_INDEX`, `CityJSON`, `OBJ`, `GPKG`,
 `IFC`, `WMS`, `WFS`, `OGCAPI`, `GPKG_DUMP`, `metadata`, and

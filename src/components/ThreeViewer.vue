@@ -30,6 +30,7 @@ import {
 	PointLight,
 	Raycaster,
 	Scene,
+	Sphere,
 	Sprite,
 	SpriteMaterial,
 	SRGBColorSpace,
@@ -126,6 +127,10 @@ export default {
 		colormap: {
 			type: Object,
 			default: null
+		},
+		locations: {
+			type: Array,
+			default: () => []
 		},
 		documentationEnabled: {
 			type: Boolean,
@@ -808,24 +813,74 @@ export default {
 			}, 250 );
 
 		},
+		setCameraFromTilesBounds() {
+
+			const tilesFrame = this.getTilesFrame();
+			if ( ! tilesFrame || ! this.map ) return false;
+			const sphere = new Sphere();
+			if ( ! this.tiles.getBoundingSphere( sphere ) || ! Number.isFinite( sphere.radius ) ) return false;
+			this.tiles.group.updateWorldMatrix( true, false );
+			const center = sphere.center.clone().applyMatrix4( this.tiles.group.matrixWorld );
+			const cartographic = worldToCartographic( tilesFrame.ellipsoid, tilesFrame.group, center );
+			if ( ! Number.isFinite( cartographic.lat ) || ! Number.isFinite( cartographic.lon ) ) return false;
+
+			const lng = MathUtils.radToDeg( cartographic.lon );
+			const lat = MathUtils.radToDeg( cartographic.lat );
+			this.updateLocalFrame( { lng, lat } );
+			const elevation = this.getTerrainElevation( lng, lat );
+			const frame = getWorldFrame( tilesFrame.ellipsoid, tilesFrame.group, cartographic.lat, cartographic.lon, elevation );
+			const distance = MathUtils.clamp( sphere.radius * 0.5, 100, 500 );
+			const cameraPosition = frame.position.clone()
+				.addScaledVector( frame.east, distance * 0.5 )
+				.addScaledVector( frame.up, distance * 0.7 )
+				.addScaledVector( frame.north, - distance * 0.8 );
+			const cameraCartographic = worldToCartographic( tilesFrame.ellipsoid, tilesFrame.group, cameraPosition );
+			const options = this.map.calculateCameraOptionsFromTo(
+				[ MathUtils.radToDeg( cameraCartographic.lon ), MathUtils.radToDeg( cameraCartographic.lat ) ],
+				cameraCartographic.height,
+				[ lng, lat ],
+				elevation
+			);
+			this.applyingRouteCamera = true;
+			this.map.jumpTo( options );
+			window.setTimeout( () => {
+
+				this.applyingRouteCamera = false;
+				this.scheduleRouteUpdate();
+
+			}, 0 );
+			this.requestRender();
+			return true;
+
+		},
 		initializeCameraPosition() {
 
 			if ( this.initialCameraSet ) return;
-			this.initialCameraSet = true;
 			const query = this.$router.currentRoute.query;
 			if ( [ 'rdx', 'rdy', 'ox', 'oy', 'oz' ].every( key => key in query ) ) {
 
+				this.initialCameraSet = true;
 				this.setCameraPosFromRoute( query );
 				return;
 
 			}
 
-			const landmarks = this.$root.$data.landmarkLocations;
-			const keys = Object.keys( landmarks );
-			const landmark = landmarks[ keys[ keys.length * Math.random() << 0 ] ];
-			this.$parent.$data.locationBoxText = landmark.name;
-			this.$parent.$data.showLocationBox = true;
-			this.setCameraPosFromRoute( landmark );
+			this.initialCameraSet = true;
+			if ( this.locations.length === 0 ) {
+
+				this.setCameraFromTilesBounds();
+				return;
+
+			}
+
+			const location = this.locations[ this.locations.length * Math.random() << 0 ];
+			if ( typeof location.name === 'string' && location.name ) {
+
+				this.$parent.$data.locationBoxText = location.name;
+				this.$parent.$data.showLocationBox = true;
+
+			}
+			this.setCameraPosFromRoute( location );
 
 			const started = Date.now();
 			this.locationTimer = window.setInterval( () => {

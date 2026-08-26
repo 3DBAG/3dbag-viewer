@@ -45,6 +45,7 @@ With `toolbar: true`, the Color dropdown lets users select any valid map or disa
 | `tiles-url` | `String` | URL of the 3D Tiles tileset. The default points to the current LoD 2.2 Cesium 3D Tiles feed. |
 | `basemap-preset` | `String` | `openfreemap`, `standaard`, `grijs`, or `luchtfoto`. The three Dutch presets are supplied by NLMaps. |
 | `colormap` | `Object` | Normalized colormap from the version manifest, or `null` when none is configured. |
+| `locations` | `Array` | Valid route-compatible startup locations from the manifest root. When empty, the root tileset bounds determine the initial camera target. |
 
 ## Configuration
 
@@ -68,6 +69,8 @@ Basemap style changes preserve the terrain and hillshade sources, including thei
 ## Route compatibility
 
 The existing `rdx`, `rdy`, `ox`, `oy`, and `oz` query parameters remain supported. RD target coordinates are transformed to WGS84 and camera offsets retain their east, up, and south meanings.
+
+Without route camera parameters, a configured manifest location is selected at random. If the manifest root has no valid `locations`, the viewer targets the root 3D Tiles bounding-sphere center from a capped 100-500 metre distance so large tilesets still open near building level.
 
 Address markers snap to a building roof when the address ray intersects loaded 3D Tiles geometry. Otherwise they use `Map.queryTerrainElevation()` and are corrected as building or terrain tiles load.
 

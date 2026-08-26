@@ -8,9 +8,8 @@ import '@/styles/bulma.scss';
 import { InlineSvgPlugin } from 'vue-inline-svg';
 
 import manifest from '@manifest';
-import landmarkLocations from '@/assets/landmark_locations.json';
 import { appConfig, resolveVersionManifest } from '@/config';
-import { normalizeMenu } from '@/utils/manifest';
+import { getViewerLocations, normalizeMenu } from '@/utils/manifest';
 
 const configuredManifest = resolveVersionManifest( manifest );
 const configuredVersions = configuredManifest.versions || {};
@@ -25,6 +24,7 @@ new Vue( {
 	data: {
 		config: appConfig,
 		menu: normalizeMenu( configuredManifest ),
+		viewerLocations: getViewerLocations( configuredManifest ),
 		version_data: configuredVersionData,
 		version_number: configuredManifest[ "latest" ],
 		versions_data_archived: Object.entries( configuredVersions ).reduce( ( acc, [ key, value ] ) => {
@@ -36,8 +36,7 @@ new Vue( {
 			}
 			return acc;
 
-		}, {} ),
-		landmarkLocations: landmarkLocations },
+		}, {} ) },
 	render: h => h( App ),
 	router,
 	i18n,
