@@ -880,7 +880,7 @@ export default {
 			const overlayPlugin = new ImageOverlayPlugin( {
 				overlays: [],
 				resolution: WMTS_TEXTURE_RESOLUTION,
-				enableTileSplitting: false
+				enableTileSplitting: true
 			} );
 			terrainTiles.registerPlugin( overlayPlugin );
 			terrainTiles.setCamera( this.camera );
