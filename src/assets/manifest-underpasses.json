@@ -4,6 +4,16 @@
     "dashboard": false,
     "feedback": false
   },
+  "locations": {
+    "delft": {
+      "name": "Weesperplein, Amsterdam",
+      "rdx": "122332.23795067225",
+      "rdy": "486070.66112072545",
+      "ox": "470.98101350864533",
+      "oy": "419.4815359806992",
+      "oz": "424.07320934933546"
+    }
+  },
   "latest": "underpasses-25.08.2026",
   "versions": {
     "underpasses-25.08.2026": {
