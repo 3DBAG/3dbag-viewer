@@ -19,6 +19,7 @@ export const appConfig = {
 	dataUrl: envUrl( 'VUE_APP_DATA_URL', 'https://data.3dbag.nl' ),
 	mapStyleUrl: envUrl( 'VUE_APP_MAP_STYLE_URL', 'https://tiles.openfreemap.org/styles/liberty' ),
 	terrainTileJsonUrl: envUrl( 'VUE_APP_TERRAIN_TILEJSON_URL', 'https://terrain.reearth.land/mapbox/ellipsoid/tilejson.json' ),
+	terrainEncoding: env[ 'VUE_APP_TERRAIN_ENCODING' ] || 'mapbox',
 	dashboardUrl: envUrl( 'VUE_APP_DASHBOARD_URL', 'https://dashboard.3dbag.nl' ),
 	feedbackUrlEn: env[ 'VUE_APP_FEEDBACK_URL_EN' ] || 'https://forms.gle/NZg83heXM75pAmfVA',
 	feedbackUrlNl: env[ 'VUE_APP_FEEDBACK_URL_NL' ] || 'https://forms.gle/N1FPRp3RG45EaBjUA',

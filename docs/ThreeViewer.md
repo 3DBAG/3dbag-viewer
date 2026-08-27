@@ -57,9 +57,10 @@ The building attribute panel can be limited per version with an ordered `visible
 | --- | --- | --- |
 | `VUE_APP_MAP_STYLE_URL` | `https://tiles.openfreemap.org/styles/liberty` | Default OpenFreeMap style URL. |
 | `VUE_APP_TERRAIN_TILEJSON_URL` | `https://terrain.reearth.land/mapbox/ellipsoid/tilejson.json` | MapLibre raster-dem TileJSON source. |
+| `VUE_APP_TERRAIN_ENCODING` | `mapbox` | Raster DEM encoding: `mapbox` or `terrarium`. |
 
 The former `VUE_APP_TERRAIN_URL` quantized-mesh setting and viewer-specific PDOK service URL overrides are no longer used.
-The terrain endpoint combines Mapterhorn's orthometric DEM with EGM2008 geoid undulation. Its WGS84-ellipsoidal heights match the 3DBAG ECEF tiles, avoiding a vertical offset between terrain and buildings.
+The default terrain endpoint combines Mapterhorn's orthometric DEM with EGM2008 geoid undulation. Its WGS84-ellipsoidal heights match the 3DBAG ECEF tiles, avoiding a vertical offset between terrain and buildings.
 Basemap style changes preserve the terrain and hillshade sources, including their loaded tile caches.
 
 ## Events

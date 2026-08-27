@@ -325,7 +325,8 @@ export default {
 
 				this.map.addSource( TERRAIN_SOURCE_ID, {
 					type: 'raster-dem',
-					url: appConfig.terrainTileJsonUrl
+					url: appConfig.terrainTileJsonUrl,
+					encoding: appConfig.terrainEncoding
 				} );
 
 			}
@@ -333,7 +334,8 @@ export default {
 
 				this.map.addSource( HILLSHADE_SOURCE_ID, {
 					type: 'raster-dem',
-					url: appConfig.terrainTileJsonUrl
+					url: appConfig.terrainTileJsonUrl,
+					encoding: appConfig.terrainEncoding
 				} );
 
 			}
@@ -373,7 +375,8 @@ export default {
 			const previousSources = previousStyle && previousStyle.sources || {};
 			const terrainSource = previousSources[ TERRAIN_SOURCE_ID ] || {
 				type: 'raster-dem',
-				url: appConfig.terrainTileJsonUrl
+				url: appConfig.terrainTileJsonUrl,
+				encoding: appConfig.terrainEncoding
 			};
 			const hillshadeSource = previousSources[ HILLSHADE_SOURCE_ID ] || terrainSource;
 			const previousLayers = previousStyle && previousStyle.layers || [];
