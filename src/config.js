@@ -26,6 +26,7 @@ export const appConfig = {
 	geoinfoUrl: env[ 'VUE_APP_GEOINFO_URL' ] || 'https://3d.bk.tudelft.nl',
 	threeDgiUrl: env[ 'VUE_APP_3DGI_URL' ] || 'https://3dgi.xyz',
 	pdokUrl: env[ 'VUE_APP_PDOK_URL' ] || 'https://www.pdok.nl',
+	brtUrl: envUrl( 'VUE_APP_PDOK_BRT_URL', 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?' ),
 	nominatimUrl: env[ 'VUE_APP_NOMINATIM_URL' ] || 'https://nominatim.openstreetmap.org/search',
 	creativecommonsUrl: env[ 'VUE_APP_CREATIVE_COMMONS_URL' ] || 'http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1',
 	creativeCommonsIconUrl: env[ 'VUE_APP_CREATIVE_COMMONS_ICON_URL' ] || 'https://mirrors.creativecommons.org/presskit/icons',

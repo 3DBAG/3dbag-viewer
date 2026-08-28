@@ -728,10 +728,17 @@ export default {
 			} ).then( function ( text ) {
 
 				var result = parser.read( text );
-				// console.log( result );
+				const layers = result.Contents && result.Contents.Layer;
+				if ( ! layers || layers.length === 0 ) {
+
+					throw new Error( 'The BRT WMTS capabilities response contains no layers.' );
+
+				}
+
+				const layer = layers.find( entry => entry.Identifier === 'standaard' ) || layers[ 0 ];
 
 				var brt_options = WMTSoptionsFromCapabilities( result, {
-					layer: 'standaard',
+					layer: layer.Identifier,
 					matrixSet: 'EPSG:28992',
 					format: 'image/png8',
 					crossOrigin: 'anonymous'
