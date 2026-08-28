@@ -495,6 +495,36 @@ function formatBytes( bytes, decimals ) {
 
 }
 
+function getFlatGeoBufExtent( bytes ) {
+
+	if ( bytes.byteLength < 16 ) return null;
+	const view = new DataView( bytes.buffer, bytes.byteOffset, bytes.byteLength );
+	const headerOffset = 12;
+	const headerLength = view.getUint32( 8, true );
+	if ( headerLength < 8 || headerOffset + headerLength > bytes.byteLength ) return null;
+
+	const rootOffset = headerOffset + view.getInt32( headerOffset, true );
+	if ( rootOffset < headerOffset || rootOffset + 4 > headerOffset + headerLength ) return null;
+	const vtableOffset = rootOffset - view.getInt32( rootOffset, true );
+	if ( vtableOffset < headerOffset || vtableOffset + 8 > headerOffset + headerLength ) return null;
+
+	const envelopeFieldOffset = view.getUint16( vtableOffset + 6, true );
+	if ( envelopeFieldOffset === 0 ) return null;
+	const envelopeVectorOffset = rootOffset + envelopeFieldOffset;
+	if ( envelopeVectorOffset + 4 > headerOffset + headerLength ) return null;
+	const envelopeOffset = envelopeVectorOffset + view.getInt32( envelopeVectorOffset, true );
+	if ( envelopeOffset + 36 > headerOffset + headerLength || view.getUint32( envelopeOffset, true ) < 4 ) return null;
+
+	const extent = [
+		view.getFloat64( envelopeOffset + 4, true ),
+		view.getFloat64( envelopeOffset + 12, true ),
+		view.getFloat64( envelopeOffset + 20, true ),
+		view.getFloat64( envelopeOffset + 28, true ),
+	];
+	return extent.every( Number.isFinite ) ? extent : null;
+
+}
+
 export default {
 
 	name: 'DownloadView',
@@ -626,6 +656,23 @@ export default {
 
 	methods: {
 
+		async getTileIndexExtent() {
+
+			try {
+
+				const response = await fetch( this.TileIndexFileURL, { headers: { Range: 'bytes=0-65535' } } );
+				if ( ! response.ok ) throw new Error( `Could not read tile index header: ${ response.status } ${ response.statusText }` );
+				return getFlatGeoBufExtent( new Uint8Array( await response.arrayBuffer() ) );
+
+			} catch ( error ) {
+
+				console.warn( 'Could not determine the FlatGeoBuf tile index extent.', error );
+				return null;
+
+			}
+
+		},
+
 		setActiveTile( tid ) {
 
 			this.$router.push(
@@ -720,12 +767,13 @@ export default {
 			var dutchProjection = olproj4get( 'EPSG:28992' );
 
 			var that = this;
+			const tileIndexExtent = this.getTileIndexExtent();
 
 			fetch( appConfig.brtUrl + 'request=getcapabilities&service=wmts' ).then( function ( response ) {
 
 				return response.text();
 
-			} ).then( function ( text ) {
+			} ).then( async function ( text ) {
 
 				var result = parser.read( text );
 				const layers = result.Contents && result.Contents.Layer;
@@ -810,6 +858,13 @@ export default {
 					target: document.getElementById( 'map' ),
 					view: view,
 				} );
+				const extent = await tileIndexExtent;
+				if ( extent ) {
+
+					that.map.updateSize();
+					view.fit( extent, { size: that.map.getSize(), padding: [ 48, 48, 48, 48 ], maxZoom: 19 } );
+
+				}
 
 				var select = new OLSelect( { condition: OLclick, } );
 

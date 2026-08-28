@@ -18,6 +18,7 @@ const LOD_DEFINITIONS = Object.freeze( [
 
 const TILE_FORMAT_DEFINITIONS = Object.freeze( [
 	{ key: 'CityJSON', hashProperty: 'cj_sha256' },
+	{ key: 'CityJSONL', hashProperty: 'cjseq_sha256' },
 	{ key: 'OBJ', hashProperty: 'obj_sha256' },
 	{ key: 'GPKG', hashProperty: 'gpkg_sha256' },
 	{ key: 'IFC', hashProperty: 'ifc_sha256' },

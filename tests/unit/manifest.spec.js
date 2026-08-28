@@ -148,12 +148,14 @@ describe( 'manifest configuration', () => {
 
 		const formats = getTileFormats( {
 			CityJSON: 'https://example.test/{TID_X}.json',
+			CityJSONL: 'https://example.test/{TID_X}.jsonl',
 			OBJ: '   ',
 			IFC: null,
 		} );
 
 		expect( formats ).toEqual( [
 			{ key: 'CityJSON', hashProperty: 'cj_sha256' },
+			{ key: 'CityJSONL', hashProperty: 'cjseq_sha256' },
 		] );
 		expect( isDefinedUrl( 'https://example.test/data' ) ).toBe( true );
 		expect( isDefinedUrl( undefined ) ).toBe( false );

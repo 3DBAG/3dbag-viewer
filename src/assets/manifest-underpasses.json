@@ -26,7 +26,7 @@
         "status"
       ],
       "TILE_INDEX" : "https://labs.3dbag.nl/data/underpasses/25.08.2026/cityjson/tile_index.fgb",
-      "CityJSON" : "https://labs.3dbag.nl/data/underpasses/25.08.2026/cityjson/reconstruction-{TID_X}-{TID_Y}-{TID_Z}.city.json",
+      "CityJSONL" : "https://labs.3dbag.nl/data/underpasses/25.08.2026/cityjson/reconstruction-{TID_X}-{TID_Y}-{TID_Z}.city.jsonl",
       "Cesium3DTilesets": {
         "lod22": "https://labs.3dbag.nl/data/underpasses/25.08.2026/3dtiles/tileset.json"
       },
