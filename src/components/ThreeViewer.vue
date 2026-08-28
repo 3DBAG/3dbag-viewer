@@ -184,6 +184,7 @@ export default {
 		this.renderer = null;
 		this.scene = null;
 		this.camera = null;
+		this.renderCamera = null;
 		this.tiles = null;
 		this.localTransform = new Matrix4();
 		this.projectionMatrix = new Matrix4();
@@ -476,6 +477,9 @@ export default {
 			this.camera = new PerspectiveCamera();
 			this.camera.matrixAutoUpdate = false;
 			this.camera.matrixWorldAutoUpdate = false;
+			this.renderCamera = new PerspectiveCamera();
+			this.renderCamera.matrixAutoUpdate = false;
+			this.renderCamera.matrixWorldAutoUpdate = false;
 
 			this.pLight = new PointLight( 0xffffff, this.pointIntensity, 0, 1 );
 			this.scene.add( this.pLight );
@@ -537,6 +541,15 @@ export default {
 			this.camera.matrixWorldInverse.copy( this.viewMatrix );
 			this.camera.matrixWorld.copy( this.viewMatrix ).invert();
 			this.camera.position.setFromMatrixPosition( this.camera.matrixWorld );
+			// Keep the split projection/view camera for TilesRenderer and raycasting, but
+			// draw with MapLibre's precomposed matrix. Factoring and recombining that
+			// matrix in shader float precision produces depth values that do not reliably
+			// match the terrain already stored in MapLibre's shared depth buffer.
+			this.renderCamera.projectionMatrix.copy( modelViewProjection );
+			this.renderCamera.projectionMatrixInverse.copy( modelViewProjection ).invert();
+			this.renderCamera.matrixWorld.copy( this.camera.matrixWorld );
+			this.renderCamera.matrixWorldInverse.identity();
+			this.renderCamera.position.copy( this.camera.position );
 			this.pLight.position.copy( this.camera.position );
 			// Use a camera-mounted key light so visible facades retain shape at every bearing.
 			this.camera.getWorldDirection( this.cameraLightDirection );
@@ -562,12 +575,7 @@ export default {
 			}
 			this.scene.fog = this.enableFog ? this.fog : null;
 			this.renderer.resetState();
-			// MapLibre renders terrain into the shared depth buffer before custom 3D
-			// layers. Do not let that surface mask the independently georeferenced
-			// building tiles; the Three.js render immediately repopulates depth for
-			// correct building-to-building occlusion.
-			this.renderer.clearDepth();
-			this.renderer.render( this.scene, this.camera );
+			this.renderer.render( this.scene, this.renderCamera );
 			this.renderer.resetState();
 
 		},
@@ -1571,6 +1579,7 @@ export default {
 			this.map = null;
 			this.renderer = null;
 			this.scene = null;
+			this.renderCamera = null;
 			this.tiles = null;
 
 		}
