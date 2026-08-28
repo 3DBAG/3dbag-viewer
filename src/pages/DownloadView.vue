@@ -94,10 +94,25 @@
               /></a>
             </td>
             <td>
-              <a
-                :href="activeTileData[format]['fileURL']"
-                download
-              > {{ getFileName( format ) }} </a>
+              <span class="tile-file-actions">
+                <a
+                  :href="activeTileData[format]['fileURL']"
+                  download
+                >{{ getFileName( format ) }}</a>
+                <a
+                  v-if="getCJLoupeUrl( format )"
+                  :href="getCJLoupeUrl( format )"
+                  class="button is-small is-light"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <b-icon
+                    size="is-small"
+                    icon="open-in-new"
+                  />
+                  <span>CJLoupe</span>
+                </a>
+              </span>
             </td>
             <td>{{ activeTileData[format]['sha256'] ? activeTileData[format]['sha256'] : $t("download.sha256inwfs") }}</td>
             <td>{{ $root.$data[ "version_number" ] }}</td>
@@ -540,6 +555,7 @@ export default {
 		return {
 			config: appConfig,
 			menu: this.$root.$data.menu,
+			settings: this.$root.$data.settings || {},
 			versionData,
 			versionsDataArchived: this.$root.$data[ "versions_data_archived" ] || {},
 			mapVisible: false,
@@ -701,6 +717,15 @@ export default {
 
 			const data = this.activeTileData[ format ];
 			return data && data.fileURL ? this.getUrlFileName( data.fileURL ) : null;
+
+		},
+
+		getCJLoupeUrl( format ) {
+
+			if ( ! this.settings.cjloupe || ! [ 'CityJSON', 'CityJSONL' ].includes( format ) ) return null;
+			const data = this.activeTileData[ format ];
+			if ( ! data || ! isDefinedUrl( data.fileURL ) ) return null;
+			return `https://3dgi.github.io/CJLoupe/?cj=${ encodeURIComponent( data.fileURL ) }`;
 
 		},
 
@@ -944,6 +969,13 @@ export default {
   font-size: 0.875rem;
   background-color: #f5f5f5;
   border: 1px solid #dbdbdb;
+}
+
+.tile-file-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .vjs-value-string {

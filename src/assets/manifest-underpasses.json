@@ -4,6 +4,9 @@
     "dashboard": false,
     "feedback": false
   },
+  "settings": {
+    "cjloupe": true
+  },
   "locations": {
     "delft": {
       "name": "Weesperplein, Amsterdam",

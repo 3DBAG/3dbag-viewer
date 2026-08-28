@@ -10,6 +10,10 @@ const MENU_DEFAULTS = Object.freeze( {
 	feedback: true,
 } );
 
+const SETTINGS_DEFAULTS = Object.freeze( {
+	cjloupe: false,
+} );
+
 const LOD_DEFINITIONS = Object.freeze( [
 	{ key: 'lod22', name: 'LoD 2.2', icon: 'home' },
 	{ key: 'lod13', name: 'LoD 1.3', icon: 'home' },
@@ -43,6 +47,18 @@ export function normalizeMenu( manifest = {} ) {
 
 		menu[ key ] = typeof configured[ key ] === 'boolean' ? configured[ key ] : MENU_DEFAULTS[ key ];
 		return menu;
+
+	}, {} );
+
+}
+
+export function normalizeSettings( manifest = {} ) {
+
+	const configured = asRecord( asRecord( manifest ).settings );
+	return Object.keys( SETTINGS_DEFAULTS ).reduce( ( settings, key ) => {
+
+		settings[ key ] = typeof configured[ key ] === 'boolean' ? configured[ key ] : SETTINGS_DEFAULTS[ key ];
+		return settings;
 
 	}, {} );
 

@@ -9,7 +9,7 @@ import { InlineSvgPlugin } from 'vue-inline-svg';
 
 import manifest from '@manifest';
 import { appConfig, resolveVersionManifest } from '@/config';
-import { getViewerLocations, normalizeMenu } from '@/utils/manifest';
+import { getViewerLocations, normalizeMenu, normalizeSettings } from '@/utils/manifest';
 
 const configuredManifest = resolveVersionManifest( manifest );
 const configuredVersions = configuredManifest.versions || {};
@@ -24,6 +24,7 @@ new Vue( {
 	data: {
 		config: appConfig,
 		menu: normalizeMenu( configuredManifest ),
+		settings: normalizeSettings( configuredManifest ),
 		viewerLocations: getViewerLocations( configuredManifest ),
 		version_data: configuredVersionData,
 		version_number: configuredManifest[ "latest" ],

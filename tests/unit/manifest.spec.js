@@ -12,7 +12,8 @@ import {
 	getViewerLocations,
 	getWebServiceRows,
 	isDefinedUrl,
-	normalizeMenu
+	normalizeMenu,
+	normalizeSettings
 } from '@/utils/manifest';
 
 describe( 'manifest configuration', () => {
@@ -34,6 +35,14 @@ describe( 'manifest configuration', () => {
 			dashboard: true,
 			feedback: false,
 		} );
+
+	} );
+
+	it( 'defaults optional root settings off and accepts explicit feature flags', () => {
+
+		expect( normalizeSettings() ).toEqual( { cjloupe: false } );
+		expect( normalizeSettings( { settings: { cjloupe: true } } ) ).toEqual( { cjloupe: true } );
+		expect( normalizeSettings( { settings: { cjloupe: 'true' } } ) ).toEqual( { cjloupe: false } );
 
 	} );
 
