@@ -439,6 +439,7 @@ export default {
 <style>
 #building-info {
 	position: absolute;
+	z-index: 3;
 	left: 0.5rem;
 	bottom: var(--attribution-clearance, 3rem);
 	margin: 0;
@@ -528,5 +529,17 @@ export default {
 	height: 0.75rem;
 	border: 1px solid rgba(0, 0, 0, 0.15);
 	border-radius: 2px;
+}
+
+@media screen and (max-width: 768px) {
+	#building-info {
+		right: 0.5rem;
+		max-width: calc(100vw - 1rem);
+	}
+
+	#attribute-legend {
+		bottom: calc(var(--attribution-clearance, 3rem) + 3.25rem);
+		max-width: calc(100vw - 1rem);
+	}
 }
 </style>

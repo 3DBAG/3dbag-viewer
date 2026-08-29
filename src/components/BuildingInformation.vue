@@ -3,7 +3,6 @@
     v-show="show"
     id="building-info"
     class="field has-addons"
-    style="z-index:1"
   >
     <b-dropdown
       aria-role="list"
@@ -28,7 +27,6 @@
       >
         <div
           class="table-container"
-          style="max-height:350px; overflow:scroll;"
         >
           <table
             class="table is-fullwidth is-striped has-text-left"
@@ -229,3 +227,37 @@ export default {
 	}
 };
 </script>
+
+<style>
+#building-info .table-container {
+	max-height: 350px;
+	overflow: auto;
+}
+
+@media screen and (max-width: 768px) {
+	#building-info .dropdown-menu {
+		width: calc(100vw - 1rem);
+		max-width: calc(100vw - 1rem);
+	}
+
+	#building-info .dropdown-content,
+	#building-info .dropdown-item,
+	#building-info .table-container {
+		max-width: 100%;
+	}
+
+	#building-info table {
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	#building-info th:first-child {
+		width: 42%;
+	}
+
+	#building-info td {
+		overflow-wrap: anywhere;
+		word-break: break-word;
+	}
+}
+</style>
