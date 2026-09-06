@@ -913,6 +913,10 @@ export default {
 			const south = Math.min( ...latitudes );
 			const north = Math.max( ...latitudes );
 			if ( [ west, east, south, north ].some( value => ! Number.isFinite( value ) ) ) return;
+			if ( west >= east || south >= north ) return;
+			// Constrain both panning and zoom-out to the dataset. MapLibre adjusts
+			// the minimum scale to cover the viewport, including after a resize.
+			if ( this.map ) this.map.setMaxBounds( [[ west, south ], [ east, north ]] );
 			const centerLongitude = ( west + east ) / 2;
 			const worldWest = centerLongitude - 180;
 			const worldEast = centerLongitude + 180;
@@ -1286,6 +1290,7 @@ export default {
 			if ( ! this.scene || ! this.camera ) return;
 			this.clearSelection();
 			this.tilesetBoundary = null;
+			if ( this.map ) this.map.setMaxBounds( null );
 			const boundarySource = this.map && this.map.getSource( TILESET_BOUNDARY_SOURCE_ID );
 			if ( boundarySource ) boundarySource.setData( { type: 'FeatureCollection', features: [] } );
 			this.selectionGeneration ++;
