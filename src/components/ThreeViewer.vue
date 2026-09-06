@@ -357,16 +357,19 @@ export default {
 			}
 			this.setTerrainVisibility( this.showTerrain );
 			if ( ! this.map.getLayer( THREE_LAYER_ID ) ) this.map.addLayer( this.customLayer, beforeId );
+			// Symbols can be interleaved with geometry (Liberty draws bridges
+			// after its road arrows). Put the overlays above all basemap geometry,
+			// then restore symbols in their original order on either side of 3D.
+			this.map.moveLayer( THREE_LAYER_ID );
+			this.map.moveLayer( HILLSHADE_LAYER_ID, THREE_LAYER_ID );
+			layers.filter( layer => layer.type === 'symbol' ).forEach( layer => {
+
+				const roadSymbol = this.basemapPreset === 'openfreemap' &&
+					[ 'transportation', 'transportation_name' ].includes( layer[ 'source-layer' ] );
+				this.map.moveLayer( layer.id, roadSymbol ? THREE_LAYER_ID : undefined );
+
+			} );
 			this.updateTilesetBoundaryLayer();
-			if ( this.basemapPreset === 'openfreemap' ) {
-
-				layers.filter( layer => {
-
-					return layer.type === 'symbol' && layer[ 'source-layer' ] === 'transportation_name';
-
-				} ).forEach( layer => this.map.moveLayer( layer.id, THREE_LAYER_ID ) );
-
-			}
 			this.queueMarkerHeightCorrection();
 			this.requestRender();
 
@@ -999,6 +1002,10 @@ export default {
 				}, beforeId );
 
 			}
+			// Also restore existing overlays after a style reload. Road symbols
+			// remain below both the mask and the buildings that occlude them.
+			this.map.moveLayer( TILESET_MASK_LAYER_ID, beforeId );
+			this.map.moveLayer( TILESET_BOUNDARY_LAYER_ID, beforeId );
 
 		},
 		initializeCameraPosition() {
