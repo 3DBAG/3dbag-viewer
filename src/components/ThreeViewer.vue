@@ -162,7 +162,12 @@ export default {
 		$route( to, from ) {
 
 			if ( ! this.ignoreRouteCameraUpdate ) this.setCameraPosFromRoute( to.query );
-			if ( to.params.locale !== from.params.locale ) this.refreshAttributionControl();
+			if ( to.params.locale !== from.params.locale ) {
+
+				this.refreshAttributionControl();
+				this.updateBasemapLanguage( to.params.locale );
+
+			}
 
 		},
 		colormap() {
@@ -266,6 +271,28 @@ export default {
 			return bgLayer( this.basemapPreset );
 
 		},
+		updateBasemapLanguage( locale = this.$route.params.locale ) {
+
+			if ( ! this.map || this.destroying || this.basemapPreset !== 'openfreemap' ) return;
+			const style = this.map.getStyle();
+			if ( ! style ) return;
+			const language = locale === 'nl' ? 'nl' : 'en';
+			( style.layers || [] ).filter( layer => {
+
+				return layer.type === 'symbol' && layer[ 'source-layer' ] === 'place';
+
+			} ).forEach( layer => {
+
+				this.map.setLayoutProperty( layer.id, 'text-field', [
+					'coalesce',
+					[ 'get', `name:${ language }` ],
+					[ 'get', 'name' ],
+					[ 'get', 'name:latin' ]
+				] );
+
+			} );
+
+		},
 		initMap() {
 
 			this.customLayer = {
@@ -315,6 +342,7 @@ export default {
 		onStyleLoad() {
 
 			if ( ! this.map || this.destroying ) return;
+			this.updateBasemapLanguage();
 			const layers = this.map.getStyle().layers || [];
 			layers.filter( layer => {
 
