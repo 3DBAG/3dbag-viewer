@@ -346,7 +346,8 @@ export default {
 			const layers = this.map.getStyle().layers || [];
 			layers.filter( layer => {
 
-				return layer.type === 'fill-extrusion' || layer.id.toLowerCase().includes( 'building' );
+				return layer.type === 'fill-extrusion' || layer.id.toLowerCase().includes( 'building' ) ||
+					( this.basemapPreset === 'openfreemap' && layer[ 'source-layer' ] === 'poi' );
 
 			} ).forEach( layer => this.map.setLayoutProperty( layer.id, 'visibility', 'none' ) );
 
