@@ -65,6 +65,7 @@ import {
 } from '@/utils/semanticFeatures';
 import { getAttributeStyle } from '@/utils/attributeStyles';
 import { SemanticStylingPlugin } from '@/utils/SemanticStylingPlugin';
+import { getBuildingNotice } from '@/utils/buildingNotice';
 
 const Tweakpane = require( 'tweakpane' );
 const HIGHLIGHT_COLOR = 0xFFC107;
@@ -593,6 +594,7 @@ export default {
 
 			const buildingsVisible = this.updateBuildingVisibility();
 			if ( buildingsVisible && ! this.tilesError ) this.tiles.update();
+			this.refreshBuildingNotice();
 			if ( this.markerHeightNeedsUpdate ) {
 
 				this.markerHeightNeedsUpdate = false;
@@ -1083,7 +1085,7 @@ export default {
 					this.startupLocationVisible = false;
 					window.clearInterval( this.locationTimer );
 					this.locationTimer = null;
-					this.updateZoomNotice( ! this.buildingsVisible );
+					this.refreshBuildingNotice();
 
 				}
 
@@ -1554,12 +1556,14 @@ export default {
 			this.requestRender();
 
 		},
-		updateZoomNotice( visible ) {
+		refreshBuildingNotice() {
 
+			const message = getBuildingNotice( this.tiles, this.buildingsVisible, this.tilesError );
+			const visible = Boolean( message );
 			this.zoomNoticeVisible = visible;
 			if ( this.startupLocationVisible ) return;
 			this.$parent.$data.showLocationBox = visible;
-			if ( visible ) this.$parent.$data.locationBoxText = this.$t( 'viewer.zoomInForBuildings' );
+			if ( visible ) this.$parent.$data.locationBoxText = this.$t( message );
 
 		},
 		updateBuildingVisibility() {
@@ -1580,7 +1584,6 @@ export default {
 					this.$emit( 'object-picked', undefined );
 
 				}
-				this.updateZoomNotice( ! shouldShow );
 				this.queueMarkerHeightCorrection();
 
 			}
