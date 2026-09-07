@@ -94,6 +94,12 @@ BRT), `grijs` (grayscale raster BRT), `luchtfoto` (aerial imagery), or `openfree
 Missing or invalid values fall back to `standaard`. Users can still switch basemaps
 using the toolbar.
 
+Viewer links include `basemap` and `lod` query parameters alongside the camera
+coordinates, for example `?basemap=openfreemap&lod=lod22`. These override the
+manifest defaults and follow toolbar changes and browser back/forward navigation.
+Missing or invalid values are replaced with the defaults; a LoD must be available
+in the active version's tilesets.
+
 Root-level `locations` may be a named object as above or an array. On an initial visit
 without camera coordinates in the route, the viewer chooses one valid location
 at random. Each location uses the route-compatible RD target (`rdx`, `rdy`) and

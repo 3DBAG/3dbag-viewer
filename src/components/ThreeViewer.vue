@@ -162,7 +162,9 @@ export default {
 		},
 		$route( to, from ) {
 
-			if ( ! this.ignoreRouteCameraUpdate ) this.setCameraPosFromRoute( to.query );
+			const cameraChanged = [ 'rdx', 'rdy', 'ox', 'oy', 'oz', 'placeMarker' ]
+				.some( key => to.query[ key ] !== from.query[ key ] );
+			if ( cameraChanged && ! this.ignoreRouteCameraUpdate ) this.setCameraPosFromRoute( to.query );
 			if ( to.params.locale !== from.params.locale ) {
 
 				this.refreshAttributionControl();

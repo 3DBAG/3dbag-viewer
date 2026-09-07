@@ -102,6 +102,7 @@ import SearchBar from '@/components/SearchBar.vue';
 import ThreeViewer from '@/components/ThreeViewer.vue';
 import Compass from '@/components/Compass.vue';
 import { appConfig } from '@/config';
+import { getViewerSelection, getViewerQuery } from '@/utils/viewerRoute';
 import {
 	getAttributeLegend,
 	resolveColormapTitle,
@@ -148,7 +149,6 @@ export default {
 			},
 			camRotationZ: 0,
 
-			basemapPreset: this.$root.$data.settings.defaultBasemap,
 			basemaps: {
 				standaard: {
 					name: "BRT Achtergrondkaart",
@@ -171,7 +171,6 @@ export default {
 			showLocationBox: false,
 			locationBoxText: "",
 
-			tileset: getDefaultLod( versionData ),
 			lods: getLodOptions( versionData ),
 			locations: this.$root.$data.viewerLocations,
 			visibleAttributes: getVisibleAttributes( versionData ),
@@ -194,6 +193,36 @@ export default {
 
 	},
 	computed: {
+		viewerSelection() {
+
+			return getViewerSelection( this.$route.query, this.basemaps, this.lods,
+				this.$root.$data.settings.defaultBasemap, getDefaultLod( this.BAG3DVersionData ) );
+
+		},
+		basemapPreset: {
+			get() {
+
+				return this.viewerSelection.basemap;
+
+			},
+			set( basemap ) {
+
+				this.updateViewerQuery( { basemap } );
+
+			}
+		},
+		tileset: {
+			get() {
+
+				return this.viewerSelection.lod;
+
+			},
+			set( lod ) {
+
+				this.updateViewerQuery( { lod } );
+
+			}
+		},
 		viewerStyle() {
 
 			return this.attributionClearance === null ? {} : {
@@ -285,39 +314,16 @@ export default {
 
 	watch: {
 
-		$route( to, from ) {
+		$route( to ) {
 
-			if ( to.query.lod && this.lods[ to.query.lod ] ) {
-
-				this.tileset = to.query.lod;
-
-			}
-
-		},
-
-		tileset( to, from ) {
-
-			if ( to && to != from ) {
-
-				let q = Object.assign( {}, this.$router.currentRoute.query );
-				q.lod = to;
-
-				this.$router.push(
-					{ url: '/', query: q }
-				).catch( err => {} );
-
-			}
+			if ( to.name === 'Viewer' ) this.updateViewerQuery( {}, true );
 
 		}
 
 	},
 	mounted() {
 
-		if ( this.lods[ this.$router.currentRoute.query.lod ] ) {
-
-			this.tileset = this.$router.currentRoute.query.lod;
-
-		}
+		this.updateViewerQuery( {}, true );
 		this.initAttributionClearanceObserver();
 
 	},
@@ -328,6 +334,14 @@ export default {
 
 	},
 	methods: {
+		updateViewerQuery( changes = {}, replace = false ) {
+
+			const route = this.$router.currentRoute;
+			const query = getViewerQuery( route.query, { ...this.viewerSelection, ...changes } );
+			if ( query.basemap === route.query.basemap && query.lod === route.query.lod ) return;
+			this.$router[ replace ? 'replace' : 'push' ]( { path: route.path, hash: route.hash, query } ).catch( () => {} );
+
+		},
 		initAttributionClearanceObserver() {
 
 			if ( ! window.ResizeObserver ) return;
