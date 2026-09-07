@@ -60,6 +60,9 @@ links can use:
     "dashboard": false,
     "feedback": false
   },
+  "settings": {
+    "defaultBasemap": "openfreemap"
+  },
   "locations": {
     "example": {
       "name": "Example building",
@@ -85,6 +88,11 @@ links can use:
   }
 }
 ```
+
+`settings.defaultBasemap` selects the initial viewer basemap: `standaard` (raster
+BRT), `grijs` (grayscale raster BRT), `luchtfoto` (aerial imagery), or `openfreemap`.
+Missing or invalid values fall back to `standaard`. Users can still switch basemaps
+using the toolbar.
 
 Root-level `locations` may be a named object as above or an array. On an initial visit
 without camera coordinates in the route, the viewer chooses one valid location

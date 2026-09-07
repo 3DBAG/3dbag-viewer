@@ -55,12 +55,15 @@ export function normalizeMenu( manifest = {} ) {
 export function normalizeSettings( manifest = {} ) {
 
 	const configured = asRecord( asRecord( manifest ).settings );
-	return Object.keys( SETTINGS_DEFAULTS ).reduce( ( settings, key ) => {
+	const settings = Object.keys( SETTINGS_DEFAULTS ).reduce( ( settings, key ) => {
 
 		settings[ key ] = typeof configured[ key ] === 'boolean' ? configured[ key ] : SETTINGS_DEFAULTS[ key ];
 		return settings;
 
 	}, {} );
+	settings.defaultBasemap = [ 'standaard', 'grijs', 'luchtfoto', 'openfreemap' ].includes( configured.defaultBasemap ) ?
+		configured.defaultBasemap : 'standaard';
+	return settings;
 
 }
 

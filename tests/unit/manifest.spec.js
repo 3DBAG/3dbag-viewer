@@ -40,9 +40,25 @@ describe( 'manifest configuration', () => {
 
 	it( 'defaults optional root settings off and accepts explicit feature flags', () => {
 
-		expect( normalizeSettings() ).toEqual( { cjloupe: false } );
-		expect( normalizeSettings( { settings: { cjloupe: true } } ) ).toEqual( { cjloupe: true } );
-		expect( normalizeSettings( { settings: { cjloupe: 'true' } } ) ).toEqual( { cjloupe: false } );
+		expect( normalizeSettings() ).toEqual( { cjloupe: false, defaultBasemap: 'standaard' } );
+		expect( normalizeSettings( { settings: { cjloupe: true } } ) ).toEqual( { cjloupe: true, defaultBasemap: 'standaard' } );
+		expect( normalizeSettings( { settings: { cjloupe: 'true' } } ) ).toEqual( { cjloupe: false, defaultBasemap: 'standaard' } );
+
+	} );
+
+	it( 'accepts supported default basemaps and falls back for invalid configuration', () => {
+
+		for ( const defaultBasemap of [ 'standaard', 'grijs', 'luchtfoto', 'openfreemap' ] ) {
+
+			expect( normalizeSettings( { settings: { defaultBasemap } } ).defaultBasemap ).toBe( defaultBasemap );
+
+		}
+		for ( const defaultBasemap of [ undefined, null, '', 'unknown', true, {} ] ) {
+
+			expect( normalizeSettings( { settings: { defaultBasemap } } ).defaultBasemap ).toBe( 'standaard' );
+
+		}
+		expect( normalizeSettings( { settings: null } ).defaultBasemap ).toBe( 'standaard' );
 
 	} );
 

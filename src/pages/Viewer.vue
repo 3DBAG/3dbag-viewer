@@ -148,7 +148,7 @@ export default {
 			},
 			camRotationZ: 0,
 
-			basemapPreset: 'standaard',
+			basemapPreset: this.$root.$data.settings.defaultBasemap,
 			basemaps: {
 				standaard: {
 					name: "BRT Achtergrondkaart",

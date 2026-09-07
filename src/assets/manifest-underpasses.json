@@ -5,6 +5,7 @@
     "feedback": false
   },
   "settings": {
+    "defaultBasemap": "openfreemap",
     "cjloupe": true
   },
   "locations": {
