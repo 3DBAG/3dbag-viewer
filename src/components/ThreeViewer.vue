@@ -394,9 +394,9 @@ export default {
 			this.map.moveLayer( HILLSHADE_LAYER_ID, THREE_LAYER_ID );
 			layers.filter( layer => layer.type === 'symbol' ).forEach( layer => {
 
-				const roadSymbol = this.basemapPreset === 'openfreemap' &&
-					[ 'transportation', 'transportation_name' ].includes( layer[ 'source-layer' ] );
-				this.map.moveLayer( layer.id, roadSymbol ? THREE_LAYER_ID : undefined );
+				const groundSymbol = this.basemapPreset === 'openfreemap' &&
+					[ 'transportation', 'transportation_name', 'waterway', 'water_name' ].includes( layer[ 'source-layer' ] );
+				this.map.moveLayer( layer.id, groundSymbol ? THREE_LAYER_ID : undefined );
 
 			} );
 			this.updateTilesetBoundaryLayer();
