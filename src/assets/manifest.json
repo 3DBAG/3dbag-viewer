@@ -271,7 +271,7 @@
     },
     "v2024.12.16" : {
       "release-type" : "beta",
-      "archive_public" : false,
+      "archive_public" : true,
 
       "GPKG_DUMP" : {
         "url":"https://data.3dbag.nl/v20241216/3dbag_nl.gpkg.zip",
@@ -335,7 +335,7 @@
     },
     "v2024.02.28" : {
       "release-type" : "beta",
-      "archive_public" : true,
+      "archive_public" : false,
 
       "GPKG_DUMP" : {
         "url":"https://data.3dbag.nl/v20240228/3dbag_nl.gpkg.zip",
