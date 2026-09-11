@@ -353,18 +353,6 @@
 
     <div
       v-if="archivedVersions.length"
-      class="notification archived-downloads-notice"
-    >
-      <b-icon
-        icon="information-outline"
-        size="is-small"
-        aria-hidden="true"
-      />
-      <span>{{ $t("download.archived_unavailable") }}</span>
-    </div>
-
-    <div
-      v-if="archivedVersions.length"
       class="table-wrapper"
     >
       <table>
@@ -389,33 +377,30 @@
           >
             <td>{{ entry.version }}</td>
             <td v-if="hasArchivedMetadata">
-              <span
+              <a
                 v-if="entry.metadata"
-                class="has-text-grey"
-                aria-disabled="true"
-              >{{ getUrlFileName( entry.metadata ) }}</span>
+                :href="entry.metadata"
+                download
+              >{{ getUrlFileName( entry.metadata ) }}</a>
               <span v-else>—</span>
             </td>
             <td v-if="hasArchivedGpkgDump">
-              <span
+              <a
                 v-if="entry.gpkgDump"
-                class="has-text-grey"
-                aria-disabled="true"
-              >{{ getUrlFileName( entry.gpkgDump.url ) }}</span>
+                :href="entry.gpkgDump.url"
+                download
+              >{{ getUrlFileName( entry.gpkgDump.url ) }}</a>
               <template v-if="entry.gpkgDump">
-                (<span
-                  class="has-text-grey"
-                  aria-disabled="true"
-                >SHA-256</span>)
+                (<a :href="entry.gpkgDump.url + '.sha256.txt'">SHA-256</a>)
               </template>
               <span v-else>—</span>
             </td>
             <td v-if="hasArchivedTileIndex">
-              <span
+              <a
                 v-if="entry.tileIndex"
-                class="has-text-grey"
-                aria-disabled="true"
-              >{{ entry.tileIndex }}</span>
+                :href="entry.tileIndex"
+                download
+              >{{ entry.tileIndex }}</a>
               <span v-else>—</span>
             </td>
           </tr>
@@ -958,17 +943,6 @@ export default {
   width: 80%;
   max-width: 500px;
   box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0px 0 1px rgb(10 10 10 / 2%)
-}
-
-.archived-downloads-notice {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  color: #4a4a4a;
-  font-size: 0.875rem;
-  background-color: #f5f5f5;
-  border: 1px solid #dbdbdb;
 }
 
 .tile-file-actions {
