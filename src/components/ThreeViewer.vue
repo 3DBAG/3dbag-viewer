@@ -86,6 +86,17 @@ const TILESET_BOUNDARY_LAYER_ID = '3dbag-tileset-boundary';
 const PICKER_LOCAL_NORMAL = new Vector3( 0, 0, 1 );
 const pickerNormalMatrix = new Matrix3();
 
+function getWaterLayer( layers ) {
+
+	return layers.find( layer => {
+
+		return [ 'fill', 'line' ].includes( layer.type ) &&
+			[ 'water', 'waterway' ].includes( layer[ 'source-layer' ] );
+
+	} );
+
+}
+
 class TileRequestPriorityPlugin {
 
 	constructor( name, tilePriority ) {
@@ -391,10 +402,13 @@ export default {
 			this.setTerrainVisibility( this.showTerrain );
 			if ( ! this.map.getLayer( THREE_LAYER_ID ) ) this.map.addLayer( this.customLayer, beforeId );
 			// Symbols can be interleaved with geometry (Liberty draws bridges
-			// after its road arrows). Put the overlays above all basemap geometry,
+			// after its road arrows). Put 3D above all basemap geometry,
 			// then restore symbols in their original order on either side of 3D.
 			this.map.moveLayer( THREE_LAYER_ID );
-			this.map.moveLayer( HILLSHADE_LAYER_ID, THREE_LAYER_ID );
+			// Vector water covers hillshade; subsequent roads and bridges keep
+			// their original order above water. Raster basemaps have no water mask.
+			const waterLayer = getWaterLayer( layers );
+			this.map.moveLayer( HILLSHADE_LAYER_ID, waterLayer ? waterLayer.id : THREE_LAYER_ID );
 			layers.filter( layer => layer.type === 'symbol' ).forEach( layer => {
 
 				const groundSymbol = this.basemapPreset === 'openfreemap' &&
@@ -427,8 +441,9 @@ export default {
 				}
 			};
 			const layers = ( nextStyle.layers || [] ).filter( layer => layer.id !== HILLSHADE_LAYER_ID );
-			const labelIndex = layers.findIndex( layer => layer.type === 'symbol' );
-			layers.splice( labelIndex === - 1 ? layers.length : labelIndex, 0, hillshadeLayer );
+			const waterLayer = getWaterLayer( layers );
+			const beforeIndex = waterLayer ? layers.indexOf( waterLayer ) : layers.findIndex( layer => layer.type === 'symbol' );
+			layers.splice( beforeIndex === - 1 ? layers.length : beforeIndex, 0, hillshadeLayer );
 			const style = Object.assign( {}, nextStyle, {
 				sources: Object.assign( {}, nextStyle.sources, {
 					[ TERRAIN_SOURCE_ID ]: terrainSource,

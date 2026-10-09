@@ -62,6 +62,7 @@ The building attribute panel can be limited per version with an ordered `visible
 The former `VUE_APP_TERRAIN_URL` quantized-mesh setting and viewer-specific PDOK service URL overrides are no longer used.
 The default terrain endpoint combines Mapterhorn's orthometric DEM with EGM2008 geoid undulation. Its WGS84-ellipsoidal heights match the 3DBAG ECEF tiles, avoiding a vertical offset between terrain and buildings.
 Basemap style changes preserve the terrain and hillshade sources, including their loaded tile caches.
+On vector basemaps, hillshade is drawn below the `water` and `waterway` geometry layers so water stays unshaded, with roads and bridges retaining their original order above it. Raster basemaps do not expose separate water geometry and keep hillshade across the whole map.
 
 ## Events
 
