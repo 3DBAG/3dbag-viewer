@@ -328,6 +328,9 @@ export default {
 				doubleClickZoom: false,
 				reduceMotion: true,
 				maxPitch: MAX_MAP_PITCH,
+				// Slice vector tiles at close zooms to keep repeated road icons
+				// within MapLibre's 16-bit symbol index limit.
+				experimentalZoomLevelsToOverscale: 4,
 				attributionControl: false,
 				canvasContextAttributes: { antialias: true }
 			} );

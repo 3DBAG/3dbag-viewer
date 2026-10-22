@@ -81,6 +81,7 @@ Without route camera parameters, a configured manifest location is selected at r
 Address markers snap to a building roof when the address ray intersects loaded 3D Tiles geometry. Otherwise they use `Map.queryTerrainElevation()` and are corrected as building or terrain tiles load.
 
 Map pitch is capped at 80 degrees from nadir. This keeps close-range panning clear of MapLibre's near-horizontal terrain collision correction.
+Vector tiles are split above their source maximum zoom, with only the last four map zoom levels overscaled (`experimentalZoomLevelsToOverscale: 4` in MapLibre 5). This prevents repeated road icons from overflowing MapLibre's 16-bit symbol indices when zooming in and tilting the view.
 
 ## Public methods
 
