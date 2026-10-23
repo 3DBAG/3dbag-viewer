@@ -73,7 +73,6 @@ const STYLED_MESH_COLOR = '#ffffff';
 const BUILDING_ERROR_TARGET = 48;
 const BUILDING_MIN_ZOOM = 13;
 const MAX_MAP_PITCH = 80;
-const MAP_NEAR_Z = 1;
 const MAP_FAR_Z = 100000;
 const BUILDING_TILE_PRIORITY = 2;
 const TERRAIN_SOURCE_ID = 'mapterhorn-dem';
@@ -334,10 +333,8 @@ export default {
 				attributionControl: false,
 				canvasContextAttributes: { antialias: true }
 			} );
-			// The automatically fitted MapLibre far plane is too tight for the
-			// rebased nationwide 3D Tiles scene. Override it at the map level so the
-			// basemap, Three.js, and TilesRenderer all receive the same projection.
-			this.map.transform.overrideNearFarZ( MAP_NEAR_Z, MAP_FAR_Z );
+			this.updateMapClippingPlanes();
+			this.map.on( 'resize', this.updateMapClippingPlanes );
 			this.refreshAttributionControl();
 			this.map.on( 'style.load', this.onStyleLoad );
 			this.map.on( 'move', this.onMapMove );
@@ -355,6 +352,17 @@ export default {
 				this.resizeObserver.observe( this.$el );
 
 			}
+
+		},
+		updateMapClippingPlanes() {
+
+			if ( ! this.map || this.destroying || this.map.transform.height <= 0 ) return;
+			// Match MapLibre's near plane in CSS pixels, including after a resize.
+			// A fixed near plane of 1 compresses depth differences enough to let
+			// street labels behind hills survive its terrain occlusion tolerance.
+			// Keep the extended far plane for the nationwide 3D Tiles scene, with
+			// MapLibre, Three.js, and TilesRenderer sharing the same projection.
+			this.map.transform.overrideNearFarZ( this.map.transform.height / 50, MAP_FAR_Z );
 
 		},
 		onStyleLoad() {
@@ -414,8 +422,14 @@ export default {
 			this.map.moveLayer( HILLSHADE_LAYER_ID, waterLayer ? waterLayer.id : THREE_LAYER_ID );
 			layers.filter( layer => layer.type === 'symbol' ).forEach( layer => {
 
+				const layout = layer.layout || {};
+				const alignment = layout[ layout[ 'text-field' ] ? 'text-rotation-alignment' : 'icon-rotation-alignment' ] || 'auto';
+				const mapAligned = alignment === 'map' ||
+					( alignment === 'auto' && [ 'line', 'line-center' ].includes( layout[ 'symbol-placement' ] ) );
+				// Only map-aligned road and water symbols belong below buildings.
+				// Viewport-aligned shields and point labels stay above, like place names.
 				const groundSymbol = this.basemapPreset === 'openfreemap' &&
-					[ 'transportation', 'transportation_name', 'waterway', 'water_name' ].includes( layer[ 'source-layer' ] );
+					[ 'transportation', 'transportation_name', 'waterway', 'water_name' ].includes( layer[ 'source-layer' ] ) && mapAligned;
 				this.map.moveLayer( layer.id, groundSymbol ? THREE_LAYER_ID : undefined );
 
 			} );
