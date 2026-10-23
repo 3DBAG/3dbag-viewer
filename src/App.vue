@@ -16,8 +16,8 @@
           icon="alert"
           aria-hidden="true"
         />
-        <span class="is-sr-only">{{ $t("serviceNotice.title") }}:</span>
-        <span>{{ $t("serviceNotice.body") }}</span>
+        <span class="is-sr-only">{{ serviceNoticeTitle }}:</span>
+        <span>{{ serviceNoticeBody }}</span>
         <button
           class="delete service-notice-close"
           type="button"
@@ -158,6 +158,7 @@
 
 import LocaleSwitcher from './components/LocaleSwitcher';
 import { appConfig } from '@/config';
+import { resolveLocalizedText } from '@/utils/attributeStyles';
 
 export default {
 
@@ -173,7 +174,7 @@ export default {
 			config: appConfig,
 			showBurgerMenu: false,
 			showAbout: false,
-			serviceNoticeVisible: false,
+			serviceNoticeVisible: Boolean( this.$root.$data.serviceNotice ),
 			serviceNoticeHeight: 0,
 			serviceNoticeObserver: null,
 
@@ -185,6 +186,23 @@ export default {
 		menu() {
 
 			return this.$root.$data.menu;
+
+		},
+		serviceNotice() {
+
+			return this.$root.$data.serviceNotice;
+
+		},
+		serviceNoticeTitle() {
+
+			return resolveLocalizedText( this.serviceNotice.title, this.currentLocale, this.$t( 'serviceNotice.title' ) );
+
+		},
+		serviceNoticeBody() {
+
+			const body = this.serviceNotice.body;
+			const fallback = typeof body === 'string' ? body : Object.values( body )[ 0 ];
+			return resolveLocalizedText( body, this.currentLocale, fallback );
 
 		},
 		appStyle() {

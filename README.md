@@ -94,6 +94,21 @@ BRT), `grijs` (grayscale raster BRT), `luchtfoto` (aerial imagery), or `openfree
 Missing or invalid values fall back to `standaard`. Users can still switch basemaps
 using the toolbar.
 
+To show a dismissible service notice, add a root-level `serviceNotice` to the
+manifest used at build time. Its `body` is required; `title` is optional and
+defaults to a localized “Service notice” label. Both fields accept a plain
+string or localized text. Omit `serviceNotice` to hide the banner.
+
+```json
+"serviceNotice": {
+  "title": { "en": "Maintenance", "nl": "Onderhoud" },
+  "body": {
+    "en": "Some services are temporarily unavailable.",
+    "nl": "Sommige diensten zijn tijdelijk niet beschikbaar."
+  }
+}
+```
+
 Viewer links include `basemap` and `lod` query parameters alongside the camera
 coordinates, for example `?basemap=openfreemap&lod=lod22`. These override the
 manifest defaults and follow toolbar changes and browser back/forward navigation.

@@ -67,6 +67,18 @@ export function normalizeSettings( manifest = {} ) {
 
 }
 
+export function getServiceNotice( manifest = {} ) {
+
+	const configured = asRecord( asRecord( manifest ).serviceNotice );
+	const body = normalizeLocalizedText( configured.body );
+	if ( ! body ) return null;
+	return {
+		title: normalizeLocalizedText( configured.title ),
+		body
+	};
+
+}
+
 function validTilesets( value ) {
 
 	if ( ! value || typeof value !== 'object' || Array.isArray( value ) ) return {};

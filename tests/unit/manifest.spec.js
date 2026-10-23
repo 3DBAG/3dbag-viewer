@@ -6,6 +6,7 @@ import {
 	getDefaultLod,
 	getGpkgDump,
 	getLodOptions,
+	getServiceNotice,
 	getTileFormats,
 	getTilesetSources,
 	getVisibleAttributes,
@@ -43,6 +44,27 @@ describe( 'manifest configuration', () => {
 		expect( normalizeSettings() ).toEqual( { cjloupe: false, defaultBasemap: 'standaard' } );
 		expect( normalizeSettings( { settings: { cjloupe: true } } ) ).toEqual( { cjloupe: true, defaultBasemap: 'standaard' } );
 		expect( normalizeSettings( { settings: { cjloupe: 'true' } } ) ).toEqual( { cjloupe: false, defaultBasemap: 'standaard' } );
+
+	} );
+
+	it( 'shows a service notice only when its manifest body is configured', () => {
+
+		expect( getServiceNotice() ).toBeNull();
+		expect( getServiceNotice( { serviceNotice: { title: 'Maintenance' } } ) ).toBeNull();
+		expect( getServiceNotice( { serviceNotice: { body: '   ' } } ) ).toBeNull();
+		expect( getServiceNotice( {
+			serviceNotice: {
+				title: { en: ' Maintenance ', nl: ' Onderhoud ' },
+				body: { en: ' Back soon ', nl: ' Zo terug ' }
+			}
+		} ) ).toEqual( {
+			title: { en: 'Maintenance', nl: 'Onderhoud' },
+			body: { en: 'Back soon', nl: 'Zo terug' }
+		} );
+		expect( getServiceNotice( { serviceNotice: { body: 'Maintenance in progress' } } ) ).toEqual( {
+			title: null,
+			body: 'Maintenance in progress'
+		} );
 
 	} );
 

@@ -20,8 +20,7 @@
     "title": "About 3DBAG and the AHN4 update"
   },
   "serviceNotice" : {
-    "title": "Service disruption",
-    "body" : "Following a security incident, we are working hard to restore the 3DBAG services. We apologize for the temporary disruption.",
+    "title": "Service notice",
     "dismiss": "Dismiss service notice"
   },
   "viewer": {
