@@ -78,6 +78,6 @@
     "gpkg_dump": "GPKG dump",
     "tile_index": "Tile index",
     "archived_title": "Previous versions",
-    "tile_index_par": "Alternatively you can access the complete tile index directly."
+    "tile_index_par": "Alternatively you can access the complete tile index directly in the FlatGeoBuf format. This contains the download links for each tile."
   }
 }
