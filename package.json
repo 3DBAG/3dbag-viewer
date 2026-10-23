@@ -19,14 +19,14 @@
     "@mdi/font": "^5.7.55",
     "@vuedoc/md": "^3.0.0",
     "@vuedoc/parser": "^3.0.0",
-    "3d-tiles-renderer": "0.5.2",
+    "3d-tiles-renderer": "0.5.3",
     "buefy": "^0.9.29",
     "core-js": "^3.6.5",
     "debounce": "^1.2.0",
     "flatgeobuf": "3.19.0",
     "jest": "^26.4.2",
     "lodash": "^4.17.20",
-    "maplibre-gl": "5.24.0",
+    "maplibre-gl": "6.15.0",
     "node-ipc": "^11.0.2",
     "ol": "^6.5.0",
     "proj4": "^2.7.2",
@@ -41,6 +41,11 @@
     "vue-router": "^3.4.5",
     "vuese": "^1.1.1",
     "x2js": "^3.4.0"
+  },
+  "overrides": {
+    "@geo-frontend/nlmaps-maplibre": {
+      "maplibre-gl": "$maplibre-gl"
+    }
   },
   "devDependencies": {
     "@babel/core": "^7.7.2",

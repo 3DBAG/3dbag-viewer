@@ -44,7 +44,7 @@ import {
 import { TilesRenderer, WGS84_ELLIPSOID } from '3d-tiles-renderer/three';
 import { GLTFExtensionsPlugin } from '3d-tiles-renderer/three/plugins';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-import { AttributionControl, Map as MapLibreMap, MercatorCoordinate } from 'maplibre-gl';
+import { AttributionControl, Map as MapLibreMap, MercatorCoordinate, setWorkerUrl } from 'maplibre-gl';
 import { bgLayer } from '@geo-frontend/nlmaps-maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import markerSprite from '@/assets/locationmarker.png';
@@ -66,6 +66,8 @@ import {
 import { getAttributeStyle } from '@/utils/attributeStyles';
 import { SemanticStylingPlugin } from '@/utils/SemanticStylingPlugin';
 import { getBuildingNotice } from '@/utils/buildingNotice';
+
+setWorkerUrl( new URL( 'maplibre-gl/dist/maplibre-gl-worker.mjs', import.meta.url ).toString() );
 
 const Tweakpane = require( 'tweakpane' );
 const HIGHLIGHT_COLOR = 0xFFC107;
@@ -323,13 +325,13 @@ export default {
 				center: [ 5.3876389, 52.1561606 ],
 				zoom: 7,
 				pitch: 45,
-				aroundCenter: false,
+				dragRotate: { around: 'center', movement: 'linear' },
 				doubleClickZoom: false,
 				reduceMotion: true,
 				maxPitch: MAX_MAP_PITCH,
 				// Slice vector tiles at close zooms to keep repeated road icons
 				// within MapLibre's 16-bit symbol index limit.
-				experimentalZoomLevelsToOverscale: 4,
+				zoomLevelsToOverscale: 4,
 				attributionControl: false,
 				canvasContextAttributes: { antialias: true }
 			} );
@@ -356,13 +358,20 @@ export default {
 		},
 		updateMapClippingPlanes() {
 
-			if ( ! this.map || this.destroying || this.map.transform.height <= 0 ) return;
+			if ( ! this.map || this.destroying ) return;
 			// Match MapLibre's near plane in CSS pixels, including after a resize.
 			// A fixed near plane of 1 compresses depth differences enough to let
 			// street labels behind hills survive its terrain occlusion tolerance.
 			// Keep the extended far plane for the nationwide 3D Tiles scene, with
 			// MapLibre, Three.js, and TilesRenderer sharing the same projection.
-			this.map.transform.overrideNearFarZ( this.map.transform.height / 50, MAP_FAR_Z );
+			// MapLibre 6 keeps the transform on its internal camera and has no
+			// public clipping-plane API. Apply the override to pending camera state
+			// too, so subsequent movement cannot restore an older clipping range.
+			this.map._camera.applyTransformChange( transform => {
+
+				if ( transform.height > 0 ) transform.overrideNearFarZ( transform.height / 50, MAP_FAR_Z );
+
+			} );
 
 		},
 		onStyleLoad() {
