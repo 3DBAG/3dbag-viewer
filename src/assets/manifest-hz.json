@@ -4,11 +4,14 @@
     "dashboard": false,
     "feedback": false
   },
+  "settings": {
+    "cjloupe": false
+  },
   "serviceNotice": {
     "title": { "en": "Maintenance", "nl": "Onderhoud" },
     "body": {
-      "en": "3DBAG services are disrupted due to TU Delft network issues. Limited functionality is now available through alternative resources.",
-      "nl": "De 3DBAG-diensten zijn verstoord door netwerkproblemen bij de TU Delft. Via alternatieve bronnen is nu beperkte functionaliteit beschikbaar."
+      "en": "3DBAG services are disrupted due to TU Delft network issues. Only the 3D viewer and CityJSON download are currently available.",
+      "nl": "De 3DBAG-diensten zijn verstoord door netwerkproblemen bij de TU Delft. Alleen de 3D viewer en CityJSON download zijn momenteel beschikbaar."
     }
   },
   "latest": "v2025.09.03",
