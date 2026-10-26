@@ -10,8 +10,8 @@
   "serviceNotice": {
     "title": { "en": "Maintenance", "nl": "Onderhoud" },
     "body": {
-      "en": "3DBAG services are disrupted due to TU Delft network issues. Only the 3D viewer, docs, API, WFS/WMS and CityJSON download are currently available.",
-      "nl": "De 3DBAG-diensten zijn verstoord door netwerkproblemen bij de TU Delft. Alleen de 3D viewer, docs, API, WFS/MS en CityJSON download zijn momenteel beschikbaar."
+      "en": "Due to a security incident at TU Delft, not all 3DBAG resources are currently available.",
+      "nl": "Door een veiligheidsincident bij de TU Delft zijn niet alle 3DBAG diensten momenteel beschikbaar."
     }
   },
   "latest": "v2025.09.03",
@@ -247,7 +247,13 @@
 
       "CityJSON" : "https://3dbag.fsn1.your-objectstorage.com/v20250903/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.city.json.gz",
 
+      "GPKG" : "https://3dbag.fsn1.your-objectstorage.com/v20250903/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.gpkg.gz",
+
+      "OBJ" : "https://3dbag.fsn1.your-objectstorage.com/v20250903/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}-obj.zip",
+
       "Cesium3DTilesets" : {
+        "lod12": "https://3dbag.fsn1.your-objectstorage.com/v20250903/cesium3dtiles/lod12/tileset.json",
+        "lod13": "https://3dbag.fsn1.your-objectstorage.com/v20250903/cesium3dtiles/lod13/tileset.json",
         "lod22": "https://3dbag.fsn1.your-objectstorage.com/v20250903/cesium3dtiles/lod22/tileset.json"
       },
 
