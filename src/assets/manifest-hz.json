@@ -1,6 +1,6 @@
 {
   "menu": {
-    "documentation": false,
+    "documentation": true,
     "dashboard": false,
     "feedback": false
   },
@@ -10,8 +10,8 @@
   "serviceNotice": {
     "title": { "en": "Maintenance", "nl": "Onderhoud" },
     "body": {
-      "en": "3DBAG services are disrupted due to TU Delft network issues. Only the 3D viewer and CityJSON download are currently available.",
-      "nl": "De 3DBAG-diensten zijn verstoord door netwerkproblemen bij de TU Delft. Alleen de 3D viewer en CityJSON download zijn momenteel beschikbaar."
+      "en": "3DBAG services are disrupted due to TU Delft network issues. Only the 3D viewer, docs, api and CityJSON download are currently available.",
+      "nl": "De 3DBAG-diensten zijn verstoord door netwerkproblemen bij de TU Delft. Alleen de 3D viewer, docs, api en CityJSON download zijn momenteel beschikbaar."
     }
   },
   "latest": "v2025.09.03",
@@ -250,6 +250,8 @@
       "Cesium3DTilesets" : {
         "lod22": "https://3dbag.fsn1.your-objectstorage.com/v20250903/cesium3dtiles/lod22/tileset.json"
       },
+
+      "OGCAPI" : "https://api.3dbag.nl/",
 
       "metadata": "https://3dbag.fsn1.your-objectstorage.com/v20250903/metadata.json"
     }
