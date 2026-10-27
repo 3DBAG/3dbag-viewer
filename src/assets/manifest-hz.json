@@ -10,8 +10,8 @@
   "serviceNotice": {
     "title": { "en": "Maintenance", "nl": "Onderhoud" },
     "body": {
-      "en": "Due to a security incident at TU Delft, not all 3DBAG resources are currently available.",
-      "nl": "Door een veiligheidsincident bij de TU Delft zijn niet alle 3DBAG diensten momenteel beschikbaar."
+      "en": "Due to preventive security measures at TU Delft, not all 3DBAG resources are currently available.",
+      "nl": "Door preventieve beveiligingsmaatregelen bij de TU Delft zijn momenteel niet alle 3DBAG diensten beschikbaar."
     }
   },
   "latest": "v2025.09.03",
