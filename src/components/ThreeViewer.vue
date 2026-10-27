@@ -251,6 +251,8 @@ export default {
 		this.fogColor = '#eeeeee';
 		this.castOnHover = false;
 		this.showTerrain = true;
+		this.showHillshade = true;
+		this.showBuildingTiles = true;
 		this.pane = null;
 		this.lruCacheSize = 0;
 		this.stylingPlugin = null;
@@ -408,12 +410,15 @@ export default {
 					source: TERRAIN_SOURCE_ID,
 					paint: {
 						'hillshade-shadow-color': '#473B24',
-						'hillshade-exaggeration': 0.5
+						'hillshade-exaggeration': 0.5,
+						'hillshade-illumination-anchor': 'map'
 					}
 				}, beforeId );
 
 			}
+			this.map.setPaintProperty( HILLSHADE_LAYER_ID, 'hillshade-illumination-anchor', 'map' );
 			this.setTerrainVisibility( this.showTerrain );
+			this.setHillshadeVisibility( this.showHillshade );
 			if ( ! this.map.getLayer( THREE_LAYER_ID ) ) this.map.addLayer( this.customLayer, beforeId );
 			// Symbols can be interleaved with geometry (Liberty draws bridges
 			// after its road arrows). Put 3D above all basemap geometry,
@@ -455,9 +460,11 @@ export default {
 				type: 'hillshade',
 				paint: {
 					'hillshade-shadow-color': '#473B24',
-					'hillshade-exaggeration': 0.5
+					'hillshade-exaggeration': 0.5,
+					'hillshade-illumination-anchor': 'map'
 				}
 			} ), source: TERRAIN_SOURCE_ID };
+			hillshadeLayer.paint = { ...hillshadeLayer.paint, 'hillshade-illumination-anchor': 'map' };
 			const layers = ( nextStyle.layers || [] ).filter( layer => layer.id !== HILLSHADE_LAYER_ID );
 			const waterLayer = getWaterLayer( layers );
 			const beforeIndex = waterLayer ? layers.indexOf( waterLayer ) : layers.findIndex( layer => layer.type === 'symbol' );
@@ -688,6 +695,10 @@ export default {
 
 			const misc = this.pane.addFolder( { expanded: false, title: 'Misc' } );
 			misc.addInput( this, 'showTerrain' ).on( 'change', value => this.setTerrainVisibility( value ) );
+			misc.addInput( this, 'showHillshade', { label: 'Hillshading' } )
+				.on( 'change', value => this.setHillshadeVisibility( value ) );
+			misc.addInput( this, 'showBuildingTiles', { label: '3D buildings' } )
+				.on( 'change', value => this.setBuildingTilesVisibility( value ) );
 			misc.addInput( this, 'castOnHover' );
 
 			const stats = this.pane.addFolder( { expanded: true, title: 'Stats' } );
@@ -777,12 +788,23 @@ export default {
 				this.map.setTerrain( null );
 
 			}
-			if ( this.map.getLayer( HILLSHADE_LAYER_ID ) ) {
-
-				this.map.setLayoutProperty( HILLSHADE_LAYER_ID, 'visibility', visible ? 'visible' : 'none' );
-
-			}
 			this.queueMarkerHeightCorrection();
+			this.requestRender();
+
+		},
+		setHillshadeVisibility( visible ) {
+
+			this.showHillshade = visible;
+			if ( ! this.map || ! this.map.getLayer( HILLSHADE_LAYER_ID ) ) return;
+			this.map.setLayoutProperty( HILLSHADE_LAYER_ID, 'visibility', visible ? 'visible' : 'none' );
+			this.requestRender();
+
+		},
+		setBuildingTilesVisibility( visible ) {
+
+			this.showBuildingTiles = visible;
+			this.updateBuildingVisibility();
+			this.refreshBuildingNotice();
 			this.requestRender();
 
 		},
@@ -1373,9 +1395,10 @@ export default {
 			}
 
 			this.tilesError = null;
-			this.buildingsVisible = true;
+			this.buildingsVisible = this.showBuildingTiles;
 			const tiles = new TilesRenderer( this.tilesUrl );
 			this.tiles = tiles;
+			tiles.group.visible = this.showBuildingTiles;
 			if ( window.matchMedia && window.matchMedia( '(pointer: coarse)' ).matches ) {
 
 				const cache = new LRUCache();
@@ -1619,7 +1642,8 @@ export default {
 		},
 		refreshBuildingNotice() {
 
-			const message = getBuildingNotice( this.tiles, this.buildingsVisible, this.tilesError );
+			const message = this.showBuildingTiles ?
+				getBuildingNotice( this.tiles, this.buildingsVisible, this.tilesError ) : null;
 			const visible = Boolean( message );
 			this.zoomNoticeVisible = visible;
 			if ( this.startupLocationVisible ) return;
@@ -1629,11 +1653,11 @@ export default {
 		},
 		updateBuildingVisibility() {
 
-			if ( ! this.tiles || ! this.map || ! this.cameraReady ) return this.buildingsVisible;
-			if ( ! this.tiles.root ) return true;
+			if ( ! this.tiles || ! this.map ) return this.buildingsVisible;
 			// Zoom is stable across pitch changes. Camera-to-center distance is not, and
 			// caused the tiles to blink out when moving into an exact top-down view.
-			const shouldShow = this.map.getZoom() >= BUILDING_MIN_ZOOM;
+			const shouldShow = this.showBuildingTiles &&
+				( ! this.cameraReady || ! this.tiles.root || this.map.getZoom() >= BUILDING_MIN_ZOOM );
 			if ( shouldShow !== this.buildingsVisible ) {
 
 				this.buildingsVisible = shouldShow;
