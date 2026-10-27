@@ -42,6 +42,7 @@ import {
 	WebGLRenderer
 } from 'three';
 import { TilesRenderer, WGS84_ELLIPSOID } from '3d-tiles-renderer/three';
+import { LRUCache } from '3d-tiles-renderer/core';
 import { GLTFExtensionsPlugin } from '3d-tiles-renderer/three/plugins';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { AttributionControl, Map as MapLibreMap, MercatorCoordinate, setWorkerUrl } from 'maplibre-gl';
@@ -77,8 +78,9 @@ const BUILDING_MIN_ZOOM = 13;
 const MAX_MAP_PITCH = 80;
 const MAP_FAR_Z = 100000;
 const BUILDING_TILE_PRIORITY = 2;
+const MOBILE_TILE_CACHE_MIN_BYTES = 64 * 1024 * 1024;
+const MOBILE_TILE_CACHE_MAX_BYTES = 128 * 1024 * 1024;
 const TERRAIN_SOURCE_ID = 'mapterhorn-dem';
-const HILLSHADE_SOURCE_ID = 'mapterhorn-hillshade-dem';
 const HILLSHADE_LAYER_ID = 'mapterhorn-hillshade';
 const THREE_LAYER_ID = '3dbag-buildings';
 const TILESET_BOUNDARY_SOURCE_ID = '3dbag-tileset-boundary-source';
@@ -86,6 +88,7 @@ const TILESET_MASK_LAYER_ID = '3dbag-tileset-mask';
 const TILESET_BOUNDARY_LAYER_ID = '3dbag-tileset-boundary';
 const PICKER_LOCAL_NORMAL = new Vector3( 0, 0, 1 );
 const pickerNormalMatrix = new Matrix3();
+const VIEWER_OWNED_MATERIAL = Symbol( 'viewer-owned-material' );
 
 function getWaterLayer( layers ) {
 
@@ -395,15 +398,6 @@ export default {
 				} );
 
 			}
-			if ( ! this.map.getSource( HILLSHADE_SOURCE_ID ) ) {
-
-				this.map.addSource( HILLSHADE_SOURCE_ID, {
-					type: 'raster-dem',
-					url: appConfig.terrainTileJsonUrl,
-					encoding: appConfig.terrainEncoding
-				} );
-
-			}
 			const labelLayer = layers.find( layer => layer.type === 'symbol' );
 			const beforeId = labelLayer && labelLayer.id;
 			if ( ! this.map.getLayer( HILLSHADE_LAYER_ID ) ) {
@@ -411,7 +405,7 @@ export default {
 				this.map.addLayer( {
 					id: HILLSHADE_LAYER_ID,
 					type: 'hillshade',
-					source: HILLSHADE_SOURCE_ID,
+					source: TERRAIN_SOURCE_ID,
 					paint: {
 						'hillshade-shadow-color': '#473B24',
 						'hillshade-exaggeration': 0.5
@@ -455,25 +449,22 @@ export default {
 				url: appConfig.terrainTileJsonUrl,
 				encoding: appConfig.terrainEncoding
 			};
-			const hillshadeSource = previousSources[ HILLSHADE_SOURCE_ID ] || terrainSource;
 			const previousLayers = previousStyle && previousStyle.layers || [];
-			const hillshadeLayer = previousLayers.find( layer => layer.id === HILLSHADE_LAYER_ID ) || {
+			const hillshadeLayer = { ...( previousLayers.find( layer => layer.id === HILLSHADE_LAYER_ID ) || {
 				id: HILLSHADE_LAYER_ID,
 				type: 'hillshade',
-				source: HILLSHADE_SOURCE_ID,
 				paint: {
 					'hillshade-shadow-color': '#473B24',
 					'hillshade-exaggeration': 0.5
 				}
-			};
+			} ), source: TERRAIN_SOURCE_ID };
 			const layers = ( nextStyle.layers || [] ).filter( layer => layer.id !== HILLSHADE_LAYER_ID );
 			const waterLayer = getWaterLayer( layers );
 			const beforeIndex = waterLayer ? layers.indexOf( waterLayer ) : layers.findIndex( layer => layer.type === 'symbol' );
 			layers.splice( beforeIndex === - 1 ? layers.length : beforeIndex, 0, hillshadeLayer );
 			const style = Object.assign( {}, nextStyle, {
 				sources: Object.assign( {}, nextStyle.sources, {
-					[ TERRAIN_SOURCE_ID ]: terrainSource,
-					[ HILLSHADE_SOURCE_ID ]: hillshadeSource
+					[ TERRAIN_SOURCE_ID ]: terrainSource
 				} ),
 				layers
 			} );
@@ -1275,6 +1266,7 @@ export default {
 				color: this.usesColormap() || hasVertexColors ? STYLED_MESH_COLOR : this.meshColor,
 				vertexColors: hasVertexColors
 			} );
+			material[ VIEWER_OWNED_MATERIAL ] = true;
 			if ( ! highlightAttribute || ! object.geometry.getAttribute( highlightAttribute ) ) return material;
 
 			material.userData.highlightedFeatureId = { value: - 1 };
@@ -1384,6 +1376,17 @@ export default {
 			this.buildingsVisible = true;
 			const tiles = new TilesRenderer( this.tilesUrl );
 			this.tiles = tiles;
+			if ( window.matchMedia && window.matchMedia( '(pointer: coarse)' ).matches ) {
+
+				const cache = new LRUCache();
+				cache.unloadPriorityCallback = tiles.lruCache.unloadPriorityCallback;
+				cache.minSize = 384;
+				cache.maxSize = 768;
+				cache.minBytesSize = MOBILE_TILE_CACHE_MIN_BYTES;
+				cache.maxBytesSize = MOBILE_TILE_CACHE_MAX_BYTES;
+				tiles.lruCache = cache;
+
+			}
 			this.viewportWidth = 0;
 			this.viewportHeight = 0;
 			tiles.errorTarget = BUILDING_ERROR_TARGET;
@@ -1422,6 +1425,16 @@ export default {
 
 				if ( this.tiles !== tiles ) return;
 				if ( this.selectedObject && event.scene.getObjectById( this.selectedObject.id ) ) this.clearSelection();
+				event.scene.traverse( child => {
+
+					const materials = Array.isArray( child.material ) ? child.material : [ child.material ];
+					materials.forEach( material => {
+
+						if ( material && material[ VIEWER_OWNED_MATERIAL ] ) material.dispose();
+
+					} );
+
+				} );
 				this.queueMarkerHeightCorrection();
 
 			} );
