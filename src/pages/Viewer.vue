@@ -64,6 +64,7 @@
       @object-picked="objectPicked"
       @cam-offset="onCamOffset"
       @cam-rotation-z="onCamRotationZ"
+      @notice="onViewerNotice"
     />
     <div
       v-else
@@ -395,6 +396,14 @@ export default {
 		orientNorth: function ( value ) {
 
 			this.$refs.threeviewer.pointCameraToNorth();
+
+		},
+
+		onViewerNotice( notice ) {
+
+			this.showLocationBox = notice.visible;
+			if ( notice.text ) this.locationBoxText = notice.text;
+			if ( notice.key ) this.locationBoxText = this.$t( notice.key );
 
 		},
 

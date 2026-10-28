@@ -31,6 +31,8 @@ module.exports = {
 	configureWebpack: {
 		devtool: 'source-map',
 		resolve: {
+			// Resolve peer dependencies from this app for the linked 3dtoml package.
+			symlinks: false,
 			alias: {
 				'@manifest': manifestPath
 			}

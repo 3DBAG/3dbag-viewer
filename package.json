@@ -20,6 +20,7 @@
     "@vuedoc/md": "^3.0.0",
     "@vuedoc/parser": "^3.0.0",
     "3d-tiles-renderer": "0.5.3",
+    "3dtoml": "github:3DBAG/3DToML#v0.1.0",
     "buefy": "^0.9.29",
     "core-js": "^3.6.5",
     "debounce": "^1.2.0",

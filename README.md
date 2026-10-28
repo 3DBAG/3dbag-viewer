@@ -2,6 +2,8 @@
 
 This is the repository for the components of the website and viewer of the 3DBAG. For general 3DBAG or data-related questions, issues see https://docs.3dbag.nl/en/contact/ . 
 
+The 3D Tiles on MapLibre engine lives in the separate [3dtoml repository](https://github.com/3DBAG/3DToML). The Vue viewer uses its `v0.1.0` release directly from GitHub; `npm install` fetches it automatically. The package's [React example](https://github.com/3DBAG/3DToML/tree/v0.1.0/examples/react) shows the same engine in a React application.
+
 ## Installation
 
 Requires Node version 26 (you can use [nvm](https://github.com/nvm-sh/nvm) to install)
