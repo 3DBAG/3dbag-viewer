@@ -404,14 +404,14 @@ export default {
 
 				this.$router.push( {
 					path: '/' + this.$route.params.locale + '/viewer',
-					query: {
+					query: getViewerQuery( {
 						rdx: res.rd_x,
 						rdy: res.rd_y,
 						ox: this.camOffset.x,
 						oy: this.camOffset.y,
 						oz: this.camOffset.z,
 						placeMarker: true
-					}
+					}, this.viewerSelection )
 				} );
 
 			}

@@ -38,6 +38,18 @@ describe( 'viewer URL selections', () => {
 
 	} );
 
+	it( 'keeps the selected basemap and LoD when an address supplies a new camera position', () => {
+
+		const selection = resolve( { basemap: 'luchtfoto', lod: 'lod13' } );
+		const destination = { rdx: 155000, rdy: 463000, ox: 400, oy: 400, oz: 400, placeMarker: true };
+		expect( getViewerQuery( destination, selection ) ).toEqual( {
+			...destination,
+			basemap: 'luchtfoto',
+			lod: 'lod13'
+		} );
+
+	} );
+
 	it( 'omits LoD when the manifest has no supported tileset', () => {
 
 		const selection = getViewerSelection( { lod: 'lod13' }, basemaps, {}, 'standaard', null );
