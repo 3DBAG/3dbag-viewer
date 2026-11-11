@@ -253,6 +253,12 @@
 
       "IFC" : "https://3dbag.fsn1.your-objectstorage.com/v20250903/tiles/{TID_X}/{TID_Y}/{TID_Z}/{TID_X}-{TID_Y}-{TID_Z}.ifc.zip",
 
+      "GPKG_DUMP" : {
+        "url":"https://3dbag.fsn1.your-objectstorage.com/v20250903/3dbag_nl.gpkg.zip",
+        "filesize": "19 GB (111 GB uncompressed)",
+        "sha256": "421265c55361ea7593074bf37d0195d7406efe77fd75290cb44403d7c7bd5d29"
+      },
+
       "Cesium3DTilesets" : {
         "lod12": "https://3dbag.fsn1.your-objectstorage.com/v20250903/cesium3dtiles/lod12/tileset.json",
         "lod13": "https://3dbag.fsn1.your-objectstorage.com/v20250903/cesium3dtiles/lod13/tileset.json",
